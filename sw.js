@@ -1,5 +1,5 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v1.1, content hash ba2f84153a). */
-var VERSION='1.1-ba2f84153a';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v1.2, content hash e7d0eaf4df). */
+var VERSION='1.2-e7d0eaf4df';
 var CACHE='vf-'+VERSION;
 var PRECACHE=['./','index.html','manifest.json','apple-touch-icon.png','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico'];
 self.addEventListener('install',function(e){
