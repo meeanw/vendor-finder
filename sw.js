@@ -1,7 +1,7 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v1.5, content hash 2f97712d93). */
-var VERSION='1.5-2f97712d93';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v1.5.1, content hash f43f716218). */
+var VERSION='1.5.1-f43f716218';
 var CACHE='vf-'+VERSION;
-var PRECACHE=['./','index.html','manifest.json','manifest-naeem.json','manifest-hans.json','apple-touch-icon.png','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico'];
+var PRECACHE=['./','index.html','manifest.json','manifest-naeem.json','manifest-hans.json','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico'];
 self.addEventListener('install',function(e){
   // fetch with cache:'reload' so we never precache a stale copy from the HTTP cache
   e.waitUntil(caches.open(CACHE).then(function(c){

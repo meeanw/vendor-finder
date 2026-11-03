@@ -313,9 +313,34 @@ html.big .rpair-q{grid-template-columns:1fr}
 .rlinkbox .rrow{display:flex;flex-wrap:wrap;gap:8px}
 .rlinkbox .rrow button{flex:1 1 9rem;min-width:0;margin:0}
 .rlinkbox .qfine{margin:8px 0 0}
+.rasgnote{color:var(--ink);font-weight:600}
+/* v1.5.1 rep card */
+.rcard{margin:0 0 14px;padding:14px;border-radius:14px;background:var(--card);border:1px solid var(--line2);border-top:3px solid var(--gold);color:var(--ink);box-shadow:var(--sh);min-width:0}
+.rc-top{display:flex;align-items:center;gap:12px;min-width:0}
+.rc-av{flex:none;width:72px;height:72px;border-radius:50%;overflow:hidden;background:var(--navy);color:#f6f0e4;font:700 1.5rem/72px Georgia,"Times New Roman",serif;text-align:center;letter-spacing:1px;border:2px solid var(--gold);box-sizing:border-box;display:block}
+.rc-av img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 38%}
+.rc-id{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+.rc-name{font:700 1.1875rem/1.2 Georgia,"Times New Roman",serif;color:var(--navy);overflow-wrap:anywhere}
+.rc-title{font-size:.875rem;line-height:1.3;color:var(--muted);overflow-wrap:anywhere}
+.rc-badge{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.3px;color:#6b5320;background:#f1e4c3;border:1px solid var(--gold);border-radius:999px;padding:2px 9px;line-height:1.4}
+.rc-list{list-style:none;margin:12px 0 0;padding:0;font-size:.9375rem}
+.rc-list li{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px;padding:7px 0;border-top:1px solid var(--line);min-width:0}
+.rc-k{flex:none;width:3.2rem;font-size:.75rem;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--muted)}
+.rc-list a{color:var(--navy);font-weight:600;text-decoration:none;min-width:0;overflow-wrap:anywhere;word-break:break-word;flex:1 1 8rem;padding:3px 0}
+.rc-list a.rc-sms{flex:none;border:1px solid var(--line2);border-radius:999px;padding:3px 12px;font-size:.8125rem;background:#fff}
+.rc-brand{margin-top:10px;padding-top:8px;border-top:1px solid var(--line);font:700 .8125rem Georgia,"Times New Roman",serif;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);text-align:center}
+.hcard{display:flex;align-items:center;gap:10px;margin:8px 0 0;padding:8px 10px;border-radius:14px;background:var(--card);border:1px solid var(--line2);border-left:3px solid var(--gold);min-width:0}
+.hcard[hidden],.rcard[hidden]{display:none}
+.rc-av.rc-sm{width:40px;height:40px;font-size:.9375rem;line-height:40px;border-width:1.5px}
+.rc-mid{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+.rc-mid b{font-size:.9375rem;color:var(--navy);overflow-wrap:anywhere}
+.rc-mid span{font-size:.75rem;color:var(--muted);line-height:1.3;overflow-wrap:anywhere}
+.rc-pill{flex:none;min-height:2.25rem;display:inline-flex;align-items:center;padding:0 14px;border-radius:999px;background:var(--navy);color:#fff;font-weight:700;font-size:.875rem;text-decoration:none}
+@media(max-width:379px){.rc-pill{padding:0 10px}.hcard{flex-wrap:wrap}}
+.rc-badge{max-width:100%;box-sizing:border-box;overflow-wrap:anywhere}.rc-id{flex:1 1 0}
 
 </style></head><body>
-<header class="hero"><div class="brand"><span class="mono" aria-hidden="true">VF</span><div><h1>Furniture Vendor Finder</h1><p id="hsub">Raymour &amp; Flanigan &middot; Bridgewater</p></div><button type="button" class="aa" id="aa" aria-pressed="false" aria-label="Large text" title="Large text"><span aria-hidden="true">A<small>a</small></span></button></div></header>
+<header class="hero"><div class="brand"><span class="mono" aria-hidden="true">VF</span><div><h1>Furniture Vendor Finder</h1><p id="hsub">Raymour &amp; Flanigan &middot; Bridgewater</p></div><button type="button" class="aa" id="aa" aria-pressed="false" aria-label="Large text" title="Large text"><span aria-hidden="true">A<small>a</small></span></button></div><div class="hcard" id="hcard" hidden></div></header>
 <div class="bar"><div class="barin">
 <div class="searchrow"><div class="sf"><label class="vh" for="search">Search vendor, product or style</label><input id="search" type="search" placeholder="Search vendors" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search"></div>
 <button type="button" class="ftoggle" id="ftoggle" aria-expanded="false" aria-controls="fpanel"><span>Filters</span></button></div>
@@ -421,7 +446,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 </div>
 <footer><details><summary>Full notes</summary><p><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use, budget tier and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p><b>Important:</b> Price tiers and styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.5</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.5.1</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span>Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -440,7 +465,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 <fieldset class="qf qfs"><legend>Best way to reach you</legend><div class="qreps" id="qcontact"></div></fieldset>
 <div class="qf"><label for="qtime">Best time to reach you <span class="opt">(optional)</span></label><input id="qtime" name="besttime" type="text" autocomplete="off" enterkeyhint="next" maxlength="100" placeholder="e.g. weekdays after 5pm"></div>
 <div class="qf"><label for="qnotes">Notes <span class="opt">(optional)</span></label><textarea id="qnotes" name="notes" rows="3" maxlength="1000" placeholder="Room, timing, colors, anything helpful"></textarea></div>
-<p class="qyourrep" id="qgoes" role="status"></p>
+<p class="qyourrep" id="qgoes" role="status"></p><div class="rcard" id="qcard" hidden></div>
 <p class="qerr" id="qerr" role="alert"></p>
 <p class="qconsent" id="qconsent">By sending, you agree to be contacted by Raymour &amp; Flanigan about this quote by text, call, or email.</p>
 <div class="qsend"><a class="btn1 qb" id="qtext" href="#" role="button">Send by text</a><a class="btn1 qb alt" id="qmail" href="#" role="button">Send by email</a></div>
@@ -462,7 +487,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 <div class="rwho"><span id="rwhotxt">Signed in as</span> <button type="button" class="rlinkbtn" id="rsignout">Sign out</button></div>
 <fieldset class="qf qfs rfrom"><legend>Quote from:</legend><div class="rseg" id="rreps" role="group" aria-label="Quote from"></div>
 <div class="rswitch" id="rswitch" hidden><label for="rswpin" id="rswlab">PIN</label><input id="rswpin" type="password" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64"><div class="rrow"><button type="button" class="btn1 rgbtn" id="rswgo">Switch</button><button type="button" class="btn2 rbtn" id="rswcancel">Cancel</button></div><p class="qerr" id="rswerr" role="alert"></p></div></fieldset>
-<div class="rlinkbox"><b>My customer link</b><p class="rlinkurl" id="rlinkurl"></p><div class="rrow"><button type="button" class="btn1 rgbtn rshare" id="rshare">Share my link</button><button type="button" class="btn2 rbtn" id="rcopy">Copy my customer link</button></div><p class="qfine" id="rlmsg" role="status"></p></div>
+<div class="rlinkbox"><b>My customer link</b><p class="rlinkurl" id="rlinkurl"></p><div class="rrow"><button type="button" class="btn1 rgbtn rshare" id="rshare">Share my link</button><button type="button" class="btn2 rbtn" id="rcopy">Copy my customer link</button></div><p class="qfine" id="rlmsg" role="status"></p><p class="qfine rasgnote" id="rasgnote" role="note" hidden></p></div>
 <details class="rload"><summary>Load from request</summary><div class="qf"><label for="rpaste">Paste the customer&rsquo;s quote-request text</label><textarea id="rpaste" rows="4" placeholder="Quote request from&hellip;"></textarea></div><button type="button" class="btn2 rbtn" id="rfill">Fill in from text</button><p class="qfine" id="rfillmsg" role="status"></p></details>
 <p class="qnum" id="rnum"></p>
 <div class="qf"><label for="rname">Customer name <span class="req">(required)</span></label><input id="rname" type="text" autocomplete="off" autocapitalize="words" maxlength="100"></div>
@@ -509,8 +534,8 @@ var STORE='rf-vendor-finder-v2';
 var QSTORE='vf-quote-v1';
 // Quote-request routing. Nothing is sent automatically: the customer's own text/email app opens with the list filled in.
 var REPS={
- naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com'},
- hans:{name:'Hans Attys',phone:'+19736871864',email:'hansraymourflanigan@gmail.com'}};
+ naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com',mono:'NW',photo:'naeem.jpg',title:'Home Furnishing Lead & Sleep Consultant',badge:'President\u2019s Club',work:'+19088952445',li:'https://www.linkedin.com/in/naeemward/'},
+ hans:{name:'Hans Attys',phone:'+19736871864',email:'hansraymourflanigan@gmail.com',mono:'HA',photo:'',title:'',badge:'',work:'',li:''}};
 var REPOPTS=[{id:'either',label:'Either one',to:['naeem','hans']},{id:'naeem',label:'Na\u2019eem Ward',to:['naeem']},{id:'hans',label:'Hans Attys',to:['hans']}];
 // Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md). Leave an endpoint EMPTY to switch that rep's logging off (skipped quietly).
 // The tokens only filter stray POSTs - they sit in this public page, so they are NOT strong security.
@@ -518,7 +543,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"4451945f97fbd93dc4b0a522e9d8e487","h":"106111df92d36a9e8edab44a9d0982eb33a6d0044477778a72ccb1c445ea043d"},"hans":{"s":"bd295b27b1fa7678afdad1c50c7bcc83","h":"6d6cebfa88086a5758efdc79941b965bbff8bbbc89b9a719c6a9510d0957113a"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"5904a21ead9b5d418eeeafcfaa3cdde3","h":"069f60fa196316f1aa2766deea730f716af09fdee2a91f24693cf1733e2a4c63"},"hans":{"s":"4467b88efce005b889086c0b8cbae531","h":"8c2503b5860148bc20bb03ea43a9b5cccfcbb95f1ee9895da4611bb88206afa3"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -672,13 +697,35 @@ function clip(v,n){return String(v==null?'':v).slice(0,n)}
 
 /* ---------- quote-request list (customer) ---------- */
 /* ---- rep assignment: a rep's own share link (?rep=naeem or ?rep=hans, also #rep=...) assigns that rep to this device. A newer link overrides it. ---- */
-var ASGK='vf-assign-v1',ASG='';
+var ASGK='vf-assign-v1',ASG='',ASGS='',ASGREADY=false;
+// ASG = the effective rep for this device: a signed-in rep always wins; otherwise the rep saved from a ?rep= link; otherwise none.
 function asgParse(){var m=/[?&]rep=([A-Za-z]+)/.exec(location.search)||/[#&]rep=([A-Za-z]+)/.exec(location.hash),v=m?m[1].toLowerCase():'';return v==='naeem'||v==='hans'?v:''}
-function asgApply(p){ASG=p;try{if(p)localStorage.setItem(ASGK,JSON.stringify({rep:p}));if(!p){var o=JSON.parse(localStorage.getItem(ASGK)||'null');if(o&&(o.rep==='naeem'||o.rep==='hans'))ASG=o.rep}}catch(e){}
- var ml=document.getElementById('mlink');if(ml&&ASG)ml.setAttribute('href','manifest-'+ASG+'.json');
- var hs=document.getElementById('hsub');if(hs&&ASG)hs.textContent='for '+REPS[ASG].name+' \u00b7 Bridgewater'} // per-rep manifest: the installed app's start_url keeps the rep
+function asgAuth(){try{var o=JSON.parse(localStorage.getItem('vf-rep-auth-v1')||'null');if(o&&(o.rep==='naeem'||o.rep==='hans'))return o.rep}catch(e){}return ''}
+var CARD_ADDR='744 US Highway 202 South, Bridgewater, NJ 08807';
+function fmtPh(p){return String(p).replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'($1) $2-$3')}
+function avHtml(r,cls){return '<span class="'+cls+'" aria-hidden="true">'+(r.photo?'<img src="'+r.photo+'" alt="" width="256" height="256" decoding="async" onerror="this.parentNode.textContent=\''+r.mono+'\'">':esc(r.mono))+'</span>'}
+function cardHtml(k){var r=REPS[k];if(!r)return '';
+ var h='<div class="rc-top">'+avHtml(r,'rc-av')+'<div class="rc-id"><b class="rc-name">'+esc(r.name)+'</b>'+(r.title?'<span class="rc-title">'+esc(r.title)+'</span>':'')+(r.badge?'<span class="rc-badge">'+esc(r.badge)+'</span>':'')+'</div></div><ul class="rc-list">';
+ h+='<li><span class="rc-k">Cell</span><a href="tel:'+r.phone+'">'+fmtPh(r.phone)+'</a><a class="rc-sms" href="sms:'+r.phone+'">Text</a></li>';
+ if(r.work)h+='<li><span class="rc-k">Work</span><a href="tel:'+r.work+'">'+fmtPh(r.work)+'</a></li>';
+ h+='<li><span class="rc-k">Email</span><a href="mailto:'+r.email+'">'+esc(r.email)+'</a></li>';
+ h+='<li><span class="rc-k">Visit</span><a href="https://www.google.com/maps/search/?api=1&amp;query='+encodeURIComponent(CARD_ADDR)+'" target="_blank" rel="noopener">'+esc(CARD_ADDR)+'</a></li>';
+ if(r.li)h+='<li><span class="rc-k">Social</span><a href="'+r.li+'" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>';
+ h+='<li><span class="rc-k">Web</span><a href="https://www.raymourflanigan.com" target="_blank" rel="noopener">raymourflanigan.com</a></li></ul><div class="rc-brand">Raymour &amp; Flanigan</div>';
+ return h}
+function miniHtml(k){var r=REPS[k];return avHtml(r,'rc-av rc-sm')+'<div class="rc-mid"><b>'+esc(r.name)+'</b><span>'+esc(r.title||'Raymour & Flanigan \u00b7 Bridgewater')+'</span></div><a class="rc-pill" href="tel:'+r.phone+'">Call</a><a class="rc-pill" href="sms:'+r.phone+'">Text</a>'}
+function asgRefresh(){var au=(typeof AUTH!=='undefined'&&AUTH)||asgAuth();
+ try{var o=JSON.parse(localStorage.getItem(ASGK)||'null');ASGS=o&&(o.rep==='naeem'||o.rep==='hans')?o.rep:ASGS}catch(e){}
+ ASG=au||ASGS||'';
+ var ml=document.getElementById('mlink');if(ml)ml.setAttribute('href',ASG?'manifest-'+ASG+'.json':'manifest.json'); // per-rep manifest: the installed app's start_url keeps the rep
+ var hs=document.getElementById('hsub');if(hs)hs.textContent=ASG?'for '+REPS[ASG].name+' \u00b7 Bridgewater':'Raymour & Flanigan \u00b7 Bridgewater';
+ var qc=document.getElementById('qcard');if(qc){qc.hidden=!ASG;qc.innerHTML=ASG?cardHtml(ASG):''}
+ var hc=document.getElementById('hcard');if(hc){hc.hidden=!ASG;hc.innerHTML=ASG?miniHtml(ASG):''}
+ var nt=document.getElementById('rasgnote');if(nt){var d=!!au&&!!ASGS&&ASGS!==au;nt.hidden=!d;nt.textContent=d?'Note: this device was opened from '+REPS[ASGS].name.split(' ')[0]+'\u2019s customer link. While you are signed in, customers here see you; after you sign out they see '+REPS[ASGS].name.split(' ')[0]+'.':''}
+ if(window.__vfReady)qsync(true)}
+function asgApply(p){if(p){try{localStorage.setItem(ASGK,JSON.stringify({rep:p}))}catch(e){}ASGS=p}asgRefresh()}
 asgApply(asgParse());
-window.addEventListener('hashchange',function(){var p=asgParse();if(p&&p!==ASG){asgApply(p);if(typeof qsync==='function')qsync(true)}});
+window.addEventListener('hashchange',function(){var p=asgParse();if(p)asgApply(p)});
 function baseUrl(){return location.origin+location.pathname.replace(/index\.html$/,'')}
 function shareLink(rep){return baseUrl()+'?rep='+rep}
 var QI={},QL=[],QF={name:'',phone:'',email:'',zip:'',needed:'',contact:'Text',time:'',notes:'',qn:''};
@@ -866,7 +913,7 @@ function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
  L.push('','Prices, taxes, delivery fees and availability are confirmed at time of purchase. Quote valid 7 days.','');
  L.push(r.name);
- if(full){L.push('Raymour & Flanigan Bridgewater','744 US Hwy 202 S, Bridgewater, NJ 08807',r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3')+' | '+r.email)}
+ if(full){L.push('Raymour & Flanigan Bridgewater','744 US Hwy 202 S, Bridgewater, NJ 08807');if(r.work)L.push('Cell '+fmtPh(r.phone)+' \u00b7 Work '+fmtPh(r.work),r.email);else L.push(r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3')+' | '+r.email)}
  else L.push('Raymour & Flanigan Bridgewater',r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3'));
  return L.join('\n')}
 function rhrefs(){return {sms:'sms:'+rphoneSms(RD.phone)+'?&body='+encodeURIComponent(rbody(false)),
@@ -960,9 +1007,9 @@ function rseg(){var h='';[['naeem','Na\u2019eem'],['hans','Hans']].forEach(funct
 function rview(){var on=!!AUTH;rEl.rgate.hidden=on;rEl.rform.hidden=!on;
  if(on){rEl.rlinkurl.textContent=shareLink(AUTH);rEl.rlmsg.textContent='';RD.rep=AUTH;rEl.rwhotxt.textContent='Signed in as '+REPS[AUTH].name+' \u00b7';rseg();rEl.rswitch.hidden=true;swTarget='';rEl.rswpin.value=''}
  else{rEl.rgpin.value='';rEl.rgerr.textContent='';if(rlWait()>0)lockMsg(rEl.rgerr)}
- logStatus()}
+ logStatus();asgRefresh()}
 function rsignedIn(rep,focusEl){authSet(rep);RD.rep=rep;rsave();rview();rsync();rrenderItems(false);rhref();logStatus();logFlush();try{(focusEl||rEl.rclose).focus({preventScroll:true})}catch(e){}}
-authLoad();if(AUTH)RD.rep=AUTH;
+authLoad();if(AUTH)RD.rep=AUTH;asgRefresh();
 rEl.rgwho.innerHTML=[['naeem','Na\u2019eem Ward'],['hans','Hans Attys']].map(function(r){return '<label class="qrep"><input type="radio" name="rgw" value="'+r[0]+'"><span>'+esc(r[1])+'</span></label>'}).join('');
 rEl.rgwho.addEventListener('change',function(){rEl.rgerr.textContent='';rEl.rgpin.focus()});
 rEl.rgsign.addEventListener('click',function(){var c=rEl.rgwho.querySelector('input:checked');if(!c){rEl.rgerr.textContent='Choose who you are first.';return}
@@ -1127,7 +1174,7 @@ setMode(S.mode);
    window.addEventListener('online',chk);setInterval(chk,30*60*1000)
   }).catch(function(){})});
 })();
-try{boot();root.classList.remove('nojs');root.classList.add('js')}catch(e){root.classList.remove('js');root.classList.add('nojs');try{var x=document.getElementById('nj-err');x.style.display='block';x.textContent='(Debug: '+e+')'}catch(e2){}}
+try{boot();window.__vfReady=true;root.classList.remove('nojs');root.classList.add('js')}catch(e){root.classList.remove('js');root.classList.add('nojs');try{var x=document.getElementById('nj-err');x.style.display='block';x.textContent='(Debug: '+e+')'}catch(e2){}}
 })();
 
 </script></body></html>
