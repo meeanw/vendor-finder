@@ -504,7 +504,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use, budget tier and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p><b>Important:</b> Price tiers and styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.7.2</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.7.3</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -611,7 +611,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"3797103d8964f5efee6a1b2f06e70ea8","h":"1b67d2e9dc87058e9e913b2a522664b9d57e4ea0a3f34865921f881bdfabd879"},"hans":{"s":"78a1f023aed5580bc8f6263b3411e7a9","h":"0993e93704bf47204cf1a6ca3215640fb5648539c70fc182389e09de5f8949c4"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"91a4ca833eadd1a212b3637a1ab80983","h":"7d1a0960b75fd34132bc3196f0ff5a734d8b8d1b2d9a21450ef97c45f54a87e6"},"hans":{"s":"3fba1711213b3965bcd9e2b8bab3294d","h":"9ff5c14e2e4c9e258d84b90ac0fe42ba2393de953bfa1fec82db286a4773636d"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -987,6 +987,7 @@ function rPriceTxt(x,full){var q=qtyOf(x.q),n=pnum(x.p);if(n!==null)return (full
 function rExpiryD(){var d=new Date();d.setDate(d.getDate()+3);return d} // quotes last 72 hours: send date + 3 days, local time, date only
 function rExpiry(){var d=rExpiryD();return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+', '+MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()}
 function rExpiryIso(){var d=rExpiryD(),m=d.getMonth()+1,k=d.getDate();return d.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(k<10?'0':'')+k}
+var RF_PROT='https://www.raymourflanigan.com/raymour-services/platinum-protection',RF_FIN='https://www.raymourflanigan.com/raymour-services/financing-options';
 var ROPEN={stop:'thanks for stopping by Raymour & Flanigan Bridgewater!',speak:'thanks for speaking with me!'};
 function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
  var op=ROPEN[RD.op]||ROPEN.stop,sofar=t.sum>0||!t.miss,tail=t.miss?' (plus items still to be priced)':'';
@@ -1004,8 +1005,11 @@ function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().
  L.push(sofar?(full?'TOTAL: ':'Total: ')+money(t.sum)+tail:'Prices to be confirmed','Plus applicable tax and delivery');
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
  L.push('');
- if(full)L.push('NEXT STEPS','- Reply YES to this email (or text me) and I'+AP+'ll get your order started.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours. Prices and availability are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
- else L.push('Reply YES and I'+AP+'ll get your order started. Call or text me anytime with questions.','','Quote valid for 72 hours. Prices and availability are confirmed at time of purchase.');
+ // wording below is limited to what the two R&F pages state (5-year plan; financing and payment options): no prices, rates or terms
+ if(full)L.push('OPTIONS','- Protect your new furniture with a 5-year Platinum Protection Plan:','  '+RF_PROT,'- Ask me about financing and payment options:','  '+RF_FIN,'');
+ else L.push('Protect your new furniture with a 5-year Platinum Protection Plan:',RF_PROT,'','Ask me about financing and payment options:',RF_FIN,'');
+ if(full)L.push('NEXT STEPS','- Reply YES to this email (Quote #'+RD.qn+') or text me, and I'+AP+'ll get your order started.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours. Prices and availability are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
+ else L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll get your order started. Call or text me anytime with questions.','','Quote valid for 72 hours. Prices and availability are confirmed at time of purchase.');
  L.push('',r.name);
  if(full&&r.title)L.push(r.title);
  L.push('Raymour & Flanigan Bridgewater');
