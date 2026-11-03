@@ -423,6 +423,17 @@ body.scan-open{overflow:hidden}
 .rsheet.repmode .tgh,.rsheet.repmode .tgoh,.rsheet.repmode .tgo b,.rsheet.repmode .tgbusy{color:#0b4545}
 .rsheet.repmode .tgo.on{border-color:#0f5a5a;box-shadow:0 0 0 2px rgba(15,90,90,.25);background:#eaf4f3}
 .rsheet.repmode .tgpanel{border-top-color:#b9d3d0}
+/* v1.9: tag type badge, type select, pieces list */
+.tgbadge{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:999px;font-size:.75rem;font-weight:700;line-height:1.5;letter-spacing:.02em;vertical-align:1px;background:#e6eaf1;color:#1f3350;border:1px solid #c5cddb}
+.tgb-sale{background:#fff1b8;color:#6b4e00;border-color:#e3c24f}
+.tgb-outlet{background:#d9e8fb;color:#12407a;border-color:#8fb5e6}
+.tgb-floor{background:#d8f0dc;color:#14572a;border-color:#8cc99a}
+.tgb-accessory{background:#ecdff7;color:#4b2273;border-color:#bfa2dc}
+.tgcomps{margin:10px 0 0}
+.tgcomps ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.tgcomps li{display:flex;flex-direction:column;padding:6px 10px;border:1px solid var(--line2);border-radius:10px;background:#fff;font-size:.9375rem;line-height:1.25}
+.tgcomps li b{color:var(--navy)}.tgcomps li span{font-size:.8125rem;color:var(--muted);overflow-wrap:anywhere}
+.rsheet.repmode .tgcomps li b{color:#0b4545}
 
 </style></head><body>
 <header class="hero"><div class="brand"><span class="mono" aria-hidden="true">VF</span><div><h1>Furniture Vendor Finder</h1><p id="hsub">Raymour &amp; Flanigan &middot; Bridgewater</p></div><button type="button" class="aa" id="aa" aria-pressed="false" aria-label="Large text" title="Large text"><span aria-hidden="true">A<small>a</small></span></button></div><div class="hcard" id="hcard" hidden></div></header>
@@ -527,7 +538,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.8</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.9</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -639,7 +650,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"45d6f9a683f6859f3e4b08c9fc589047","h":"61ace40b62a98e3eed6a22ad7ac74861ef6bc5e700202b9b0f49f4ab352fe78a"},"hans":{"s":"9ce16aa0d03977a95fcf1c89f02c1aba","h":"394e4598141df815be023153362af5b43322983b09a77261d8d7495b8806ea74"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"94dcef7bf20150ead5ce244bda3a74e7","h":"54f11be57156daf6ec65014955a72aff625aea18fcc212605439a592f97805d2"},"hans":{"s":"6db0e51bccdef807d0875090f7016476","h":"145d32565f4a8ce381bcc1cec302f9ac43a0b3fc83bb1fe8c74422962b7ffdd8"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -838,7 +849,7 @@ function qlabel(on){return on?'<span aria-hidden="true">\u2713</span> Added to q
 function qkey(r){return String(r.v._i)}
 function qitem(r){return {k:qkey(r),n:r.v.n,d:'',sku:'',c:'',f:'',q:'1',nt:'',u:'',ph:[]}} // vendor name + piece-specific fields only (no categories/tiers)
 function qload(){try{var o=JSON.parse(localStorage.getItem(QSTORE)||'null');if(!o)return;
- if(Array.isArray(o.items))o.items.forEach(function(x){if(x&&typeof x.k==='string'&&typeof x.n==='string'&&!QI[x.k]){var it={k:x.k,n:x.n,d:clip(x.d,200),sku:clip(x.sku,120),c:clip(x.c,80),f:clip(x.f,80),q:String(qtyOf(x.q)),nt:clip(x.nt,200),u:rfOk(x.u),ph:phIds(x.ph)};QI[it.k]=it;QL.push(it)}});
+ if(Array.isArray(o.items))o.items.forEach(function(x){if(x&&typeof x.k==='string'&&typeof x.n==='string'&&!QI[x.k]){var it={k:x.k,n:x.n,d:clip(x.d,200),sku:clip(x.sku,120),c:clip(x.c,80),f:clip(x.f,80),q:String(qtyOf(x.q)),nt:clip(x.nt,200),u:rfOk(x.u),ph:phIds(x.ph),tg:tgItemClean(x.tg)};QI[it.k]=it;QL.push(it)}});
  if(o.form){['name','phone','email','notes','zip','time'].forEach(function(k){if(typeof o.form[k]==='string')QF[k]=o.form[k].slice(0,2000)});
   if(validIso(o.form.needed))QF.needed=o.form.needed;
   if(CONTACTS.indexOf(o.form.contact)>=0)QF.contact=o.form.contact;
@@ -868,7 +879,7 @@ function qbody(full){var L=[],rp=qrep();qstamp();
  L.push('Sales rep: '+(ASG?rp.label:'Bridgewater sales team'));
  if(QF.notes.trim())L.push('Notes: '+QF.notes.trim().replace(/\r?\n/g,' / '));
  L.push('','Items ('+QL.length+'):');
- QL.forEach(function(x,n){L.push((n+1)+'. '+itemHead(x.n.trim()||(x.ph&&x.ph.length&&!x.d.trim()&&!x.sku.trim()?'Item (see photo)':''),qparts(x)));if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));if(x.u)L.push('   Link: '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)')});
+ QL.forEach(function(x,n){L.push((n+1)+'. '+itemHead(x.n.trim()||(x.ph&&x.ph.length&&!x.d.trim()&&!x.sku.trim()?'Item (see photo)':''),qparts(x)));qTgLines(x).forEach(function(l){L.push('   '+l)});if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));if(x.u)L.push('   Link: '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)')});
  L.push('','Sent from Furniture Vendor Finder');
  return L.join('\n')}
 function qhrefs(){var rc=qrecips();
@@ -958,7 +969,39 @@ var RD={rep:'naeem',name:'',phone:'',email:'',zip:'',needed:'',notes:'',dl:'',re
 var STORE_ADDR='Raymour & Flanigan Bridgewater, 744 US Hwy 202 S, Bridgewater, NJ 08807';
 var rsh=document.getElementById('rsheet'),rbk=document.getElementById('qback'),rEl={};
 ['rclose','rreps','rpaste','rfill','rfillmsg','rname','rphone','remail','rzip','rneeded','rref','ropen','rnum','rdel','rbreak','rsubl','ritems','radd','raddq','rnotes','rsub','rerr','rtext','rmail','rclear','rvlist','rlink','rlogbar','rlog','rlogretry','rlogfine','rgate','rgwho','rgpin','rgerr','rgsign','rform','rwhotxt','rsignout','rswitch','rswpin','rswgo','rswcancel','rswerr','rswlab','rlinkurl','rshare','rcopy','rlmsg','rbanner','rtitle','rcartnote'].forEach(function(k){rEl[k]=document.getElementById(k)});
-function ritemClean(x){x=x||{};return {v:clip(x.v,60),d:clip(x.d,400),c:clip(x.c,80),nt:clip(x.nt,200),sku:clip(x.sku,80),vn:clip(x.vn,60),q:String(qtyOf(x.q)),fin:clip(x.fin,80),p:clip(x.p,30),e:clip(x.e,100),k:clip(x.k,40),u:rfOk(x.u),ph:phIds(x.ph)}}
+/* ---- v1.9: tag types carried onto a quote line (sale / outlet / floor sample / accessory), set by Read tag from photo or by hand ---- */
+var TGT={sale:'Sale',outlet:'Outlet',floor:'Floor sample',accessory:'Accessory'};
+function tgItemClean(g){if(!g||!TGT[g.t])return undefined;var o={t:g.t},w=pnum(g.w),s=pnum(g.s);
+ if(w!==null&&w>0&&w<1e6)o.w=String(Math.round(w*100)/100);if(s!==null&&s>0&&s<1e6)o.s=String(Math.round(s*100)/100);if(validIso(g.se))o.se=g.se;
+ if(Array.isArray(g.cm)){var cm=g.cm.slice(0,8).map(function(c){c=c||{};return {s:clip(String(c.s||'').replace(/\D/g,''),12),d:clip(c.d,60),z:clip(c.z,40),c:clip(c.c,40)}}).filter(function(c){return c.s||c.d});if(cm.length)o.cm=cm}
+ return o}
+function tgWasTxt(v){var n=pnum(v);if(n===null||n<=0)return '';return n===Math.round(n)?'$'+String(n).replace(/\B(?=(\d{3})+(?!\d))/g,','):money(n)}
+function tgSaleEndTxt(iso){var m=/^\d{4}-(\d{2})-(\d{2})$/.exec(iso||'');return m?MON[+m[1]-1]+' '+(+m[2]):''}
+function tgSaleWarn(g){if(!g||g.t!=='sale'||!validIso(g.se))return '';
+ if(g.se<isoToday())return 'This sale ended '+dshow(g.se)+'. Check the price before you send.';
+ if(g.se<rExpiryIso())return 'This sale ends '+dshow(g.se)+', before the 72-hour quote expires ('+rExpiry()+'). The quote will say the sale price is good through '+tgSaleEndTxt(g.se)+' only.';return ''}
+// lines under an item on the rep's quote (full=true: email, one detail per line; false: text message)
+function rTgLines(x,full){var g=x.tg,a=[];if(!g||!TGT[g.t])return a;var n=pnum(x.p);
+ if(g.t==='sale'){var t='Sale price',w=tgWasTxt(g.w),sv=tgWasTxt(g.s),e=tgSaleEndTxt(g.se);if(w)t+=', was '+w;if(sv)t+=' (save '+sv+')';if(e)t+=', sale ends '+e;a.push(t);
+  if(validIso(g.se)){if(g.se<isoToday())a.push('That sale has ended. Price to be confirmed.');else if(g.se<rExpiryIso())a.push('Sale price good through '+e+' only.')}}
+ else if(g.t==='floor'){var w2=tgWasTxt(g.w);if(w2){var sv2=n!==null&&pnum(g.w)>n?' (save '+tgWasTxt((pnum(g.w)-n).toFixed(2))+')':'';a.push('Was '+w2+sv2)}a.push('Floor sample, sold as is. No layaways, no warranties.')}
+ else if(g.t==='outlet')a.push('Outlet item');
+ if(g.cm&&g.cm.length){if(full){a.push('Includes:');g.cm.forEach(function(c){a.push('  - '+[c.d||'Piece',c.s?'SKU '+c.s:'',c.z,c.c].filter(Boolean).join(', '))})}
+  else a.push('Includes: '+g.cm.map(function(c){return (c.d||'Piece')+(c.s?' (SKU '+c.s+')':'')}).join(' \u00b7 '))}
+ return a}
+// the customer's own quote request: same facts, no prices of ours
+function qTgLines(x){var g=x.tg,a=[];if(!g||!TGT[g.t])return a;
+ if(g.t==='sale'){var t='Tag: Sale',w=tgWasTxt(g.w),sv=tgWasTxt(g.s),e=tgSaleEndTxt(g.se);if(w)t+=', was '+w;if(sv)t+=' (save '+sv+')';if(e)t+=', sale ends '+e;a.push(t)}
+ else if(g.t==='floor'){a.push('Tag: Floor sample, sold as is (no layaways, no warranties)'+(tgWasTxt(g.w)?', was '+tgWasTxt(g.w):''))}
+ else if(g.t==='outlet')a.push('Tag: Outlet item');else if(g.t==='accessory')a.push('Tag: Accessory');
+ if(g.cm&&g.cm.length)a.push('Includes: '+g.cm.map(function(c){return (c.d||'Piece')+(c.s?' (SKU '+c.s+')':'')}).join(' \u00b7 '));return a}
+// Platinum Protection is not offered on a floor sample: 'all' = offer it, 'some' = offer it with a note, 'none' = leave it out (financing always stays)
+function rPlatMode(){var on=RD.items.filter(ritemOn),f=on.filter(function(x){return x.tg&&x.tg.t==='floor'}).length;return !f?'all':f===on.length?'none':'some'}
+function rTgRow(x,i){var g=x.tg;if(!g||!TGT[g.t])return '';var w=tgSaleWarn(g),o='<option value="">Regular (remove tag info)</option>'+Object.keys(TGT).map(function(k){return '<option value="'+k+'"'+(k===g.t?' selected':'')+'>'+TGT[k]+'</option>'}).join('');
+ return '<div class="qf rtgrow"><label for="rtt'+i+'">Tag type <span class="tgbadge tgb-'+g.t+'">'+esc(TGT[g.t])+'</span></label><select id="rtt'+i+'" data-tgt="'+i+'">'+o+'</select>'
+ +(g.t==='sale'&&(g.w||g.s||g.se)?'<p class="qfine">'+esc(rTgLines(x,false)[0])+'</p>':'')+(g.t==='floor'?'<p class="qfine">Sold as is. The quote says no layaways, no warranties, and leaves out Platinum Protection for this item.</p>':'')
+ +(g.cm&&g.cm.length?'<p class="qfine">Includes: '+esc(g.cm.map(function(c){return c.d||'Piece'}).join(', '))+'</p>':'')+(w?'<p class="tgwarn" role="status">'+esc(w)+'</p>':'')+'</div>'}
+function ritemClean(x){x=x||{};return {v:clip(x.v,60),d:clip(x.d,400),c:clip(x.c,80),nt:clip(x.nt,200),sku:clip(x.sku,80),vn:clip(x.vn,60),q:String(qtyOf(x.q)),fin:clip(x.fin,80),p:clip(x.p,30),e:clip(x.e,100),k:clip(x.k,40),u:rfOk(x.u),ph:phIds(x.ph),tg:tgItemClean(x.tg)}}
 function rload(){try{var o=JSON.parse(localStorage.getItem(RS)||'null');if(!o)return;
  if(o.rep==='naeem'||o.rep==='hans')RD.rep=o.rep;
  ['name','phone','email','notes'].forEach(function(k){if(typeof o[k]==='string')RD[k]=o[k].slice(0,2000)});
@@ -996,7 +1039,7 @@ function rrenderItems(focusLast){var h='';
  RD.items.forEach(function(x,i){var n=i+1;
   h+='<div class="ritem"><div class="ritop"><b>Item '+n+'</b>'+(RD.items.length>1?'<button type="button" class="qrm" data-rrm="'+i+'" aria-label="Remove item '+n+'">Remove</button>':'')+'</div>'
   +'<div class="qf"><label for="rv'+i+'">Vendor</label><input id="rv'+i+'" data-rf="v" data-i="'+i+'" type="text" list="rvlist" autocomplete="off" maxlength="60" placeholder="Pick a vendor or type a name" value="'+esc(x.v)+'"></div>'
-  +'<div class="qf"><label for="rd'+i+'">Item / description</label><input id="rd'+i+'" data-rf="d" data-i="'+i+'" type="text" autocomplete="off" maxlength="400" placeholder="e.g. Port Townsend bed" value="'+esc(x.d)+'"></div>'
+  +'<div class="qf"><label for="rd'+i+'">Item / description</label><input id="rd'+i+'" data-rf="d" data-i="'+i+'" type="text" autocomplete="off" maxlength="400" placeholder="e.g. Port Townsend bed" value="'+esc(x.d)+'"></div>'+rTgRow(x,i)
   +'<div class="rpair"><div class="qf"><label for="rsk'+i+'">SKU</label><input id="rsk'+i+'" data-rf="sku" data-i="'+i+'" type="text" autocomplete="off" autocapitalize="characters" maxlength="80" value="'+esc(x.sku)+'"></div>'
   +'<div class="qf"><label for="rvn'+i+'">Vendor # <span class="opt">(internal, not sent to customer)</span></label><input id="rvn'+i+'" data-rf="vn" data-i="'+i+'" type="text" autocomplete="off" autocapitalize="characters" maxlength="60" value="'+esc(x.vn)+'"></div></div>'
   +'<div class="rpair"><div class="qf"><label for="rc'+i+'">Collection</label><input id="rc'+i+'" data-rf="c" data-i="'+i+'" type="text" autocomplete="off" maxlength="80" value="'+esc(x.c)+'"></div>'
@@ -1041,11 +1084,11 @@ function rsms(){ // v1.7.4 tighter text message (the email keeps the long form i
  L.push('Hi '+first+', '+op+' Here'+AP+'s your quote.','');to.lines.forEach(function(l){L.push(l)});L.push(to.est,'Valid 72 hours, until '+exp+' \u00b7 Quote #'+RD.qn);
  if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(dl.length)L.push(dl.join(' \u00b7 '));L.push('');
  var n=0;RD.items.forEach(function(x){if(!ritemOn(x))return;n++;var pr=rPriceTxt(x,false);L.push(n+'. '+rItemHead(x)+(pr?' \u00b7 '+pr:''));
-  var d=[];if(x.sku.trim())d.push('SKU '+x.sku.trim());if(x.c.trim())d.push('Collection: '+x.c.trim());if(x.fin.trim())d.push(x.fin.trim());d.push('Qty '+qtyOf(x.q));L.push('   '+d.join(' \u00b7 '));
+  var d=[];if(x.sku.trim())d.push('SKU '+x.sku.trim());if(x.c.trim())d.push('Collection: '+x.c.trim());if(x.fin.trim())d.push(x.fin.trim());d.push('Qty '+qtyOf(x.q));L.push('   '+d.join(' \u00b7 '));rTgLines(x,false).forEach(function(l){L.push('   '+l)});
   if(x.e.trim())L.push('   Est. delivery: '+x.e.trim());if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));
   if(x.u)L.push('   View online:','   '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)');L.push('')});
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
- L.push('5-year Platinum Protection:',RF_PROT,'','Financing options:',RF_FIN,'');
+ var pm=rPlatMode();if(pm!=='none')L.push('5-year Platinum Protection'+(pm==='some'?' (not available on floor sample items)':'')+':',RF_PROT,'');L.push('Financing options:',RF_FIN,'');
  L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll get your order started.','','Prices, availability and the final amount are confirmed at time of purchase.','');
  L.push(r.name+' \u00b7 Raymour & Flanigan Bridgewater','Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
  return L.join('\n')}
@@ -1059,6 +1102,7 @@ function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],t=rsubtotal(
  var n=0;RD.items.forEach(function(x){if(!ritemOn(x))return;n++;L.push(n+'. '+rItemHead(x));var pr=rPriceTxt(x,full);
   if(full){if(x.sku.trim())L.push('   SKU: '+x.sku.trim());if(x.c.trim())L.push('   Collection: '+x.c.trim());if(x.fin.trim())L.push('   Finish: '+x.fin.trim());L.push('   Qty: '+qtyOf(x.q));if(pr)L.push('   '+pr)}
   else{var d=[];if(x.sku.trim())d.push('SKU '+x.sku.trim());if(x.c.trim())d.push('Collection: '+x.c.trim());if(x.fin.trim())d.push(x.fin.trim());d.push('Qty '+qtyOf(x.q));L.push('   '+d.join(' \u00b7 '));if(pr)L.push('   '+pr)}
+  rTgLines(x,full).forEach(function(l){L.push('   '+l)});
   if(x.e.trim())L.push('   Est. delivery: '+x.e.trim());if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));
   if(x.u)L.push('   View online:','   '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)');L.push('')});
  if(full)L.push('------------------------------');
@@ -1066,7 +1110,7 @@ function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],t=rsubtotal(
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
  L.push('');
  // wording below is limited to what the two R&F pages state (5-year plan; financing and payment options): no prices, rates or terms
- if(full)L.push('OPTIONS','- Protect your new furniture with a 5-year Platinum Protection Plan:','  '+RF_PROT,'- Ask me about financing and payment options:','  '+RF_FIN,'');
+ var pm2=rPlatMode();if(full)L.push.apply(L,['OPTIONS'].concat(pm2==='none'?[]:['- Protect your new furniture with a 5-year Platinum Protection Plan'+(pm2==='some'?' (not available on floor sample items)':'')+':','  '+RF_PROT],['- Ask me about financing and payment options:','  '+RF_FIN,'']));
  else L.push('Protect your new furniture with a 5-year Platinum Protection Plan:',RF_PROT,'','Ask me about financing and payment options:',RF_FIN,'');
  if(full)L.push('NEXT STEPS','- Reply YES to this email (Quote #'+RD.qn+') or text me, and I'+AP+'ll get your order started.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours. Prices, availability and the final amount are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
  else L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll get your order started. Call or text me anytime with questions.','','Quote valid for 72 hours. Prices and availability are confirmed at time of purchase.');
@@ -1089,7 +1133,7 @@ function rimport(){var keys={},n=0;QL.forEach(function(x){keys[x.k]=x});
  RD.imp=RD.imp.filter(function(k){return keys[k]});
  var add=QL.filter(function(x){return RD.imp.indexOf(x.k)<0});
  if(add.length){if(RD.items.every(rblankRow))RD.items=[];
-  add.forEach(function(x){if(RD.items.length<40){RD.items.push(ritemClean({v:x.n,d:x.d,sku:x.sku,c:x.c,q:x.q,fin:x.f,nt:x.nt,k:x.k,u:x.u,ph:x.ph}));RD.imp.push(x.k);n++}});
+  add.forEach(function(x){if(RD.items.length<40){RD.items.push(ritemClean({v:x.n,d:x.d,sku:x.sku,c:x.c,q:x.q,fin:x.f,nt:x.nt,k:x.k,u:x.u,ph:x.ph,tg:x.tg}));RD.imp.push(x.k);n++}});
   if(!RD.zip.trim()&&QF.zip.trim())RD.zip=QF.zip.trim().slice(0,60);if(!RD.needed&&validIso(QF.needed)&&QF.needed>=isoToday())RD.needed=QF.needed}
  if(!RD.items.length)RD.items.push(rblank());
  var c=RD.items.filter(function(x){return x.k}).length;
@@ -1139,7 +1183,7 @@ function logStatus(){var parts=[];
  LOGREPS.forEach(function(rep){var n=logOn(rep)&&!logBusy[rep]?logLoad(rep).length:0;if(n)parts.push(REPS[rep].name.split(' ')[0]+(n>1?' ('+n+')':''))});
  if(!AUTH)parts=[];rEl.rlogbar.hidden=!parts.length;rEl.rlog.textContent=parts.length?'Not logged yet \u2013 '+parts.join(', ')+'. Will retry automatically.':''}
 function logSummary(){var a=[];RD.items.forEach(function(x){if(!ritemOn(x))return;var q=qtyOf(x.q),n=pnum(x.p),m=[];
- if(x.sku.trim())m.push('SKU '+x.sku.trim());if(x.vn.trim())m.push('Vendor # '+x.vn.trim());if(x.c.trim())m.push('Collection: '+x.c.trim());if(x.fin.trim())m.push('Finish: '+x.fin.trim());if(x.nt.trim())m.push('Note: '+x.nt.trim());if(x.u)m.push('Link: '+x.u);
+ if(x.sku.trim())m.push('SKU '+x.sku.trim());if(x.vn.trim())m.push('Vendor # '+x.vn.trim());if(x.c.trim())m.push('Collection: '+x.c.trim());if(x.fin.trim())m.push('Finish: '+x.fin.trim());if(x.tg&&TGT[x.tg.t])m.push('Tag: '+TGT[x.tg.t]+(x.tg.w?', was '+tgWasTxt(x.tg.w):'')+(x.tg.se?', sale ends '+tgSaleEndTxt(x.tg.se):''));if(x.nt.trim())m.push('Note: '+x.nt.trim());if(x.u)m.push('Link: '+x.u);
  a.push(q+' \u00d7 '+itemHead(x.v,x.d.trim()?[x.d.trim()]:[])+(m.length?' ('+m.join('; ')+')':'')+' @ '+(n===null?'price TBC':money(n)))});return a.join('; ').slice(0,3000)}
 function logEntry(rep,kind){var t=rsubtotal();
  return {id:RD.qn+'|'+kind+'|'+Date.now(),ts:new Date().toISOString(),quote:RD.qn,ref:RD.ref.trim(),repKey:rep,rep:REPS[rep].name,name:RD.name.trim(),phone:RD.phone.trim(),email:RD.email.trim(),zip:RD.zip.trim(),items:logSummary(),expires:rExpiryIso(),delivery:rdelC()===null?'':rdelC()/100,tax:rcalc().taxC/100,estTotal:rcalc().estC/100,subtotal:t.sum,via:kind==='sms'?'text':'email',token:LOGCFG[rep].token}}
@@ -1217,6 +1261,8 @@ rEl.rswcancel.addEventListener('click',function(){rEl.rswitch.hidden=true;swTarg
 [['rname','name'],['rphone','phone'],['remail','email'],['rnotes','notes'],['rzip','zip'],['rneeded','needed'],['rref','ref'],['rdel','dl']].forEach(function(a){['input','change'].forEach(function(ev){rEl[a[0]].addEventListener(ev,function(){RD[a[1]]=rEl[a[0]].value;rEl.rerr.textContent='';rEl[a[0]].removeAttribute('aria-invalid');rhref()})})});
 rEl.ritems.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-rf');if(!k)return;var i=+t.getAttribute('data-i');
  if(k==='q'){var cl=t.value.replace(/\D/g,'').slice(0,3);if(cl!==t.value)t.value=cl;RD.items[i][k]=cl}else RD.items[i][k]=t.value;rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rltxt(i);rhref()});
+rEl.ritems.addEventListener('change',function(e){var t=e.target;if(!t.getAttribute||!t.hasAttribute('data-tgt'))return;var i=+t.getAttribute('data-tgt'),x=RD.items[i];if(!x)return;var v=t.value,g=x.tg||{};
+ if(!TGT[v])delete x.tg;else x.tg=tgItemClean({t:v,w:g.w,s:g.s,se:g.se,cm:g.cm});rrenderItems(false);rhref()});
 rEl.ritems.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttribute||t.getAttribute('data-rf')!=='q')return;var i=+t.getAttribute('data-i');RD.items[i].q=String(qtyOf(RD.items[i].q));t.value=RD.items[i].q;rtotxt();rltxt(i);rhref()});
 rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rrm]'):null;if(!b)return;var gone=RD.items.splice(+b.getAttribute('data-rrm'),1)[0];
  if(gone&&gone.k&&QI[gone.k]){QL=QL.filter(function(x){return x.k!==gone.k});delete QI[gone.k];RD.imp=RD.imp.filter(function(k){return k!==gone.k});qsync()}
@@ -1499,7 +1545,7 @@ function tgParse(text,words){
   else if(!words){L.forEach(function(s){var m=/^\$?\s*(\d{5})$/.exec(s);if(m)o.price.push({v:m[1].slice(0,-2)+'.'+m[1].slice(-2),w:1.5,src:'tok'})})}
   // front: collection (mixed case) then description (all caps), after the marketing header
   var hi=-1;L.forEach(function(s,n){if(/mattress|furniture/i.test(s))hi=n});
-  var cand=[];L.forEach(function(s,n){if(n<=hi||skip[n])return;if(TG_MARK.test(s)||/[$]/.test(s))return;
+  var cand=[];L.forEach(function(s,n){if(n<=hi||skip[n])return;if(TG_MARK.test(s)||TG_MARK2.test(s)||/[$]/.test(s))return;
    var c=s.replace(/^(?:\S{1,3}[^A-Za-z0-9\s]\S{0,2}\s+)+/,'').replace(/^[^A-Za-z0-9]+/,'').replace(/[^A-Za-z0-9)'"!.]+$/,'').trim();
    var al=(c.match(/[A-Za-z]/g)||[]).length;if(al<3||al/c.replace(/\s/g,'').length<0.75||/^\d+$/.test(c))return;cand.push(c)});
   var caps=function(x){return x===x.toUpperCase()},okC=function(x){var w=x.split(/\s+/);return w.length<=3&&x.length<=24&&w.every(function(t){return /^[A-Za-z][A-Za-z'-]{2,}$/.test(t)})},
@@ -1559,8 +1605,182 @@ function tgMerge(P){
  R.options=opts.map(function(o){return {sku:o.sku,piece:scrub(tgTitle(o.piece)),color:scrub(tgTitle(o.color)),check:o.check}}).filter(function(o){return o.piece&&o.color});
  R.drop=[]; // never exposed
  return R}
+/* ---------- v1.9: the other four tag types (sale, outlet, floor sample, accessory) ----------
+   The type is detected from words on the tag ('LIMITED TIME SALE', 'OUTLET', 'FLOOR SAMPLE / No Layaways', 'surround yourself in style', '(STK)' rows) and can be changed by hand.
+   As before, vendor codes, vendor stock #s, the sticker's vendor prefix and the sale tag's vendor line are only ever collected to be scrubbed. */
+var TG_TYPES=[['regular','Regular'],['sale','Sale'],['outlet','Outlet'],['floor','Floor sample'],['accessory','Accessory']];
+function tgTypeName(t){var r='';TG_TYPES.forEach(function(x){if(x[0]===t)r=x[1]});return r}
+var TG_MARK2=/\boutlet\b|lowest price|every day|limited time|floor sample|\bas[\s-]+is\b|layaway|warranties|surround|yourself|in style|sale ends|^\W*sale\W*$|^\W*(?:save|was|now)\b/i;
+function tgHam(a,b){if(a.length!==b.length)return 99;var n=0;for(var i=0;i<a.length;i++)if(a.charAt(i)!==b.charAt(i))n++;return n}
+function tgDims(a,b,c){return tgFmtN(a)+'"W x '+tgFmtN(b)+'"D x '+tgFmtN(c)+'"H'}
+function tgFixName(s){s=String(s||'').replace(/\[[^\]]*\]/g,' ').replace(/\bW[\\\/]\s*/gi,'with ').replace(/\bWA\s+(?=SLEEP|SLPR)/gi,'with ').replace(/\bSLEEPR\b|\bSLPR\b/gi,'SLEEPER').replace(/\s+/g,' ').trim();
+ return tgTitle(s).replace(/\bWith\b/g,'with').replace(/\b(\d+)pc\b/gi,function(m,d){return d+'PC'}).replace(/\b(laf|raf)\b/gi,function(m){return m.toUpperCase()})}
+// last line of defence: nothing that looks like a vendor stock # or the vendor prefix on the sticker may reach a name, a note or a piece
+function tgScrubOut(s,drop){var d=drop||[];return String(s||'').replace(/\bATI\s+IN\b/gi,' ').split(/\s+/).filter(function(w){if(!w)return false;var u=w.toUpperCase().replace(/[^A-Z0-9]/g,'');
+ if(d.indexOf(u)>=0)return false;if(/^(?=.*[A-Za-z])(?=(?:.*\d){3,})[A-Za-z0-9-]{5,}$/.test(w))return false;return true}).join(' ')}
+function tgIso(m,d,y){m=+m;d=+d;y=+y;if(!(m>=1&&m<=12&&d>=1&&d<=31&&y>=2020&&y<=2099))return '';return y+'-'+(m<10?'0':'')+m+'-'+(d<10?'0':'')+d}
+// Parse one OCR pass for the extra tag types. Returns cues (sc), components (rows), notes, options and the sale tag's was/save/ends fields.
+function tgParseX(text,words){
+ var L=tgLines(text),T=tgClean(text).replace(/\s+/g,' '),x={sc:{floor:0,sale:0,outlet:0,accessory:0},rows:[],drop:[],notes:[],adds:[],also:[],was:[],now:[],save:[],se:[],sale:null,sku9:[],skuPart:null,rcoll:[],sticker:[]},i;
+ var cue=function(k,n,re){if(re.test(T))x.sc[k]=Math.max(x.sc[k],n)};
+ cue('floor',3,/floor\s*sample/i);cue('floor',2,/no\s*layaway|layaways?\s*avail|no\s*warrant|warranties\s*incl/i);cue('floor',2,/(?:^|\s)as\s+is\b/i);
+ cue('sale',2,/limited\s*time/i);cue('sale',2,/sale\s*ends?\s*[\d\/ ]{5,}/i);cue('sale',1,/\bsave\s*\$\s*\d/i);cue('sale',1,/\bwas\s*\$\s*\d/i);
+ cue('outlet',2,/\boutlet\b/i);cue('outlet',1,/lowest price every day/i);
+ cue('accessory',2,/surround\s*yourself|in\s*style\./i);cue('accessory',2,/\bATI\s*IN\b/);
+ // rows: 'QTY SKU# VENDOR STOCK# DIMS RETAIL', then (MARK), DESCRIPTION, COVER/FINISH
+ var rowRe=/^[^A-Za-z0-9]*((?:\d ?){9,13})(?!\d)(.*)$/,starts=[];
+ L.forEach(function(s,n){var m=rowRe.exec(s);if(m)starts.push(n)});
+ starts.forEach(function(n,si){var m=rowRe.exec(L[n]),dg=m[1].replace(/\D/g,''),sku=dg.slice(-9),rest=m[2],row={sku:sku,dims:'',price:'',desc:'',cover:'',mark:''};
+  var dm=/(?:^|[^\d.])(\d{1,3}(?:\.\d{1,2})?)\s*[xX]\s*(\d{1,3}(?:\.\d{1,2})?)\s*[xX]\s*(\d{1,3}(?:\.\d{1,2})?)(?!\d)/.exec(rest);
+  if(dm){var a=tgNum(dm[1]),b=tgNum(dm[2]),c=tgNum(dm[3]);if(a>240&&/^\d{3}$/.test(dm[1]))a=a/10;if(tgDimOk(a)&&tgDimOk(b)&&tgDimOk(c))row.dims=tgDims(a,b,c)}
+  var pm=/(?:^|[^\d.,])(\d{1,5})\.(\d{2})(?!\d)/.exec(rest);if(pm)row.price=(+pm[1]).toFixed(0)+'.'+pm[2];
+  var toks=rest.split(/\s+/).filter(Boolean),stockAt=-1;
+  toks.forEach(function(t,ti){var u=t.replace(/[^A-Za-z0-9-]/g,'');if(u.length>=5&&/\d/.test(u)&&/[A-Za-z]/.test(u)&&(u.match(/\d/g)||[]).length>=3&&!/^[\dxX.]+$/.test(u)){tgSet(x.drop,u);stockAt=ti;
+    if(ti>0&&/^[A-Za-z]{2,5}$/.test(toks[ti-1]))tgSet(x.drop,toks[ti-1])}});
+  if(stockAt>=0){var rc=[];for(var q=stockAt+1;q<toks.length;q++){if(/^[A-Za-z]{3,}$/.test(toks[q]))rc.push(toks[q]);else break}if(rc.length&&rc.length<=2&&!/\b(?:retail|stk|outlet)\b/i.test(rc.join(' ')))x.rcoll.push(rc.join(' '))}
+  var end=si+1<starts.length?starts[si+1]:L.length,got=0;
+  for(var j=n+1;j<end&&got<3&&j<n+6;j++){var s2=L[j];
+   if(/^[^A-Za-z]*(?:FAS|INFO|CARTON|ITM_WEIGHT)\b/i.test(s2)||/\d{1,2}\/\d{1,2}\/\d{2,4}/.test(s2))break;
+   var mk=/\(\s*(outlet|stk)\s*\)/i.exec(s2);if(mk){row.mark=mk[1].toLowerCase();s2=s2.replace(mk[0],' ')}
+   s2=s2.replace(/\s+/g,' ').replace(/^[^A-Za-z0-9]+/,'').replace(/[^A-Za-z0-9\])]+$/,'').trim();
+   if(!/^[A-Z0-9][A-Z0-9 &\/'\[\]\\-]{2,60}$/.test(s2)||TG_HDR.test(s2)||/\d{5,}/.test(s2)||(s2.match(/[A-Z]/g)||[]).length<3)continue;
+   if(!row.desc)row.desc=s2;else if(!row.cover){row.cover=s2;got=9}}
+  x.rows.push(row)});
+ // the accessory's sticker repeats the price and name: '<vendor tag> <stock #> $239.95', '(STK)', 'DUSTED 2'
+ L.forEach(function(s,n){if(/\bATI\s*IN\b/.test(s)){var t=s.replace(/\bATI\s*IN\b/,' ').split(/\s+/);t.forEach(function(w){var u=w.replace(/[^A-Za-z0-9-]/g,'');if(u.length>=5&&/[A-Za-z]/.test(u)&&/\d/.test(u))tgSet(x.drop,u)});
+  var pm=/\$\s*(\d{1,5})\.(\d{2})(?!\d)/.exec(s);var st={price:pm?(+pm[1])+'.'+pm[2]:'',desc:''};
+  for(var j=n+1;j<Math.min(L.length,n+4);j++){var s2=L[j].replace(/\(\s*stk\s*\)/i,' ').replace(/\s+/g,' ').replace(/^[^A-Za-z0-9]+/,'').replace(/[^A-Za-z0-9]+$/,'').trim();if(/^[A-Z][A-Z0-9 &'-]{2,40}$/.test(s2)&&!TG_HDR.test(s2)&&!/\d{5,}/.test(s2)){st.desc=s2;break}}
+  x.sticker.push(st)}});
+ if(x.rows.length===1&&!x.rows[0].dims&&x.rows[0].mark==='stk')x.sc.accessory=Math.max(x.sc.accessory,2);
+ // INFO lines: add-on pieces, 'also available in', and a few short notes
+ var nk={};
+ L.forEach(function(s){
+  var al=/ALSO\s+AVAILABLE\s+IN\s+([A-Za-z][A-Za-z &'-]{2,40}?)\s*\(\s*(\d{3})\s*-?\s*(\d{5})\s*-?\s*(\d)\s*\)/i.exec(s);if(al){x.also.push({color:tgNormW(al[1]),sku:al[2]+al[3]+al[4]});return}
+  var ad=/(?:^|[^\d])(\d{3})\s*-\s*(\d{5})\s*-\s*(\d)\s+([A-Za-z][A-Za-z &\/'-]{3,40}?)\s*(?:\(\s*([\dXx. "'-]+?)\s*\))?\s*$/.exec(s);
+  if(ad&&!/\bIN\b|AVAILABLE|HANG\s*TAG/i.test(ad[4])){var sz='',dd=ad[5]&&/^(\d{1,3}(?:\.\d{1,2})?)\s*[xX]\s*(\d{1,3}(?:\.\d{1,2})?)\s*[xX]\s*(\d{1,3}(?:\.\d{1,2})?)$/.exec(ad[5].replace(/["']/g,'').trim());
+   if(dd&&tgDimOk(tgNum(dd[1]))&&tgDimOk(tgNum(dd[2]))&&tgDimOk(tgNum(dd[3])))sz=tgDims(tgNum(dd[1]),tgNum(dd[2]),tgNum(dd[3]));x.adds.push({sku:ad[1]+ad[2]+ad[3],piece:tgNormW(ad[4]),size:sz});return}
+  if(/removable\s*legs/i.test(s))nk['Removable legs']=1;if(/no\s*special\s*order/i.test(s))nk['No special order options']=1;if(/\bpill?ow/i.test(s))nk['Pillows included (see tag)']=1});
+ x.notes=Object.keys(nk);
+ // front-of-tag price words: WAS $849, SAVE $85, NOW $1449 (handwritten), SALE ENDS 11/11/2026
+ var wm=/\bwas\W{0,3}\s*\$?\s*(\d{1,2},?\d{3}|\d{2,5})(?:[ .](\d{2}))?(?![\d,])/i.exec(T);if(wm)x.was.push(wm[1].replace(/,/g,'')+(wm[2]?'.'+wm[2]:''));
+ var sm=/\bsave\W{0,3}\s*\$?\s*(\d{1,5})(?![\d,])/i.exec(T);if(sm)x.save.push(sm[1]);
+ var nm=/\bnow\W{0,3}\s*\$?\s*(\d{1,2},?\d{3}|\d{3,5})(?:[ .](\d{2}))?(?![\d,])/i.exec(T);if(nm)x.now.push(nm[1].replace(/,/g,'')+(nm[2]?'.'+nm[2]:''));
+ var em=/sale\s*ends?\s*([\d\/ ]{6,16})/i.exec(T);if(em){var dm2=/^(\d{1,2})\/(\d{1,2})\/(\d{4})/.exec(em[1].replace(/ /g,''));if(dm2){var iso=tgIso(dm2[1],dm2[2],dm2[3]);if(iso)x.se.push(iso)}}
+ // sale tag: collection line + product line, SKU in the bottom-left corner
+ if(x.sc.sale>=2){
+  var cand=[];L.forEach(function(s){if(TG_MARK.test(s)||TG_MARK2.test(s)||/[$\d]/.test(s)&&!/^[A-Za-z' -]+\d?$/.test(s))return;
+   var c=s.replace(/^[^A-Za-z]+/,'').replace(/[^A-Za-z'")!.-]+$/,'').trim(),al=(c.match(/[A-Za-z]/g)||[]).length;if(al<3||al/c.replace(/\s/g,'').length<0.85)return;cand.push(c)});
+  var okC=function(t){var w=t.split(/\s+/);return w.length<=2&&t.length<=22&&w.every(function(q){return /^[A-Za-z][A-Za-z'-]{2,}$/.test(q)})};
+  var ci=-1;for(i=0;i<cand.length;i++){if(okC(cand[i])&&cand[i]!==cand[i].toUpperCase()){ci=i;break}}
+  if(ci>=0){var coll=cand[ci],prod='';for(i=ci+1;i<cand.length;i++){var w2=cand[i].split(/\s+/);if(w2.length>=2&&w2.length<=7&&(cand[i].match(/[A-Za-z]/g)||[]).length>=8&&w2.every(function(q){return /^[A-Za-z][A-Za-z'&\/-]*$/.test(q)})){prod=cand[i];break}}
+   x.sale={coll:coll,prod:prod}}
+  // SKU: a 9-digit run, or the tail of one (the small print is often only partly read)
+  var best=null;(words||[]).forEach(function(w){var d=w.t.replace(/[^0-9]/g,'');if(d!==w.t.replace(/[^A-Za-z0-9]/g,''))return;if(d.length===9&&/^[1-3]/.test(d))x.sku9.push({v:d,w:2});else if(d.length>=5&&d.length<=8){if(!best||w.y1>best.y1)best={d:d,x0:w.x0,y0:w.y0,x1:w.x1,y1:w.y1}}});
+  if(!words)L.forEach(function(s){var m=/^\W*(\d{9})\W*$/.exec(s);if(m&&/^[1-3]/.test(m[1]))x.sku9.push({v:m[1],w:2})});
+  if(!x.sku9.length&&best)x.skuPart=best}
+ return x}
+// Re-read the small number in the corner of a sale tag from an enlarged crop (digits only), a few times.
+function tgSkuCrop(w,cvs,box,W,H){
+ var bw=box.x1-box.x0,bh=box.y1-box.y0,x0=Math.max(0,Math.round(box.x0-bw*0.95)),x1=Math.min(W,Math.round(box.x1+bw*0.3)),y0=Math.max(0,Math.round(box.y0-bh*0.6)),y1=Math.min(H,Math.round(box.y1+bh*0.6)),jobs=[];
+ cvs.forEach(function(cv){[2,3].forEach(function(s){jobs.push([cv,s])})});var reads=[],k=0,tail=box.d.slice(-4);
+ function one(){if(k>=jobs.length)return Promise.resolve(reads);var jb=jobs[k++],s=jb[1],c=document.createElement('canvas'),pad=24;c.width=(x1-x0)*s+2*pad;c.height=(y1-y0)*s+2*pad;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(jb[0],x0,y0,x1-x0,y1-y0,pad,pad,(x1-x0)*s,(y1-y0)*s);
+  return tgRec(w,c,'7','0123456789').then(function(r){var d=String((r&&r.data&&r.data.text)||'').replace(/\D/g,'');if(d.length===9&&d.slice(-4)===tail&&/^[1-3]/.test(d))reads.push(d)},function(){}).then(one)}
+ return one()}
+// Which type is this? Strongest cue wins; floor sample beats sale because its tag also says 'WAS $'.
+function tgDetect(P){var sc={floor:0,sale:0,outlet:0,accessory:0};P.forEach(function(p){if(!p.x)return;for(var k in sc)sc[k]=Math.max(sc[k],p.x.sc[k])});
+ if(sc.floor>=2)return 'floor';if(sc.outlet>=2)return 'outlet';if(sc.sale>=2)return 'sale';if(sc.accessory>=2)return 'accessory';return 'regular'}
+function tgVoteS(list){var c=list.map(function(v){return {v:v,w:1,k:v}});if(!c.length)return null;var b=tgVote(c);return {v:b.best.v,n:b.best.n,all:c.length,agree:b.best.n*3>=c.length*2}}
+// Merge every pass and photo. Regular tags go straight through the v1.8 merge (unchanged); the other types add their own fields on top.
+function tgMerge19(P,force){
+ var R=tgMerge(P),det=tgDetect(P),t=force||det;R.detected=det;R.type=t;R.comps=[];R.was='';R.save='';R.se='';R.notes='';
+ if(t==='regular')return R;
+ R.options=[];
+ var X=P.map(function(p){return p.x}).filter(Boolean),drop=[];X.forEach(function(x){x.drop.forEach(function(d){tgSet(drop,d)})});P.forEach(function(p){p.drop.forEach(function(d){tgSet(drop,d)})});
+ var sc=function(s){return tgScrubOut(s,drop.map(function(d){return d.replace(/[^A-Z0-9]/g,'')}))};
+ var fl=R.flags;delete fl.size;R.size='';
+ // components (rows) from every pass: cluster by SKU (within 2 digits), vote each field
+ var cl=[],passesWithRows=0;
+ // rows re-read from enlarged crops carry their position (ix); they anchor the clusters, and a pass that found as many rows as there are anchors is matched by position
+ var anch=[];X.forEach(function(x){x.rows.forEach(function(r){if(r.ix!==undefined){while(anch.length<=r.ix)anch.push(null);if(!anch[r.ix])anch[r.ix]={sku:r.sku,sk:{},rs:[]};var a=anch[r.ix];a.sk[r.sku]=(a.sk[r.sku]||0)+1;a.rs.push(r)}})});
+ if(anch.length&&anch.every(Boolean)){anch.forEach(function(a){a.sku=Object.keys(a.sk).sort(function(p,q){return a.sk[q]-a.sk[p]})[0];cl.push(a)})}
+ X.forEach(function(x){var real=x.rows.filter(function(r){return r.ix===undefined});if(real.length)passesWithRows++;var byPos=cl.length>1&&anch.length===cl.length&&real.length===cl.length;
+  x.rows.forEach(function(r,ri){var c=null;if(r.ix!==undefined)return;
+   if(byPos)c=cl[real.indexOf(r)];else{cl.forEach(function(k){if(!c&&k.sku===r.sku)c=k});if(!c)cl.forEach(function(k){if(!c&&tgHam(k.sku,r.sku)<=1)c=k})}
+   if(!c){c={sku:r.sku,sk:{},rs:[]};cl.push(c)}c.sk[r.sku]=(c.sk[r.sku]||0)+1;c.rs.push(r)})});
+ if(anch.length)passesWithRows=Math.max(passesWithRows,2);
+ var kept=cl.filter(function(c){return passesWithRows<2||c.rs.length>=2});if(!kept.length)kept=cl;
+ var vf=function(rs,f){var v=tgVoteS(rs.map(function(r){return r[f]}).filter(Boolean));return v?v.v:''};
+ var comps=kept.map(function(c){var sk=Object.keys(c.sk).sort(function(a,b){return c.sk[b]-c.sk[a]})[0];
+  var ds=tgVote(c.rs.filter(function(r){return r.desc}).map(function(r){return {v:r.desc,w:1,k:r.desc.replace(/[^A-Z0-9]/g,'')}}));
+  return {sku:sk,n:c.rs.length,d:ds.best?tgFixName(sc(ds.best.v)):'',z:vf(c.rs,'dims'),p:vf(c.rs,'price'),c:(function(){var v=vf(c.rs,'cover');return v?tgFixName(sc(v)):''})(),mark:vf(c.rs,'mark')}}).sort(function(a,b){return a.sku<b.sku?-1:a.sku>b.sku?1:0});
+ var covers={};comps.forEach(function(c){if(c.c)covers[c.c]=(covers[c.c]||0)+1});var ck=Object.keys(covers),fin=ck.length===1?ck[0]:'';
+ if(ck.length>1)comps.forEach(function(c){if(!c.c)c.c=''});
+ comps.forEach(function(c){if(!c.c&&fin)c.c=fin});
+ R.comps=(t==='outlet'||t==='floor')?comps.filter(function(c){return c.d||c.z}).map(function(c){return {sku:c.sku,d:c.d,z:c.z,c:ck.length>1?c.c:'',n:c.n}}):[];
+ var sum=0,sumOk=comps.length>0;comps.forEach(function(c){var n=tgNum(c.p);if(isNaN(n))sumOk=false;else sum+=n});sum=Math.round(sum*100)/100;
+ var frontP=[];P.forEach(function(p){p.price.forEach(function(q){if(q.src!=='dot')frontP.push(q)})});
+ var fvote=function(){if(!frontP.length)return null;var b=tgVote(frontP),tot=frontP.reduce(function(a,q){return a+q.w},0);return {v:b.best.v,check:(b.n>1&&b.best.w<2*(tot-b.best.w))||P.some(function(p){return p.centsWeak})}};
+ var pkg=[];P.forEach(function(p){p.sku.forEach(function(q){if(q.w>=3)pkg.push(q)})});
+ var pkgV=pkg.length?tgVote(pkg):null;
+ var rcv=tgVote([].concat.apply([],X.map(function(x){return x.rcoll.map(function(v){return {v:v,w:1,k:v.toUpperCase()}})})));
+ var NS=R;if(t==='outlet'||t==='floor'){var FP=P.filter(function(p){return !p.back});if(FP.length)NS=tgMerge(FP)}
+ var nameFrom=function(){var coll=NS.coll,desc=NS.desc;
+  if(coll)coll=tgFixName(sc(coll));if(desc)desc=tgFixName(sc(desc));
+  var nm=coll&&desc&&desc.toLowerCase().indexOf(coll.toLowerCase())===0?desc:[coll,desc].filter(Boolean).join(' ');return {nm:nm,coll:coll,desc:desc}};
+ var nf=nameFrom();R.coll=nf.coll;R.desc=nf.desc;R.name=nf.nm;delete fl.name;
+ if((t==='outlet'||t==='floor'||t==='accessory')&&!P.some(function(p){return !p.back})){if(t!=='accessory'){R.name='';R.coll='';R.desc=''}fl.name='check'}
+ if(t==='accessory'){
+  if(!R.name){var dv=tgVote([].concat.apply([],X.map(function(x){var o=[];x.rows.forEach(function(r){if(r.desc)o.push({v:r.desc,w:2,k:r.desc.replace(/[^A-Z0-9]/g,'')})});x.sticker.forEach(function(s){if(s.desc)o.push({v:s.desc,w:1,k:s.desc.replace(/[^A-Z0-9]/g,'')})});return o})));
+   if(dv.best){R.name=tgFixName(sc(dv.best.v));if(!R.name)fl.name='check'}else fl.name='check'}
+  else if(R.coll&&!R.desc)fl.name='check';
+  var sk=pkgV?pkgV.best.v:(comps.length===1?comps[0].sku:'');R.sku=sk;if(sk){delete fl.sku;if(pkgV&&pkgV.n>1)fl.sku='check'}else fl.sku='missing';
+  // price: tag front, back row and sticker all carry it
+  var ap=frontP.slice();comps.forEach(function(c){if(c.p)ap.push({v:(+c.p).toFixed(2),w:2,src:'row'})});X.forEach(function(x){x.sticker.forEach(function(s){if(s.price)ap.push({v:(+s.price).toFixed(2),w:2,src:'sticker'})})});
+  P.forEach(function(p){p.price.forEach(function(q){if(q.src==='dot')ap.push(q)})});
+  if(ap.length){var b=tgVote(ap),tot=ap.reduce(function(a,q){return a+q.w},0);R.price=b.best.v;delete fl.price;if(b.n>1&&b.best.w<2*(tot-b.best.w))fl.price='check'}
+  R.comps=[]}
+ else if(t==='sale'){
+  var sv=tgVote([].concat.apply([],X.filter(function(x){return x.sale&&x.sale.coll}).map(function(x){return [{v:x.sale.coll,w:1,k:x.sale.coll.toUpperCase()}]})));
+  var pv=tgVote([].concat.apply([],X.filter(function(x){return x.sale&&x.sale.prod}).map(function(x){return [{v:x.sale.prod,w:1,k:x.sale.prod.toUpperCase().replace(/[^A-Z0-9]/g,'')}]})));
+  var co=sv.best?tgFixName(sc(sv.best.v)):'',pr2=pv.best?tgFixName(sc(pv.best.v)):'';
+  R.coll=co;R.desc=pr2;R.name=co&&pr2&&pr2.toLowerCase().indexOf(co.toLowerCase())===0?pr2:[co,pr2].filter(Boolean).join(' ');
+  if(!R.name)R.name=nf.nm;if(!pr2||!co)fl.name='check';
+  var s9=[];X.forEach(function(x){x.sku9.forEach(function(q){s9.push(q)})});
+  if(s9.length){var b9=tgVote(s9);R.sku=b9.best.v;delete fl.sku;if(b9.n>1)fl.sku='check'}else{R.sku='';fl.sku='missing'}
+  var fp=fvote();if(fp){R.price=fp.v;delete fl.price;if(fp.check)fl.price='check'}else{R.price='';if(!fl.price||fl.price!=='cents')fl.price='missing'}
+  var w=tgVoteS([].concat.apply([],X.map(function(x){return x.was})));if(w){R.was=w.v;if(!w.agree)fl.was='check'}else fl.was='missing';
+  var sa=tgVoteS([].concat.apply([],X.map(function(x){return x.save})));if(sa){R.save=sa.v;if(!sa.agree)fl.save='check'}
+  var se=tgVoteS([].concat.apply([],X.map(function(x){return x.se})));if(se){R.se=se.v;if(!se.agree)fl.se='check'}else fl.se='missing';
+  if(R.price&&R.was&&R.save){var pn=tgNum(R.price),wn=tgNum(R.was),sn=tgNum(R.save);if(Math.abs(wn-pn-sn)>1.01){fl.save='check'}}
+  else if(R.price&&R.was&&!R.save){R.save=String(Math.round(tgNum(R.was)-tgNum(R.price)))}}
+ else{ // outlet and floor sample
+  R.sku=pkgV&&t==='outlet'?pkgV.best.v:'';
+  if(t==='outlet'){if(pkgV){delete fl.sku;if(pkgV.n>1)fl.sku='check'}else fl.sku='missing'}else delete fl.sku;
+  if(!R.name&&rcv.best&&t==='outlet'){R.name=tgFixName(sc(rcv.best.v));fl.name='check'}
+  R.fin=fin;
+  if(t==='outlet'){var fp2=fvote();
+   if(fp2){R.price=fp2.v;delete fl.price;if(fp2.check)fl.price='check';
+    if(sumOk&&Math.floor(tgNum(R.price))===Math.floor(sum)&&tgNum(R.price)!==sum){R.price=sum.toFixed(2);if(fl.price==='check'||fl.price==='cents')delete fl.price}}
+   else if(sumOk&&comps.length>=2){R.price=sum.toFixed(2);fl.price='check'}else{R.price='';fl.price='missing'}}
+  else{ // floor sample: the marked-down price is handwritten, so it is never trusted
+   var nw=tgVoteS([].concat.apply([],X.map(function(x){return x.now})));
+   R.price='';R.nowHint=nw?String(Math.round(+nw.v)):'';fl.price='confirm';
+   var XE=X.filter(function(x){return x.fromE&&x.was.length}),wv=tgVoteS([].concat.apply([],(XE.length?XE:X).map(function(x){return x.was})));
+   if(sumOk&&comps.length>=2&&(!wv||Math.abs(tgNum(wv.v)-sum)/sum<0.03))R.was=sum.toFixed(2);else if(wv){R.was=wv.v;fl.was='check'}
+   if(R.price&&R.was){var sv2=tgNum(R.was)-tgNum(R.price);if(sv2>0)R.save=sv2.toFixed(2)}
+   if(!R.name)fl.name='check'}
+  // add-on pieces and 'also available in' colours become options (no price on the tag)
+  var opts=[],seen={};
+  var al={};X.forEach(function(x){x.also.forEach(function(o){var k=o.color;(al[k]=al[k]||[]).push({v:o.sku,w:1,k:o.sku})})});
+  Object.keys(al).forEach(function(k){var b=tgVote(al[k]).best.v;if(!seen[b]&&k.length>=4){seen[b]=1;opts.push({sku:b,piece:'',color:sc(tgTitle(k)),same:true,check:false})}});
+  var ad={};X.forEach(function(x){x.adds.forEach(function(o){var k=o.piece;if(!ad[k])ad[k]={sk:[],sz:[]};ad[k].sk.push({v:o.sku,w:1,k:o.sku});if(o.size)ad[k].sz.push({v:o.size,w:1,k:o.size})})});
+  Object.keys(ad).forEach(function(k){var b=tgVote(ad[k].sk).best.v;if(seen[b])return;seen[b]=1;var z=ad[k].sz.length?tgVote(ad[k].sz).best.v:'';
+   opts.push({sku:b,piece:sc(tgFixName(k)),color:'',size:z,same:false,check:false})});
+  R.options=opts.filter(function(o){return o.piece||o.color});
+  var nts={};X.forEach(function(x){x.notes.forEach(function(n){nts[n]=1})});R.notes=Object.keys(nts).join(' \u00b7 ')}
+ return R}
 /* ---- OCR driver ---- */
-var TGS={ctx:'',parts:[],res:null,f:{},sel:-1,base:null,busy:false,worker:null,photos:0,msg:''};
+var TGS={ctx:'',parts:[],res:null,f:{},sel:-1,base:null,busy:false,worker:null,photos:0,msg:'',force:''};
 function tgLoadLib(cb){if(window.Tesseract){cb(true);return}var s=document.createElement('script');s.src=TG_CDN+'tesseract.min.js';s.integrity=TG_SRI;s.crossOrigin='anonymous';s.async=true;
  s.onload=function(){cb(!!window.Tesseract)};s.onerror=function(){cb(false)};document.head.appendChild(s)}
 function tgWorker(cb,prog){if(TGS.worker){cb(TGS.worker);return}
@@ -1571,8 +1791,25 @@ function tgBitmap(file){return new Promise(function(res,rej){
  var viaImg=function(){var u=URL.createObjectURL(file),im=new Image();im.onload=function(){URL.revokeObjectURL(u);res({src:im,w:im.naturalWidth,h:im.naturalHeight})};im.onerror=function(){URL.revokeObjectURL(u);rej()};im.src=u};
  if(window.createImageBitmap){createImageBitmap(file,{imageOrientation:'from-image'}).then(function(b){res({src:b,w:b.width,h:b.height,bm:b})},viaImg)}else viaImg()})}
 // Two grey versions of the photo: A = stretched contrast, C = lighting flattened (helps with shading, shiny sleeves and the grey table row)
-function tgPrep(file){return tgBitmap(file).then(function(b){
- var s=Math.min(1,2048/Math.max(b.w,b.h)),w=Math.max(1,Math.round(b.w*s)),h=Math.max(1,Math.round(b.h*s)),c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d',{willReadFrequently:true});g.fillStyle='#fff';g.fillRect(0,0,w,h);g.drawImage(b.src,0,0,w,h);if(b.bm&&b.bm.close)b.bm.close();
+// A tag photographed on a dark surface: find the bright paper (row and column projections of the bright pixels) and crop to it, so the dark surround doesn't skew the contrast. Returns null when the tag already fills the frame.
+function tgBox(c){var w=c.width,h=c.height,sx=Math.max(1,Math.round(Math.max(w,h)/320)),gw=Math.floor(w/sx),gh=Math.floor(h/sx);if(gw<20||gh<20)return null;
+ var t=document.createElement('canvas');t.width=gw;t.height=gh;var tg=t.getContext('2d',{willReadFrequently:true});tg.drawImage(c,0,0,gw,gh);var d=tg.getImageData(0,0,gw,gh).data,n=gw*gh,L=new Float32Array(n),hs=new Uint32Array(256),i,x,y;
+ for(i=0;i<n;i++){var v=0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2];L[i]=v;hs[v|0]++}
+ var tot=n,sum=0;for(i=0;i<256;i++)sum+=i*hs[i];var wB=0,sB=0,best=0,th=128;for(i=0;i<256;i++){wB+=hs[i];if(!wB)continue;var wF=tot-wB;if(!wF)break;sB+=i*hs[i];var mB=sB/wB,mF=(sum-sB)/wF,bv=wB*wF*(mB-mF)*(mB-mF);if(bv>best){best=bv;th=i}}
+ var rp=new Float32Array(gh),cp=new Float32Array(gw),on=0;for(y=0;y<gh;y++)for(x=0;x<gw;x++)if(L[y*gw+x]>th){rp[y]++;cp[x]++;on++}
+ if(on<n*0.08||on>n*0.8)return null;
+ var rt=gw*0.3,ct=gh*0.3,y0=0,y1=gh-1,x0=0,x1=gw-1;while(y0<gh&&rp[y0]<rt)y0++;while(y1>y0&&rp[y1]<rt)y1--;while(x0<gw&&cp[x0]<ct)x0++;while(x1>x0&&cp[x1]<ct)x1--;
+ if(x1-x0<gw*0.3||y1-y0<gh*0.3)return null;
+ // only when the surround is clearly darker than the paper (a tag lying on a dark floor or sofa); a tag with its own dark artwork keeps the whole frame
+ var si=0,so=0,ni=0,no=0;for(y=0;y<gh;y++)for(x=0;x<gw;x++){if(x>=x0&&x<=x1&&y>=y0&&y<=y1){si+=L[y*gw+x];ni++}else{so+=L[y*gw+x];no++}}
+ if(no&&(so/no)>0.5*(si/Math.max(1,ni)))return null;if((x1-x0+1)*(y1-y0+1)<n*0.5)return null;
+ var mx=Math.round(gw*0.02),my=Math.round(gh*0.02);x0=Math.max(0,x0-mx);y0=Math.max(0,y0-my);x1=Math.min(gw-1,x1+mx);y1=Math.min(gh-1,y1+my);
+ if((x1-x0+1)*(y1-y0+1)>n*0.82)return null;
+ return {x:x0*sx,y:y0*sx,w:Math.min(w-x0*sx,(x1-x0+1)*sx),h:Math.min(h-y0*sx,(y1-y0+1)*sx)}}
+function tgPrep(file,rot,maxSide,nobox){return tgBitmap(file).then(function(b){
+ rot=rot||0;var sw=(rot===90||rot===270),bw=sw?b.h:b.w,bh=sw?b.w:b.h,s=Math.min(1,(maxSide||2048)/Math.max(bw,bh)),w=Math.max(1,Math.round(bw*s)),h=Math.max(1,Math.round(bh*s)),c=document.createElement('canvas');c.width=w;c.height=h;var g=c.getContext('2d',{willReadFrequently:true});g.fillStyle='#fff';g.fillRect(0,0,w,h);
+ g.save();g.translate(w/2,h/2);g.rotate(rot*Math.PI/180);var dw=Math.round(b.w*s),dh=Math.round(b.h*s);g.drawImage(b.src,-dw/2,-dh/2,dw,dh);g.restore();if(b.bm&&b.bm.close)b.bm.close();
+ var bx=nobox?null:tgBox(c);if(bx){var c2=document.createElement('canvas');c2.width=bx.w;c2.height=bx.h;var g2=c2.getContext('2d',{willReadFrequently:true});g2.drawImage(c,bx.x,bx.y,bx.w,bx.h,0,0,bx.w,bx.h);c=c2;g=g2;w=bx.w;h=bx.h}
  var id=g.getImageData(0,0,w,h),px=id.data,n=w*h,gr=new Float32Array(n),i,hist=new Uint32Array(256);
  for(i=0;i<n;i++){var v=0.299*px[4*i]+0.587*px[4*i+1]+0.114*px[4*i+2];gr[i]=v;hist[v|0]++}
  var lo=0,hi=255,acc=0;for(i=0;i<256;i++){acc+=hist[i];if(acc>=n*0.01){lo=i;break}}acc=0;for(i=255;i>=0;i--){acc+=hist[i];if(acc>=n*0.01){hi=i;break}}if(hi<=lo+10){lo=0;hi=255}
@@ -1583,98 +1820,219 @@ function tgPrep(file){return tgBitmap(file).then(function(b){
  for(y=0;y<h;y++){var y0=Math.max(0,y-r),y1=Math.min(h,y+r+1);for(x=0;x<w;x++){var x0=Math.max(0,x-r),x1=Math.min(w,x+r+1);
   var sm=I[y1*W1+x1]-I[y0*W1+x1]-I[y1*W1+x0]+I[y0*W1+x0],bg=sm/((x1-x0)*(y1-y0));var cv=gr[y*w+x]/Math.max(bg,1)*235;cv=cv<0?0:cv>255?255:cv;
   var k=4*(y*w+x);cp[k]=cp[k+1]=cp[k+2]=cv;cp[k+3]=255}}
- cg.putImageData(cd,0,0);return {A:A,C:C,w:w,h:h}})}
+ cg.putImageData(cd,0,0);
+ // N: inverted minimum channel with its own percentile stretch, so white lettering on a coloured band ('FLOOR SAMPLE', 'OUTLET') turns into dark-on-light
+ var mn=new Float32Array(n),h2=new Uint32Array(256);for(i=0;i<n;i++){var m1=Math.min(px[4*i],px[4*i+1],px[4*i+2]);mn[i]=m1;h2[m1]++}
+ var l2=0,u2=255;acc=0;for(i=0;i<256;i++){acc+=h2[i];if(acc>=n*0.01){l2=i;break}}acc=0;for(i=255;i>=0;i--){acc+=h2[i];if(acc>=n*0.01){u2=i;break}}if(u2<=l2+10){l2=0;u2=255}
+ var N=document.createElement('canvas');N.width=w;N.height=h;var ng=N.getContext('2d'),nd=ng.createImageData(w,h),np=nd.data;
+ for(i=0;i<n;i++){var a2=(mn[i]-l2)/(u2-l2)*255;a2=a2<0?0:a2>255?255:a2;a2=255-a2;np[4*i]=np[4*i+1]=np[4*i+2]=a2;np[4*i+3]=255}ng.putImageData(nd,0,0);
+ // R: only the red ink (handwritten NOW price), dark on white. E: the A image with red ink wiped out (the red strike-through on the crossed-out WAS price).
+ var Rc=document.createElement('canvas');Rc.width=w;Rc.height=h;var rg2=Rc.getContext('2d'),rd=rg2.createImageData(w,h),rp=rd.data,Ec=document.createElement('canvas');Ec.width=w;Ec.height=h;var eg=Ec.getContext('2d'),ed=eg.createImageData(w,h),ep=ed.data;
+ for(i=0;i<n;i++){var rr=px[4*i],gg=px[4*i+1],bb=px[4*i+2],rn=rr-Math.max(gg,bb),isRed=rn>45&&rr>110&&rn>0.45*rr,rv=isRed?255-Math.min(255,(rn-30)*3):255,ev=isRed?255:ap[4*i];rp[4*i]=rp[4*i+1]=rp[4*i+2]=rv;rp[4*i+3]=255;ep[4*i]=ep[4*i+1]=ep[4*i+2]=ev;ep[4*i+3]=255}
+ rg2.putImageData(rd,0,0);eg.putImageData(ed,0,0);
+ return {A:A,C:C,N:N,R:Rc,E:Ec,w:w,h:h,boxed:!!bx}})}
 function tgRec(w,cv,psm,wl){return w.setParameters({tessedit_pageseg_mode:psm,tessedit_char_whitelist:wl||'',preserve_interword_spaces:'1'}).then(function(){return w.recognize(cv)})}
 function tgWords(r){var o=[];((r&&r.data&&r.data.words)||[]).forEach(function(w){if(w&&w.bbox&&w.text)o.push({t:String(w.text),x0:w.bbox.x0,y0:w.bbox.y0,x1:w.bbox.x1,y1:w.bbox.y1})});return o}
 // The cents on a front tag are tiny superscript digits: re-read just that corner, enlarged, a few times.
+// Wipe everything in a crop that is not a small glyph (the tall dollar digits, a cut-off digit at the left edge, the dark surround): what's left is the cents.
+function tgCentsClean(src,bh){var w=src.width,h=src.height,g=src.getContext('2d',{willReadFrequently:true}),id=g.getImageData(0,0,w,h),d=id.data,n=w*h,L=new Uint8Array(n),hs=new Uint32Array(256),i;
+ for(i=0;i<n;i++){var v=(0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2])|0;L[i]=v;hs[v]++}
+ var sum=0;for(i=0;i<256;i++)sum+=i*hs[i];var wB=0,sB=0,best=0,th=128;for(i=0;i<256;i++){wB+=hs[i];if(!wB)continue;var wF=n-wB;if(!wF)break;sB+=i*hs[i];var mB=sB/wB,mF=(sum-sB)/wF,bv=wB*wF*(mB-mF)*(mB-mF);if(bv>best){best=bv;th=i}}
+ var ink=new Uint8Array(n);for(i=0;i<n;i++)ink[i]=L[i]<th?1:0;var seen=new Uint8Array(n),st=[],kill=[];
+ for(i=0;i<n;i++){if(!ink[i]||seen[i])continue;var x0=w,x1=0,y0=h,y1=0,cnt=0,comp=[];st.length=0;st.push(i);seen[i]=1;
+  while(st.length){var q=st.pop(),qx=q%w,qy=(q-qx)/w;comp.push(q);cnt++;if(qx<x0)x0=qx;if(qx>x1)x1=qx;if(qy<y0)y0=qy;if(qy>y1)y1=qy;
+   for(var dy=-1;dy<=1;dy++)for(var dx=-1;dx<=1;dx++){var nx=qx+dx,ny=qy+dy;if(nx<0||ny<0||nx>=w||ny>=h)continue;var k=ny*w+nx;if(ink[k]&&!seen[k]){seen[k]=1;st.push(k)}}}
+  var ch=y1-y0+1,edge=x0<=1||y0<=1||x1>=w-2||y1>=h-2;
+  if(ch>bh*0.5||edge||cnt<6)comp.forEach(function(k){kill.push(k)})}
+ kill.forEach(function(k){d[4*k]=d[4*k+1]=d[4*k+2]=255});g.putImageData(id,0,0);return kill.length}
 function tgCents(w,C,box,W,H){
  var bw=box.x1-box.x0,bh=box.y1-box.y0,cx0=Math.max(0,Math.round(box.x0+bw*0.55)),cx1=Math.min(W,Math.round(box.x1+bw*0.45)),cy0=Math.max(0,Math.round(box.y0-bh*0.15)),cy1=Math.min(H,Math.round(box.y0+bh*0.85));
- var reads=[],sc=[1,2,3],i=0;
- function one(){if(i>=sc.length)return Promise.resolve(reads);var s=sc[i++],c=document.createElement('canvas'),pad=20;c.width=(cx1-cx0)*s+2*pad;c.height=(cy1-cy0)*s+2*pad;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(C,cx0,cy0,cx1-cx0,cy1-cy0,pad,pad,(cx1-cx0)*s,(cy1-cy0)*s);
-  return tgRec(w,c,'8','0123456789').then(function(r){var d=String((r&&r.data&&r.data.text)||'').replace(/\D/g,'');if(d.length>=2)reads.push(d.slice(-2))},function(){}).then(one)}
+ var reads=[],sc=[1,2,3],clean=[false,true],i=0;
+ function one(){if(i>=sc.length*clean.length)return Promise.resolve(reads);var s=sc[i%sc.length],cl=clean[Math.floor(i/sc.length)];i++;var c=document.createElement('canvas'),pad=20;c.width=(cx1-cx0)*s+2*pad;c.height=(cy1-cy0)*s+2*pad;var g=c.getContext('2d',{willReadFrequently:true});g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(C,cx0,cy0,cx1-cx0,cy1-cy0,pad,pad,(cx1-cx0)*s,(cy1-cy0)*s);
+  if(cl){var raw=document.createElement('canvas');raw.width=cx1-cx0;raw.height=cy1-cy0;var rg=raw.getContext('2d',{willReadFrequently:true});rg.drawImage(C,cx0,cy0,cx1-cx0,cy1-cy0,0,0,cx1-cx0,cy1-cy0);tgCentsClean(raw,bh);g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(raw,0,0,raw.width,raw.height,pad,pad,raw.width*s,raw.height*s)}
+  return tgRec(w,c,cl?'7':'8','0123456789').then(function(r){var d=String((r&&r.data&&r.data.text)||'').replace(/\D/g,'');if(cl?d.length===2:d.length>=2)reads.push(cl?d:d.slice(-2));if(cl&&d.length===2)reads.push(d)},function(){}).then(one)}
  return one().then(function(rs){var m={},best='',bn=0;rs.forEach(function(x){m[x]=(m[x]||0)+1;if(m[x]>bn){bn=m[x];best=x}});return {v:best,n:bn,of:rs.length}})}
-var TG_PASSES=[['C','6'],['A','3'],['C','3']];
+var TG_PASSES=[['C','6'],['A','3'],['C','3'],['N','3'],['A','11']];
 function tgComplete(R){if(R.hasBack&&!R.hasFront)return !!(R.sku&&!R.flags.sku&&R.size&&!R.flags.size&&R.price&&!R.flags.price);if(R.hasFront&&!R.hasBack)return !!(R.name&&!R.flags.name&&R.price&&!R.flags.price);return !!(R.name&&R.price&&R.sku)}
-// Read one photo. Resolves to the list of parses from the passes that were needed.
+function tgComplete19(P){var R=tgMerge19(P);if(R.type==='regular')return tgComplete(R);
+ var f=R.flags,comp=R.comps.length>0&&R.comps.every(function(c){return c.n>=2});
+ if(R.type==='sale')return !!(P.length>=2&&R.name&&!f.name&&R.sku&&!f.sku&&R.price&&!f.price&&R.was&&R.se&&parseFloat(R.price)<parseFloat(R.was));
+ if(R.type==='accessory')return !!(R.name&&!f.name&&R.sku&&!f.sku&&R.price&&!f.price);
+ if(R.type==='outlet')return !!(R.sku&&!f.sku&&comp&&R.name&&!f.name&&R.price&&!f.price&&R.options.length);
+ return !!(comp&&R.comps.length>=2&&R.name&&!f.name)}
+// how much real text did a pass find? (used to spot a sideways or upside-down photo)
+function tgGood(r){var n=0;((r&&r.data&&r.data.words)||[]).forEach(function(w){var t=String(w.text||'').replace(/[^A-Za-z0-9]/g,'');if(w.confidence>=70&&(/^[A-Za-z]{3,}$/.test(t)||/^\d{3,}$/.test(t)))n++});return n}
+function tgProbe(w,file,rots){var best={rot:rots[0],n:-1},i=0;
+ function one(){if(i>=rots.length)return Promise.resolve(best);var rot=rots[i++];
+  return tgPrep(file,rot,1024).then(function(pr){return tgRec(w,pr.A,'3','')}).then(function(r){var n=tgGood(r);if(best.n<0||n>best.n*1.3+2)best={rot:rot,n:n}},function(){}).then(one)}
+ return one()}
+// Read one photo. Resolves to the list of parses from the passes that were needed. A sideways (landscape) photo is turned upright first.
+// Extra reads for floor sample and outlet tags (run after the normal passes of one photo)
+// Otsu-binarize a small canvas in place (a grey table row behind black text reads much better as pure black on white)
+function tgBinarize(cv){var w=cv.width,h=cv.height,g=cv.getContext('2d',{willReadFrequently:true}),id=g.getImageData(0,0,w,h),d=id.data,n=w*h,L=new Float32Array(n),i,x,y,W1=w+1,I=new Float64Array(W1*(h+1));
+ for(i=0;i<n;i++)L[i]=0.299*d[4*i]+0.587*d[4*i+1]+0.114*d[4*i+2];
+ for(y=0;y<h;y++){var rs=0;for(x=0;x<w;x++){rs+=L[y*w+x];I[(y+1)*W1+x+1]=I[y*W1+x+1]+rs}}
+ var r=Math.max(10,Math.round(h*0.9));
+ for(y=0;y<h;y++){var y0=Math.max(0,y-r),y1=Math.min(h,y+r+1);for(x=0;x<w;x++){var x0=Math.max(0,x-r),x1=Math.min(w,x+r+1),m=(I[y1*W1+x1]-I[y0*W1+x1]-I[y1*W1+x0]+I[y0*W1+x0])/((x1-x0)*(y1-y0)),v=L[y*w+x]<m*0.72?0:255,k=4*(y*w+x);d[k]=d[k+1]=d[k+2]=v}}
+ g.putImageData(id,0,0)}
+function tgBoxCrop(cv,x0,y0,x1,y1,s,bin){var raw=document.createElement('canvas');raw.width=Math.max(1,x1-x0);raw.height=Math.max(1,y1-y0);raw.getContext('2d',{willReadFrequently:true}).drawImage(cv,x0,y0,x1-x0,y1-y0,0,0,x1-x0,y1-y0);if(bin)tgBinarize(raw);
+ var pad=24,c=document.createElement('canvas');c.width=raw.width*s+2*pad;c.height=raw.height*s+2*pad;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(raw,0,0,raw.width,raw.height,pad,pad,raw.width*s,raw.height*s);return c}
+// The rows of a floor sample / outlet 'back' sit on a grey band and are easy to misread. Re-read each row's SKU and retail price from enlarged, binarized crops.
+function tgRowFix(w,pr,mine){
+ var bx=[];mine.forEach(function(p){(p._w||[]).forEach(function(q){var t=q.t.replace(/[^A-Za-z0-9]/g,''),d=t.replace(/\D/g,'');if(d.length>=8&&d.length<=10&&d.length>=t.length-1&&q.x0<pr.w*0.45&&q.x1-q.x0<pr.w*0.3)bx.push(q)})});
+ var cl=[];bx.sort(function(a,b){return a.y0-b.y0});bx.forEach(function(q){var c=cl[cl.length-1];if(c&&q.y0-c.y0<(c.y1-c.y0)*0.9)c.l.push(q);else cl.push({y0:q.y0,y1:q.y1,l:[q]})});
+ var rows=[],ci=0,colX=0;bx.forEach(function(q){if(q.x1-q.x0<pr.w*0.15&&q.x1>colX)colX=q.x1});if(!colX)colX=pr.w*0.25;
+ function nextC(){if(ci>=cl.length)return Promise.resolve();var c=cl[ci++],q=c.l[0],bh=q.y1-q.y0,x0=Math.max(0,Math.round(pr.w*0.03)),x1=Math.min(pr.w,Math.round(colX+bh*0.5)),y0=Math.max(0,Math.round(q.y0-bh*0.35)),y1=Math.min(pr.h,Math.round(q.y1+bh*0.35)),jobs=[],px0=Math.round(pr.w*0.6),px1=Math.round(pr.w*0.99),sk=[],pj=[];
+  [[pr.A,2,1],[pr.C,2,1],[pr.A,3,1],[pr.C,3,1]].forEach(function(j){jobs.push(j)});
+  [[pr.A,2,1],[pr.C,2,1],[pr.A,3,1],[pr.C,3,1]].forEach(function(j){pj.push(j)});
+  var k=0,k2=0;
+  function one(){if(k>=jobs.length)return Promise.resolve();var jb=jobs[k++];return tgRec(w,tgBoxCrop(jb[0],x0,y0,x1,y1,jb[1],jb[2]),'6','0123456789').then(function(r){String((r&&r.data&&r.data.text)||'').split('\n').forEach(function(ln){var d=ln.replace(/\D/g,'');if(d.length>=9&&d.length<=10)sk.push(d.slice(-9))})},function(){}).then(one)}
+  var prs=[];
+  function onep(){if(k2>=pj.length)return Promise.resolve();var jb=pj[k2++];return tgRec(w,tgBoxCrop(jb[0],px0,y0,px1,y1,jb[1],jb[2]),'6','0123456789.').then(function(r){var m=/(?:^|[^\d.])(\d{3,5})\.(\d{2})(?!\d)/.exec(String((r&&r.data&&r.data.text)||''));if(m)prs.push((+m[1])+'.'+m[2])},function(){}).then(onep)}
+  return one().then(onep).then(function(){var pv=prs.length?tgVote(prs.map(function(v){return {v:v,w:1,k:v}})).best.v:'';var sv=sk.length?tgVote(sk.map(function(v){return {v:v,w:1,k:v}})):null;
+    if(window.vfTag&&window.vfTag.keep)window.vfTag.raws.push('ROWFIX '+JSON.stringify({q:q,box:[x0,y0,x1,y1],sk:sk,prs:prs})+'::');
+    if(sv&&sv.best)sk.forEach(function(v){if(v===sv.best.v)rows.push({sku:v,price:pv,ix:ci-1})})}).then(nextC)}
+ return nextC().then(function(){if(mine.length&&rows.length)rows.forEach(function(r){mine[0].x.rows.push({sku:r.sku,ix:r.ix,dims:'',price:r.price,desc:'',cover:'',mark:''})})})}
+// the dominant band of ink on the red-ink canvas (the handwritten price), as a padded crop
+function tgInkBand(R){var w=R.width,h=R.height,d=R.getContext('2d',{willReadFrequently:true}).getImageData(0,0,w,h).data,rows=new Uint32Array(h),y,x;
+ for(y=0;y<h;y++){var c=0;for(x=0;x<w;x++)if(d[4*(y*w+x)]<140)c++;rows[y]=c}
+ var bands=[],cur=null,gap=0;for(y=0;y<h;y++){if(rows[y]>=2){if(!cur){cur={y0:y,y1:y,ink:0};bands.push(cur)}cur.y1=y;cur.ink+=rows[y];gap=0}else if(cur&&++gap>Math.max(6,h*0.006))cur=null}
+ var best=null;bands.forEach(function(b){var hh=b.y1-b.y0+1;if(hh>=h*0.02&&(!best||b.ink>best.ink))best=b});if(!best)return null;
+ var x0=w,x1=0;for(y=best.y0;y<=best.y1;y++)for(x=0;x<w;x++)if(d[4*(y*w+x)]<140){if(x<x0)x0=x;if(x>x1)x1=x}
+ if(x1-x0<w*0.08)return null;var px=Math.round((x1-x0)*0.06),py=Math.round((best.y1-best.y0)*0.2);return {x:Math.max(0,x0-px),y:Math.max(0,best.y0-py),w:Math.min(w,x1+px)-Math.max(0,x0-px),h:Math.min(h,best.y1+py)-Math.max(0,best.y0-py)}}
+function tgCropRec(w,cv,bx,s,psm,wl){var c=document.createElement('canvas'),pad=24;c.width=Math.round(bx.w*s)+2*pad;c.height=Math.round(bx.h*s)+2*pad;var g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(cv,bx.x,bx.y,bx.w,bx.h,pad,pad,Math.round(bx.w*s),Math.round(bx.h*s));return tgRec(w,c,psm,wl||'')}
+function tgExtras(w,pr,mine,say){
+ var fl=0,ou=0,rows=0;mine.forEach(function(p){if(!p.x)return;if(p.x.sc.floor>=2)fl=1;if(p.x.sc.outlet>=2)ou=1;if(p.x.rows.length)rows=1});
+ var jobs=Promise.resolve(),keep=function(t,r){if(window.vfTag&&window.vfTag.keep)window.vfTag.raws.push(t+'::\n'+(r&&r.data&&r.data.text))};
+ if(rows&&(fl||ou))jobs=jobs.then(function(){say('Checking the SKUs\u2026');return tgRowFix(w,pr,mine)});
+ if(fl&&!rows&&mine.length){
+  jobs=jobs.then(function(){say('Looking for the handwritten price\u2026');var bx=tgInkBand(pr.R);if(!bx)return;var ss=[1,1.6],i=0;
+   function one(){if(i>=ss.length)return Promise.resolve();var s=ss[i++];return tgCropRec(w,pr.R,bx,s,'7','0123456789$').then(function(r){keep('R7 '+JSON.stringify(bx)+' '+s+' '+pr.w+'x'+pr.h+' '+pr.R.width+'x'+pr.R.height,r);var m=String((r&&r.data&&r.data.text)||'').replace(/[,\s]/g,'').match(/\d{3,5}/g)||[];m.forEach(function(v){mine[0].x.now.push(v)})},function(){}).then(one)}
+   return one()})
+  .then(function(){var bx={x:0,y:Math.round(pr.h*0.5),w:pr.w,h:pr.h-Math.round(pr.h*0.5)};return tgCropRec(w,pr.E,bx,1,'6','').then(function(r){var words=tgWords(r),p=tgParse(r.data.text||'',words);p.x=tgParseX(r.data.text||'',words);p.x.fromE=true;keep('E6',r);mine.push(p)},function(){})})}
+ return jobs.then(function(){},function(){})}
 function tgReadPhoto(file,prog){return new Promise(function(res,rej){
- tgPrep(file).then(function(pr){
-  tgWorker(function(w){if(!w){rej(new Error('lib'));return}
+ tgWorker(function(w){if(!w){rej(new Error('lib'));return}
+  var say=function(m){if(prog)prog(m)};
+  function run(rot,canRetry,nobox){return tgPrep(file,rot,0,nobox).then(function(pr){return new Promise(function(done){
    var mine=[],pi=0;
-   function next(){if(pi>=TG_PASSES.length){res(mine);return}
-    var ps=TG_PASSES[pi++];if(prog)prog('Reading the tag\u2026 (step '+pi+')');
-    tgRec(w,pr[ps[0]],ps[1],'').then(function(r){var words=tgWords(r),p=tgParse(r.data.text||'',words);if(window.vfTag&&window.vfTag.keep)window.vfTag.raws.push(ps.join('')+'::\n'+r.data.text);mine.push(p);
-     var after=function(){var R=tgMerge(TGS.parts.concat(mine));if(tgComplete(R)||pi>=TG_PASSES.length){res(mine)}else next()};
+   function next(){if(pi>=TG_PASSES.length){done({mine:mine,boxed:pr.boxed});return}
+    var ps=TG_PASSES[pi++];say('Reading the tag\u2026 (step '+pi+')');
+    tgRec(w,pr[ps[0]],ps[1],'').then(function(r){var words=tgWords(r),p=tgParse(r.data.text||'',words);p.x=tgParseX(r.data.text||'',words);p._w=words;if(window.vfTag&&window.vfTag.keep)window.vfTag.raws.push(ps.join('')+'::\n'+r.data.text);
+     if(pi===1&&canRetry&&tgGood(r)<4){done({retry:true});return}
+     mine.push(p);
+     var after=function(){var P=TGS.parts.concat(mine);if(pi>=TG_PASSES.length||tgComplete19(P)){tgExtras(w,pr,mine,say).then(function(){done({mine:mine,boxed:pr.boxed})})}else next()};
+     var skuStep=function(){var has=mine.some(function(q){return q.x&&q.x.sku9.length});
+      if(p.x.skuPart&&!has){tgSkuCrop(w,[pr.A,pr.N,pr.C],p.x.skuPart,pr.w,pr.h).then(function(rs){rs.forEach(function(d){p.x.sku9.push({v:d,w:2})});p.x.skuPart=null;after()},after)}else after()};
      if(p.dollars&&!mine.some(function(q){return q.price.some(function(x){return x.src==='cents'})})){
-      tgCents(w,pr.C,p.dollars.box,pr.w,pr.h).then(function(c){if(c.v){p.price.push({v:p.dollars.d+'.'+c.v,w:2.5,src:'cents'});if(c.n<c.of)p.centsWeak=true}after()},after)}
-     else after()},function(){next()})}
-   next()},function(m){if(prog&&m.status==='recognizing text')prog('Reading the tag\u2026 '+Math.round((m.progress||0)*100)+'%');else if(prog&&/loading|initializ/.test(m.status))prog('Getting the tag reader ready (first time only)\u2026')})
- },function(){rej(new Error('img'))})})}
-window.vfTag={keep:false,raws:[],parse:tgParse,merge:tgMerge,read:tgReadPhoto,state:function(){return TGS},ready:function(){return !TGS.busy}};
+      tgCents(w,pr.C,p.dollars.box,pr.w,pr.h).then(function(c){if(c.v){p.price.push({v:p.dollars.d+'.'+c.v,w:2.5,src:'cents'});if(c.n*2<c.of)p.centsWeak=true}skuStep()},skuStep)}
+     else skuStep()},function(){next()})}
+   next()})})}
+  // a photo cropped to its bright paper that read back as an incomplete regular back is read again on the whole frame (glare can fool the crop); the better read wins
+  var needMore=function(o){if(!o||!o.mine||!o.boxed)return false;var R=tgMerge19(o.mine);return !!(R.hasBack&&R.type==='regular'&&(R.flags.sku||R.flags.size))};
+  var score=function(o){var R=tgMerge19(o.mine),n=0;if(R.sku)n+=2;if(R.size)n+=2;if(!R.flags.sku)n+=1;if(!R.flags.size)n+=2;return n};
+  var runB=function(rot,canRetry){return run(rot,canRetry).then(function(o){if(!needMore(o))return o;say('Trying the whole photo\u2026');return run(rot,false,true).then(function(o2){return o2&&o2.mine&&score(o2)>score(o)?o2:o},function(){return o})})};
+  var go=function(rot){runB(rot,rot===0).then(function(o){
+    if(o.retry){say('Turning the photo upright\u2026');tgProbe(w,file,[0,90,270,180]).then(function(b){if(b.rot!==0&&b.n>=4)runB(b.rot,false).then(function(o2){res(o2.mine)},function(){rej(new Error('img'))});else runB(0,false).then(function(o2){res(o2.mine)},function(){rej(new Error('img'))})});return}
+    res(o.mine)},function(){rej(new Error('img'))})};
+  tgBitmap(file).then(function(b){var land=b.w>b.h*1.1;if(b.bm&&b.bm.close)b.bm.close();return land},function(){return false}).then(function(land){
+   if(land){say('Checking which way up the photo is\u2026');tgProbe(w,file,[0,90,270]).then(function(b){go(b.rot)})}else go(0)})
+ },function(m){if(prog&&m.status==='recognizing text')prog('Reading the tag\u2026 '+Math.round((m.progress||0)*100)+'%');else if(prog&&/loading|initializ/.test(m.status))prog('Getting the tag reader ready (first time only)\u2026')})})}
+window.vfTag={dbg:{boxcrop:tgBoxCrop,probe:tgProbe,good:tgGood,ink:tgInkBand,cropRec:tgCropRec,prep:function(){return tgPrep.apply(null,arguments)},rec:function(){return tgRec.apply(null,arguments)},worker:function(cb){tgWorker(cb)},words:function(r){return tgWords(r)},decode:function(f,cb){decodeFile(f,cb)}},keep:false,raws:[],parse:function(t,w){var p=tgParse(t,w);p.x=tgParseX(t,w);return p},merge:tgMerge19,read:tgReadPhoto,state:function(){return TGS},ready:function(){return !TGS.busy}};
 /* ---- review UI (inside the Add an item box, rep screen and customer form) ---- */
 function tgEl(ctx){return document.getElementById(ctx+'tgpanel')}
 function tgFlagTxt(R){var f=R.flags||{},o={};
  if(f.name)o.name='Check the name: only part of it was readable.';
- if(f.sku==='missing')o.sku='SKU not readable. Type it or add a photo of the back.';else if(f.sku==='rebuilt')o.sku='Partly hidden by glare and rebuilt from the other lines. Check the SKU.';else if(f.sku)o.sku='Two readings disagreed. Check the SKU.';
+ if(f.sku==='missing')o.sku=R.type==='sale'?'SKU not readable. Type it from the tag\u2019s bottom-left corner.':'SKU not readable. Type it or add a photo of the back.';else if(f.sku==='rebuilt')o.sku='Partly hidden by glare and rebuilt from the other lines. Check the SKU.';else if(f.sku)o.sku='Two readings disagreed. Check the SKU.';
  if(f.size==='missing')o.size='Size not found. Add a photo of the back, or type it.';else if(f.size==='partial')o.size='Only part of the size was readable. Check it.';
- if(f.price==='missing')o.price='Price not found. Type it or add a photo of the front.';else if(f.price==='cents')o.price='Cents not readable. Check price.';else if(f.price)o.price='Check price.';
+ if(f.price==='missing')o.price=R.type==='floor'?'The handwritten price was not readable. Type it from the tag, then confirm it.':'Price not found. Type it or add a photo of the front.';else if(f.price==='cents')o.price='Cents not readable. Check price.';else if(f.price==='confirm')o.price=(R.nowHint?'The handwritten price looks like about $'+R.nowHint+', but handwriting is easy to misread. Type the price from the tag.':'Handwritten price not readable. Confirm price: type it from the tag.');else if(f.price)o.price='Check price.';
+ if(f.was==='missing')o.was='Was price not found. Type it or leave it blank.';else if(f.was)o.was='Check the was price.';
+ if(f.save)o.save='Check the savings.';
+ if(f.se==='missing')o.se='Sale end date not read. Pick it.';else if(f.se)o.se='Check the sale end date.';
  return o}
+function tgSaleNote(se){return typeof tgSaleWarn==='function'?tgSaleWarn({t:'sale',se:se}):''}
 function tgDraw(){var ctx=TGS.ctx,el=tgEl(ctx);if(!el)return;['q','r'].forEach(function(c){if(c!==ctx){var o=tgEl(c);if(o){o.hidden=true;o.innerHTML=''}}});
  el.hidden=false;var h='',rep=ctx==='r';
  if(TGS.busy){el.innerHTML='<h4 class="tgh">Read a price tag</h4><p class="tgbusy" role="status">'+esc(TGS.msg||'Reading the tag\u2026')+'</p><p class="qfine">Everything is read on this phone. Nothing is uploaded.</p>';return}
- if(!TGS.res){el.innerHTML='<h4 class="tgh">Read a price tag</h4><p class="qfine tgnote">Take a clear photo of the front or back of the tag, or pick one from your gallery. The text is read on this phone. The photo is not uploaded, saved or attached to your quote.'+(TGS.msg?'</p><p class="tgwarn" role="status">'+esc(TGS.msg):'')+'</p><div class="tgbtns"><button type="button" class="btn1 rgbtn" data-tg="cam">Take photo</button><button type="button" class="btn2 rbtn" data-tg="gal">Choose from gallery</button></div><button type="button" class="tgx" data-tg="cancel">Cancel</button>';return}
- var R=TGS.res,F=TGS.f,fl=tgFlagTxt(R);
- var fld=function(id,lab,val,ph,extra){return '<div class="qf"><label for="'+ctx+'tg'+id+'">'+lab+'</label><input id="'+ctx+'tg'+id+'" data-tgf="'+id+'" type="text" autocomplete="off" maxlength="'+(id==='name'?'200':'80')+'" value="'+esc(val)+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'+(fl[id]?'<p class="tgwarn">'+esc(fl[id])+'</p>':'')+'</div>'};
+ if(!TGS.res){el.innerHTML='<h4 class="tgh">Read a price tag</h4><p class="qfine tgnote">Take a clear photo of the tag (regular, sale, outlet, floor sample or accessory), front or back, or pick one from your gallery. The text is read on this phone. The photo is not uploaded, saved or attached to your quote.'+(TGS.msg?'</p><p class="tgwarn" role="status">'+esc(TGS.msg):'')+'</p><div class="tgbtns"><button type="button" class="btn1 rgbtn" data-tg="cam">Take photo</button><button type="button" class="btn2 rbtn" data-tg="gal">Choose from gallery</button></div><button type="button" class="tgx" data-tg="cancel">Cancel</button>';return}
+ var R=TGS.res,F=TGS.f,fl=tgFlagTxt(R),ty=R.type||'regular',reg=ty==='regular';
+ var fld=function(id,lab,val,ph,extra,type){return '<div class="qf"><label for="'+ctx+'tg'+id+'">'+lab+'</label><input id="'+ctx+'tg'+id+'" data-tgf="'+id+'" type="'+(type||'text')+'" autocomplete="off" maxlength="'+(id==='name'?'200':id==='nt'?'200':'80')+'" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'"'+(extra||'')+'>'+(fl[id]?'<p class="tgwarn">'+esc(fl[id])+'</p>':'')+'</div>'};
  h+='<h4 class="tgh">Check what was read</h4><p class="qfine tgnote">'+(R.hasFront?'\u2713 Front read. ':'')+(R.hasBack?'\u2713 Back read. ':'')+((!R.hasFront&&!R.hasBack)?'Nothing readable yet. Try again with better light, or type the item. ':'')+'Fix anything that looks wrong, then add it.</p>';
+ h+='<div class="qf tgtyperow"><label for="'+ctx+'tgtype">Tag type <span class="tgbadge tgb-'+ty+'" data-tgbadge>'+esc(tgTypeName(ty))+'</span>'+(R.detected&&R.detected!==ty?' <span class="opt">(changed by you; it looked like '+esc(tgTypeName(R.detected))+')</span>':'')+'</label><select id="'+ctx+'tgtype" data-tgtype>'+TG_TYPES.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===ty?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>';
  h+=fld('name','Item / description',F.name,'e.g. Abella 2 Door Accent Cabinet')+'<div class="rpair">'+fld('sku','SKU',F.sku,'',' inputmode="numeric" autocapitalize="characters"')+fld('fin','Finish / color',F.fin,'')+'</div>';
- h+='<div class="rpair">'+fld('size','Size (W x D x H)',F.size,'')+fld('price',rep?'Unit price':'Price on tag',F.price,'$0.00',' inputmode="decimal"')+'</div>';
+ if(reg)h+='<div class="rpair">'+fld('size','Size (W x D x H)',F.size,'')+fld('price',rep?'Unit price':'Price on tag',F.price,'$0.00',' inputmode="decimal"')+'</div>';
+ else{
+  h+='<div class="rpair">'+fld('price',ty==='sale'?'Sale price':(ty==='floor'?'Price (handwritten)':(rep?'Unit price':'Price on tag')),F.price,'$0.00',' inputmode="decimal"');
+  if(ty==='sale'||ty==='floor')h+=fld('was','Was price',F.was,'$0.00',' inputmode="decimal"');else h+='<div></div>';
+  h+='</div>';
+  if(ty==='sale'){h+='<div class="rpair">'+fld('save','You save',F.save,'$0',' inputmode="decimal"')+fld('se','Sale ends',F.se,'','','date')+'</div>';var sw=tgSaleNote(F.se);h+='<p class="tgwarn" role="status" data-tgsw'+(sw?'':' hidden')+'>'+esc(sw)+'</p>'}
+  if(ty==='floor')h+='<p class="qfine tgnote">Floor sample, sold as is. The quote says: no layaways, no warranties, and it leaves out Platinum Protection for this item (financing stays).</p>';
+  if(ty==='outlet')h+='<p class="qfine tgnote">Outlet item. The quote marks it as an outlet item.</p>';
+  h+=fld('nt','Notes for this item',F.nt,'')}
+ if(R.comps&&R.comps.length&&!(TGS.sel>=0&&!(R.options[TGS.sel]&&R.options[TGS.sel].same))){h+='<div class="tgcomps"><p class="tgoh">Pieces on this tag</p><ul>';R.comps.forEach(function(c){h+='<li><b>'+esc(c.d||'Piece')+'</b><span>SKU '+esc(c.sku)+(c.z?' \u00b7 '+esc(c.z):'')+(c.c?' \u00b7 '+esc(c.c):'')+'</span></li>'});h+='</ul></div>'}
  if(TGS.warn)h+='<p class="tgwarn" role="status">'+esc(TGS.warn)+'</p>';
- if(R.options.length){h+='<div class="tgopts"><p class="tgoh">Other options on this tag</p><p class="qfine">Tap one to switch the SKU and finish. The tag doesn\u2019t list prices for these, so the price stays and needs a check.</p><div class="tgol">';
+ if(R.options.length){h+='<div class="tgopts"><p class="tgoh">Other options on this tag</p><p class="qfine">Tap one to switch the SKU'+(R.options.some(function(o){return !o.same})?', piece':'')+' and finish. The tag doesn\u2019t list prices for these, so the price stays and needs a check.</p><div class="tgol">';
   if(TGS.sel>=0)h+='<button type="button" class="tgo tgo0" data-tgopt="-1"><b>Back to the tag\u2019s item</b><span>'+esc(TGS.base.name)+'</span></button>';
-  R.options.forEach(function(o,i){h+='<button type="button" class="tgo'+(i===TGS.sel?' on':'')+'" data-tgopt="'+i+'" aria-pressed="'+(i===TGS.sel)+'"><b>'+esc(o.piece)+' \u00b7 '+esc(o.color)+'</b><span>SKU '+esc(o.sku)+(o.check?' \u00b7 check':'')+'</span></button>'});
+  R.options.forEach(function(o,i){h+='<button type="button" class="tgo'+(i===TGS.sel?' on':'')+'" data-tgopt="'+i+'" aria-pressed="'+(i===TGS.sel)+'"><b>'+esc([o.piece,o.color].filter(Boolean).join(' \u00b7 '))+'</b><span>SKU '+esc(o.sku)+(o.size?' \u00b7 '+esc(o.size):'')+(o.check?' \u00b7 check':'')+'</span></button>'});
   h+='</div></div>'}
- h+='<div class="tgbtns"><button type="button" class="btn1 rgbtn" data-tg="add">Add item</button></div><div class="tgmore"><p class="tgoh">Other side of the tag?</p><div class="tgbtns"><button type="button" class="btn2 rbtn" data-tg="cam">Take photo</button><button type="button" class="btn2 rbtn" data-tg="gal">Choose from gallery</button></div></div><button type="button" class="tgx" data-tg="cancel">Cancel</button>';
+ h+='<div class="tgbtns"><button type="button" class="btn1 rgbtn" data-tg="add">Add item</button></div>'+(ty==='sale'?'':'<div class="tgmore"><p class="tgoh">Other side of the tag?</p><div class="tgbtns"><button type="button" class="btn2 rbtn" data-tg="cam">Take photo</button><button type="button" class="btn2 rbtn" data-tg="gal">Choose from gallery</button></div></div>')+'<button type="button" class="tgx" data-tg="cancel">Cancel</button>';
  el.innerHTML=h}
-function tgFresh(){TGS.parts=[];TGS.res=null;TGS.f={};TGS.sel=-1;TGS.base=null;TGS.warn='';TGS.photos=0}
+function tgFresh(){TGS.parts=[];TGS.res=null;TGS.f={};TGS.sel=-1;TGS.base=null;TGS.warn='';TGS.photos=0;TGS.force=''}
 function tgOpen(ctx){TGS.ctx=ctx;TGS.busy=false;TGS.msg='';tgFresh();tgDraw();var el=tgEl(ctx);if(el&&el.scrollIntoView)try{el.scrollIntoView({block:'nearest'})}catch(e){}}
 function tgClose(){var c=TGS.ctx;TGS.busy=false;tgFresh();TGS.msg='';tgKill();var el=tgEl(c);if(el){el.hidden=true;el.innerHTML=''}}
-function tgSetFromRes(){var R=TGS.res;TGS.f={name:R.name,sku:R.sku,fin:'',size:R.size,price:R.price};TGS.base={name:R.name,sku:R.sku,fin:'',size:R.size};TGS.sel=-1;TGS.warn=''}
+var TG_EDITF=['name','sku','fin','size','price','was','save','se','nt'];
+function tgBaseOf(R){return {name:R.name,sku:R.sku,fin:R.fin||'',size:R.size||'',nt:R.notes||'',was:R.was||'',save:R.save||'',se:R.se||''}}
+function tgSetFromRes(){var R=TGS.res;TGS.f={name:R.name,sku:R.sku,fin:R.fin||'',size:R.size,price:R.price,was:R.was||'',save:R.save||'',se:R.se||'',nt:R.notes||''};TGS.base=tgBaseOf(R);TGS.sel=-1;TGS.warn=''}
+function tgKeepEdits(old,oldBase){TG_EDITF.forEach(function(k){if(String(old[k]||'').trim()&&String(old[k])!==String(oldBase&&oldBase[k]||'')){TGS.f[k]=old[k]}})}
 function tgRun(file){if(!file||TGS.busy)return;var ctx=TGS.ctx||'r';TGS.busy=true;TGS.msg='Opening the photo\u2026';tgDraw();
  var had=TGS.res,keep=had?{f:TGS.f,sel:TGS.sel}:null;
  tgReadPhoto(file,function(m){TGS.msg=m;var p=document.querySelector('#'+ctx+'tgpanel .tgbusy');if(p)p.textContent=m;else tgDraw()}).then(function(mine){
-  TGS.busy=false;TGS.photos++;TGS.parts=TGS.parts.concat(mine);var R=tgMerge(TGS.parts);
-  if(!R.hasFront&&!R.hasBack&&!R.name&&!R.sku&&!R.price&&!R.options.length){TGS.res=had;TGS.msg='I couldn\u2019t find tag text in that photo. Try again closer, straight on, with the tag flat and no glare.';
+  TGS.busy=false;TGS.photos++;TGS.parts=TGS.parts.concat(mine);var R=tgMerge19(TGS.parts,TGS.force);
+  if(!R.hasFront&&!R.hasBack&&!R.name&&!R.sku&&!R.price&&!R.options.length&&!R.comps.length){TGS.res=had;TGS.msg='I couldn\u2019t find tag text in that photo. Try again closer, straight on, with the tag flat and no glare.';
    if(!had){TGS.res=null}tgDraw();return}
   TGS.msg='';
   // keep what the rep already edited; fill the fields they left blank
   var old=TGS.f,oldBase=TGS.base;TGS.res=R;tgSetFromRes();
-  if(had&&keep){['name','sku','fin','size','price'].forEach(function(k){if(String(old[k]||'').trim()&&String(old[k])!==String(oldBase&&oldBase[k]||'')){TGS.f[k]=old[k]}})}
-  tgDraw();qlive('Tag read. Check the fields, then add the item.');
+  if(had&&keep)tgKeepEdits(old,oldBase);
+  tgDraw();qlive('Tag read as '+tgTypeName(R.type)+'. Check the fields, then add the item.');
   var f1=document.getElementById(ctx+'tgname');if(f1&&!had)try{f1.focus({preventScroll:true})}catch(e){}
  },function(e){TGS.busy=false;TGS.msg=(e&&e.message==='lib')?'The tag reader couldn\u2019t load. It needs an internet connection the first time. You can still type the item, paste a link or add a photo.':'I couldn\u2019t open that photo. Please try another.';TGS.res=had;tgDraw()})}
+function tgSetType(v){var R=TGS.res;if(!R||!tgTypeName(v))return;var old=TGS.f,ob=TGS.base;TGS.force=v;TGS.res=tgMerge19(TGS.parts,v);tgSetFromRes();tgKeepEdits(old,ob);tgDraw();qlive('Tag type set to '+tgTypeName(v)+'.');var s=document.getElementById(TGS.ctx+'tgtype');if(s)try{s.focus({preventScroll:true})}catch(e){}}
 function tgSwap(i){var R=TGS.res,F=TGS.f;if(!R)return;
- if(i<0){F.sku=TGS.base.sku;F.fin='';F.name=TGS.base.name;F.size=TGS.base.size;TGS.sel=-1;TGS.warn='';tgDraw();return}
- var o=R.options[i];if(!o)return;TGS.sel=i;F.sku=o.sku;F.fin=o.color;
+ if(i<0){var B=TGS.base;F.sku=B.sku;F.fin=B.fin;F.name=B.name;F.size=B.size;F.nt=B.nt;F.was=B.was;F.save=B.save;F.se=B.se;TGS.sel=-1;TGS.warn='';tgDraw();return}
+ var o=R.options[i];if(!o)return;TGS.sel=i;F.sku=o.sku;
+ if(R.type&&R.type!=='regular'){
+  if(o.same){F.fin=o.color;TGS.warn='Switched to '+o.color+' (SKU '+o.sku+'). The tag shows no price for this option. Check price.'}
+  else{F.name=[R.coll,o.piece].filter(Boolean).join(' ');F.nt=o.size?'Size: '+o.size:'';F.was='';F.save='';TGS.warn='Switched to '+o.piece+' (SKU '+o.sku+'). The tag shows no price for this add-on'+(o.size?'':' or size')+'. Check price'+(o.size?'':' and size')+'.'}
+  tgDraw();qlive(TGS.warn);return}
+ F.fin=o.color;
  var dw=tgNormW(R.desc).split(' '),same=o.piece&&tgNormW(o.piece).split(' ').every(function(w){return dw.indexOf(w)>=0});
  if(same){F.name=TGS.base.name;F.size=TGS.base.size;TGS.warn='Switched to '+o.color+' (SKU '+o.sku+'). The tag shows no price for this option. Check price.'}
  else{F.name=[R.coll,o.piece].filter(Boolean).join(' ');F.size='';TGS.warn='Switched to '+o.piece+' in '+o.color+' (SKU '+o.sku+'). The tag shows no size or price for this option. Check size and price.'}
  tgDraw();qlive(TGS.warn)}
-function tgAdd(){var ctx=TGS.ctx,F=TGS.f,name=String(F.name||'').trim(),sku=String(F.sku||'').trim(),price=String(F.price||'').trim(),size=String(F.size||'').trim(),fin=String(F.fin||'').trim();
+function tgAdd(){var ctx=TGS.ctx,F=TGS.f,R=TGS.res||{},ty=R.type||'regular',name=String(F.name||'').trim(),sku=String(F.sku||'').trim(),price=String(F.price||'').trim(),size=String(F.size||'').trim(),fin=String(F.fin||'').trim();
  if(!name&&!sku){TGS.warn='Add a name or a SKU first.';tgDraw();return}
  if(sku&&itemsOf(ctx).some(function(x){return String(x.sku||'').trim()===sku&&String(x.d||x.n||'').trim()===name})){TGS.warn='That item is already on your list.';tgDraw();return}
- var it;
- if(ctx==='r'){it=addItem('r',{n:RF_NAME,d:name,sku:sku,fin:fin,nt:size?'Size: '+size:''});if(it){var pn=pnum(price);it.p=pn!==null?pn.toFixed(2):price.slice(0,30);refresh('r')}}
- else{var nt=[];if(size)nt.push('Size: '+size);if(price)nt.push('Tag price '+(pnum(price)!==null?money(pnum(price)):price));it=addItem('q',{n:RF_NAME,d:name,sku:sku,fin:fin,nt:nt.join(' \u00b7 ')})}
+ var tg=null,so=TGS.sel>=0?R.options[TGS.sel]:null;
+ if(ty!=='regular'){var cm=(so&&!so.same)?[]:(R.comps||[]);tg={t:ty,w:ty==='sale'||ty==='floor'?F.was:'',s:ty==='sale'?F.save:'',se:ty==='sale'?F.se:'',cm:cm.map(function(c){return {s:c.sku,d:c.d,z:c.z,c:c.c}})}}
+ var it,nt0=ty==='regular'?(size?'Size: '+size:''):String(F.nt||'').trim();
+ if(ctx==='r'){it=addItem('r',{n:RF_NAME,d:name,sku:sku,fin:fin,nt:nt0});if(it){var pn=pnum(price);it.p=pn!==null?pn.toFixed(2):price.slice(0,30);if(tg)it.tg=tgItemClean(tg);refresh('r')}}
+ else{var nt=[];if(nt0)nt.push(nt0);if(price)nt.push('Tag price '+(pnum(price)!==null?money(pnum(price)):price));it=addItem('q',{n:RF_NAME,d:name,sku:sku,fin:fin,nt:nt.join(' \u00b7 ')});if(it&&tg){it.tg=tgItemClean(tg);qsync()}}
  if(!it){TGS.warn='The list is full.';tgDraw();return}
  var chk=TGS.sel>=0?' The tag shows no price for this option, so check the price.':'';
+ if(ty==='floor')chk+=' Floor sample: confirm the handwritten price.';
+ var sw=ty==='sale'&&tg?tgSaleWarn(it.tg):'';if(sw)chk+=' '+sw;
  tgClose();amsg(ctx,'Added '+(name||'the item')+(sku?' (SKU '+sku+')':'')+' from the tag.'+(ctx==='r'?' Check the price and quantity below.':' Check it below, then send.')+chk)}
 function tgPanelClick(e){var b=e.target.closest?e.target.closest('[data-tg],[data-tgopt]'):null;if(!b)return;
  if(b.hasAttribute('data-tgopt')){tgSwap(+b.getAttribute('data-tgopt'));return}
  var a=b.getAttribute('data-tg');
  if(a==='cam')document.getElementById('tgcam').click();else if(a==='gal')document.getElementById('tggal').click();else if(a==='cancel')tgClose();else if(a==='add')tgAdd()}
-function tgPanelInput(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-tgf');if(!k)return;TGS.f[k]=t.value}
+function tgPanelInput(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-tgf');if(!k)return;TGS.f[k]=t.value;
+ if(k==='se'){var el=tgEl(TGS.ctx),w=el&&el.querySelector('[data-tgsw]');if(w){var m=tgSaleNote(t.value);w.textContent=m;w.hidden=!m}}}
 ['tgcam','tggal'].forEach(function(id){document.getElementById(id).addEventListener('change',function(e){var f=(e.target.files||[])[0];e.target.value='';if(f)tgRun(f)})});
 document.addEventListener('click',function(e){var p=e.target.closest?e.target.closest('.tgpanel'):null;if(p)tgPanelClick(e)});
 document.addEventListener('input',function(e){var p=e.target.closest?e.target.closest('.tgpanel'):null;if(p)tgPanelInput(e)});
+document.addEventListener('change',function(e){var t=e.target;if(t&&t.hasAttribute&&t.hasAttribute('data-tgtype')&&t.closest&&t.closest('.tgpanel'))tgSetType(t.value)});
 /*TAG18-END*/
 addAreaInit('q');addAreaInit('r');
 /* ---- Android share target: Share from Chrome on a raymourflanigan.com page opens the app with ?title=&text=&url= ---- */
