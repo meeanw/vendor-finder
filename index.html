@@ -223,7 +223,7 @@ body.hasupd main{padding-bottom:calc(210px + var(--safe-b))}
 .qf{min-width:0;border:0;margin:0;padding:0}
 .qf label,.qf legend{display:block;font-size:.875rem;font-weight:600;color:var(--muted);margin-bottom:5px;padding:0}
 .qf .req{color:#8a6a2c}.qf .opt{font-weight:400}
-.qf input[type=text],.qf input[type=tel],.qf input[type=email],.qf input[type=date],.qf textarea{display:block;width:100%;min-height:2.875rem;font-size:1rem;line-height:1.3;font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:12px;padding:10px 14px;-webkit-appearance:none;appearance:none}
+.qf input[type=text],.qf input[type=tel],.qf input[type=email],.qf input[type=password],.qf input[type=date],.qf textarea{display:block;width:100%;min-height:2.875rem;font-size:1rem;line-height:1.3;font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:12px;padding:10px 14px;-webkit-appearance:none;appearance:none}
 .qf textarea{resize:vertical;min-height:5rem}
 .qf input:focus,.qf textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,51,80,.18)}
 .qf input[aria-invalid=true]{border-color:#a3281c;box-shadow:0 0 0 3px rgba(163,40,28,.15)}
@@ -289,6 +289,23 @@ html.big .rpair-q{grid-template-columns:1fr}
 .rlogbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#fff7e0;border:1px solid #e0c36a;border-radius:12px;padding:8px 12px;font-size:.875rem;line-height:1.35;color:#5a4410}
 .rlogbar[hidden]{display:none}
 .rlogretry{min-height:2.5rem;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:#fff;color:var(--navy);font:600 .875rem/1 inherit;font-family:inherit;cursor:pointer}
+/* v1.4 rep sign-in */
+.rgate[hidden],.rsheet .qform[hidden],.rswitch[hidden]{display:none!important}
+.rgate{padding-top:4px}
+.rgh{margin:6px 0 4px;font-family:Georgia,serif;font-size:1.25rem;color:var(--navy)}
+.rgp{margin:0 0 12px}
+.rgbtn{display:flex;align-items:center;justify-content:center;width:100%;min-height:2.875rem;padding:8px 14px;border-radius:12px;border:1px solid var(--navy);background:var(--navy);color:#fff;font:inherit;font-weight:700;cursor:pointer;margin:6px 0 10px}
+.rwho{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:10px 12px;margin:0 0 12px;border-radius:12px;background:#fff;border:1px solid var(--line2);color:var(--navy);font-weight:600;font-size:.9375rem;overflow-wrap:anywhere}
+.rlinkbtn{background:none;border:0;padding:8px 4px;min-height:2.75rem;color:var(--navy);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.rfrom legend{font-weight:800;color:var(--navy)}
+.rseg{display:flex;gap:8px}
+.rsegb{flex:1 1 0;min-width:0;min-height:3.25rem;padding:6px 12px;border-radius:12px;border:2px solid var(--line2);background:#fff;color:var(--navy);font:inherit;font-weight:700;font-size:1.0625rem;cursor:pointer;overflow-wrap:anywhere}
+.rsegb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rsegb:focus-visible,.rgbtn:focus-visible,.rlinkbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.rswitch{margin-top:12px;padding:12px;border-radius:12px;border:1px dashed var(--line2);background:#fff}
+.rswitch label{display:block;margin:0 0 6px;font-weight:600}
+.rswitch input{width:100%}
+.rswitch .rrow{margin-top:10px}
 
 </style></head><body>
 <header class="hero"><div class="brand"><span class="mono" aria-hidden="true">VF</span><div><h1>Furniture Vendor Finder</h1><p>for Na&rsquo;eem Ward &middot; Bridgewater</p></div><button type="button" class="aa" id="aa" aria-pressed="false" aria-label="Large text" title="Large text"><span aria-hidden="true">A<small>a</small></span></button></div></header>
@@ -397,7 +414,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 </div>
 <footer><details><summary>Full notes</summary><p><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use, budget tier and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p><b>Important:</b> Price tiers and styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.3</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.4</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span>Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -416,7 +433,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 <fieldset class="qf qfs"><legend>Best way to reach you</legend><div class="qreps" id="qcontact"></div></fieldset>
 <div class="qf"><label for="qtime">Best time to reach you <span class="opt">(optional)</span></label><input id="qtime" name="besttime" type="text" autocomplete="off" enterkeyhint="next" maxlength="100" placeholder="e.g. weekdays after 5pm"></div>
 <div class="qf"><label for="qnotes">Notes <span class="opt">(optional)</span></label><textarea id="qnotes" name="notes" rows="3" maxlength="1000" placeholder="Room, timing, colors, anything helpful"></textarea></div>
-<fieldset class="qf qfs"><legend>Your sales rep</legend><div class="qreps" id="qreps"></div><p class="qgoes" id="qgoes"></p></fieldset>
+<fieldset class="qf qfs"><legend>Send my request to</legend><div class="qreps" id="qreps"></div><p class="qgoes" id="qgoes"></p></fieldset>
 <p class="qerr" id="qerr" role="alert"></p>
 <p class="qconsent" id="qconsent">By sending, you agree to be contacted by Raymour &amp; Flanigan about this quote by text, call, or email.</p>
 <div class="qsend"><a class="btn1 qb" id="qtext" href="#" role="button">Send by text</a><a class="btn1 qb alt" id="qmail" href="#" role="button">Send by email</a></div>
@@ -425,8 +442,19 @@ html.big .rpair-q{grid-template-columns:1fr}
 </div>
 <div class="qsheet rsheet" id="rsheet" role="dialog" aria-modal="true" aria-labelledby="rtitle">
 <div class="sheethead"><span class="grab" aria-hidden="true"></span><h2 id="rtitle">Rep quote</h2><button type="button" class="x" id="rclose" aria-label="Close rep quote">Close</button></div>
-<div class="qform" id="rform">
-<fieldset class="qf qfs"><legend>I am</legend><div class="qreps" id="rreps"></div></fieldset>
+<div class="qform rgate" id="rgate" hidden>
+<h3 class="rgh">Rep sign-in</h3>
+<p class="qfine rgp">For Raymour &amp; Flanigan reps only. Choose who you are and enter your PIN.</p>
+<fieldset class="qf qfs"><legend>Who are you?</legend><div class="qreps" id="rgwho"></div></fieldset>
+<div class="qf"><label for="rgpin">PIN</label><input id="rgpin" type="password" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64"></div>
+<p class="qerr" id="rgerr" role="alert"></p>
+<button type="button" class="btn1 rgbtn" id="rgsign">Sign in</button>
+<p class="qfine">This sign-in is a convenience lock on a static site, not strong security. The PIN is checked in your browser against a salted hash in the page, so it keeps casual users out and picks the right rep for you.</p>
+</div>
+<div class="qform" id="rform" hidden>
+<div class="rwho"><span id="rwhotxt">Signed in as</span> <button type="button" class="rlinkbtn" id="rsignout">Sign out</button></div>
+<fieldset class="qf qfs rfrom"><legend>Quote from:</legend><div class="rseg" id="rreps" role="group" aria-label="Quote from"></div>
+<div class="rswitch" id="rswitch" hidden><label for="rswpin" id="rswlab">PIN</label><input id="rswpin" type="password" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="64"><div class="rrow"><button type="button" class="btn1 rgbtn" id="rswgo">Switch</button><button type="button" class="btn2 rbtn" id="rswcancel">Cancel</button></div><p class="qerr" id="rswerr" role="alert"></p></div></fieldset>
 <details class="rload"><summary>Load from request</summary><div class="qf"><label for="rpaste">Paste the customer&rsquo;s quote-request text</label><textarea id="rpaste" rows="4" placeholder="Quote request from&hellip;"></textarea></div><button type="button" class="btn2 rbtn" id="rfill">Fill in from text</button><p class="qfine" id="rfillmsg" role="status"></p></details>
 <p class="qnum" id="rnum"></p>
 <div class="qf"><label for="rname">Customer name <span class="req">(required)</span></label><input id="rname" type="text" autocomplete="off" autocapitalize="words" maxlength="100"></div>
@@ -443,7 +471,7 @@ html.big .rpair-q{grid-template-columns:1fr}
 <p class="qerr" id="rerr" role="alert"></p>
 <div class="rlogbar" id="rlogbar" hidden><span id="rlog" role="status"></span><button type="button" class="rlogretry" id="rlogretry">Retry now</button></div>
 <div class="qsend"><a class="btn1 qb" id="rtext" href="#" role="button">Text quote to customer</a><a class="btn1 qb alt" id="rmail" href="#" role="button">Email quote to customer</a></div>
-<p class="qfine">This opens your own text or email app with the quote filled in. Nothing is sent automatically. Drafts are saved on this device only.<span id="rlogfine"></span></p>
+<p class="qfine">This opens your own text or email app with the quote filled in. Nothing is sent automatically. Drafts are saved on this device only; signing out clears the draft.<span id="rlogfine"></span></p>
 <div class="qtools"><button type="button" class="clear" id="rclear">Clear draft</button></div>
 </div>
 </div>
@@ -478,10 +506,11 @@ var REPS={
 var REPOPTS=[{id:'either',label:'Either one',to:['naeem','hans']},{id:'naeem',label:'Na\u2019eem Ward',to:['naeem']},{id:'hans',label:'Hans Attys',to:['hans']}];
 // Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md). Leave an endpoint EMPTY to switch that rep's logging off (skipped quietly).
 // The tokens only filter stray POSTs - they sit in this public page, so they are NOT strong security.
-var LOG_ENDPOINT_NAEEM='';
+var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7EdX9zUr3ku2qVFuF7An73wiRrwLvyTJKcj0RvKJmkcCsDKQrhu9BA/exec';
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
+var PINCFG={"it":150000,"naeem":{"s":"919ef23ebbcce57d7ec41372ad2cd8e9","h":"01a69bbf45e4befe507165b130efebd2ffe56a7e094998cf57a5bc2af5bac4fb"},"hans":{"s":"c793826cbb162ef41c0f8650b69f196c","h":"fe80b4a01e2a2b9a2f52bf95ca2a396e1b6733fbb29c5b231a5ea0a46865bf40"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -757,7 +786,7 @@ function rblank(){return {d:'',sku:'',vn:'',q:'1',fin:'',p:'',e:''}}
 var RD={rep:'naeem',name:'',phone:'',email:'',zip:'',needed:'',notes:'',ref:'',qn:'',items:[rblank()]};
 var STORE_ADDR='Raymour & Flanigan Bridgewater, 744 US Hwy 202 S, Bridgewater, NJ 08807';
 var rsh=document.getElementById('rsheet'),rbk=document.getElementById('qback'),rEl={};
-['rclose','rreps','rpaste','rfill','rfillmsg','rname','rphone','remail','rzip','rneeded','rref','rnum','ritems','radd','raddq','rnotes','rsub','rerr','rtext','rmail','rclear','rvlist','rlink','rlogbar','rlog','rlogretry','rlogfine'].forEach(function(k){rEl[k]=document.getElementById(k)});
+['rclose','rreps','rpaste','rfill','rfillmsg','rname','rphone','remail','rzip','rneeded','rref','rnum','ritems','radd','raddq','rnotes','rsub','rerr','rtext','rmail','rclear','rvlist','rlink','rlogbar','rlog','rlogretry','rlogfine','rgate','rgwho','rgpin','rgerr','rgsign','rform','rwhotxt','rsignout','rswitch','rswpin','rswgo','rswcancel','rswerr','rswlab'].forEach(function(k){rEl[k]=document.getElementById(k)});
 function ritemClean(x){x=x||{};return {d:clip(x.d,400),sku:clip(x.sku,80),vn:clip(x.vn,60),q:String(qtyOf(x.q)),fin:clip(x.fin,80),p:clip(x.p,30),e:clip(x.e,100)}}
 function rload(){try{var o=JSON.parse(localStorage.getItem(RS)||'null');if(!o)return;
  if(o.rep==='naeem'||o.rep==='hans')RD.rep=o.rep;
@@ -795,7 +824,7 @@ function rrenderItems(focusLast){var h='';
 function rsync(){ // everything except item rows
  rEl.rname.value=RD.name;rEl.rphone.value=RD.phone;rEl.remail.value=RD.email;rEl.rnotes.value=RD.notes;rEl.rzip.value=RD.zip;rEl.rneeded.value=RD.needed;rEl.rref.value=RD.ref;
  rEl.rneeded.setAttribute('min',isoToday());
- var rs=rEl.rreps.querySelectorAll('input');for(var i=0;i<rs.length;i++)rs[i].checked=(rs[i].value===RD.rep);
+ rseg();
  rEl.raddq.style.display=QL.length?'':'none';rEl.raddq.textContent='Add the '+QL.length+(QL.length===1?' item':' items')+' on this device\u2019s quote list'}
 function rhasVendors(){var seen={},h='';V.forEach(function(v){if(!seen[v.n]){seen[v.n]=1;h+='<option value="'+esc(v.n)+'">'}});rEl.rvlist.innerHTML=h}
 function rphoneSms(t){var d=qdigits(t);if(d.length===10)return '+1'+d;if(d.length===11&&d[0]==='1')return '+'+d;return d.length>=10?'+'+d:''}
@@ -834,7 +863,7 @@ var rLast=null;
 function ropen(on){
  rsh.className=on?'qsheet rsheet open':'qsheet rsheet';rbk.className=on?'qback on':'qback';
  document.body.classList.toggle('sheet-open',on);
- if(on){if(qopened()){els.qsheet.className='qsheet'}rLast=document.activeElement;rsync();rrenderItems(false);rhref();rEl.rerr.textContent='';logStatus();logFlush();setTimeout(function(){try{rEl.rclose.focus({preventScroll:true})}catch(e){}},60)}
+ if(on){if(qopened()){els.qsheet.className='qsheet'}rLast=document.activeElement;rview();rsync();rrenderItems(false);rhref();rEl.rerr.textContent='';logStatus();logFlush();setTimeout(function(){try{rEl.rclose.focus({preventScroll:true})}catch(e){}},60)}
  else{if(location.hash==='#rep'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}}
   try{(rLast&&document.body.contains(rLast)&&rLast!==document.body?rLast:rEl.rlink||document.body).focus({preventScroll:true})}catch(e){}}}
 function rhash(){if(location.hash==='#rep'&&!ropened())ropen(true)}
@@ -864,13 +893,14 @@ function logSave(rep,a){try{localStorage.setItem(logKey(rep),JSON.stringify(a.sl
 var logBusy={naeem:false,hans:false},logTimer={naeem:0,hans:0};
 function logStatus(){var parts=[];
  LOGREPS.forEach(function(rep){var n=logOn(rep)&&!logBusy[rep]?logLoad(rep).length:0;if(n)parts.push(REPS[rep].name.split(' ')[0]+(n>1?' ('+n+')':''))});
- rEl.rlogbar.hidden=!parts.length;rEl.rlog.textContent=parts.length?'Not logged yet \u2013 '+parts.join(', ')+'. Will retry automatically.':''}
+ if(!AUTH)parts=[];rEl.rlogbar.hidden=!parts.length;rEl.rlog.textContent=parts.length?'Not logged yet \u2013 '+parts.join(', ')+'. Will retry automatically.':''}
 function logSummary(){var a=[];RD.items.forEach(function(x){if(!x.d.trim())return;var q=qtyOf(x.q),n=pnum(x.p),m=[];
  if(x.sku.trim())m.push('SKU '+x.sku.trim());if(x.vn.trim())m.push('Vendor # '+x.vn.trim());if(x.fin.trim())m.push(x.fin.trim());
  a.push(q+' \u00d7 '+x.d.trim()+(m.length?' ('+m.join('; ')+')':'')+' @ '+(n===null?'price TBC':money(n)))});return a.join('; ').slice(0,3000)}
 function logEntry(rep,kind){var t=rsubtotal();
  return {id:RD.qn+'|'+kind+'|'+Date.now(),ts:new Date().toISOString(),quote:RD.qn,ref:RD.ref.trim(),repKey:rep,rep:REPS[rep].name,name:RD.name.trim(),phone:RD.phone.trim(),email:RD.email.trim(),zip:RD.zip.trim(),items:logSummary(),subtotal:t.sum,via:kind==='sms'?'text':'email',token:LOGCFG[rep].token}}
 function logFlush(rep){
+ if(!AUTH)return; // logging belongs to the rep tools: nothing is logged or retried while signed out
  if(!rep){LOGREPS.forEach(logFlush);return}
  if(!logOn(rep)||logBusy[rep])return;clearTimeout(logTimer[rep]);
  var q=logLoad(rep);if(!q.length){logStatus();return}
@@ -881,14 +911,56 @@ function logFlush(rep){
   else{logStatus();logTimer[rep]=setTimeout(function(){logFlush(rep)},60000)}};
  try{fetch(LOGCFG[rep].url,{method:'POST',mode:'no-cors',keepalive:true,body:JSON.stringify(e),signal:ctl?ctl.signal:undefined}).then(function(){fin(true)},function(){fin(false)})}catch(er){fin(false)}}
 var logLast={};
-function logSend(kind){try{var rep=RD.rep;if(!logOn(rep))return;var lk=rep+'|'+RD.qn+'|'+kind,nw=Date.now();if(logLast[lk]&&nw-logLast[lk]<8000)return;logLast[lk]=nw;var q=logLoad(rep),e=logEntry(rep,kind);if(!q.some(function(x){return x.id===e.id})){q.push(e);logSave(rep,q)}logFlush(rep)}catch(er){}}
+function logSend(kind){try{var rep=AUTH;if(!rep||RD.rep!==rep||!logOn(rep))return;var lk=rep+'|'+RD.qn+'|'+kind,nw=Date.now();if(logLast[lk]&&nw-logLast[lk]<8000)return;logLast[lk]=nw;var q=logLoad(rep),e=logEntry(rep,kind);if(!q.some(function(x){return x.id===e.id})){q.push(e);logSave(rep,q)}logFlush(rep)}catch(er){}}
 window.addEventListener('online',function(){logFlush()});
 document.addEventListener('visibilitychange',function(){if(!document.hidden)logFlush()});
 rEl.rlogretry.addEventListener('click',function(){logFlush()});
 rhasVendors();rload();rstamp();
-var rrep=[['naeem','Na\u2019eem Ward'],['hans','Hans Attys']];
-rEl.rreps.innerHTML=rrep.map(function(r){return '<label class="qrep"><input type="radio" name="rrep" value="'+r[0]+'"'+(r[0]===RD.rep?' checked':'')+'><span>'+esc(r[1])+'</span></label>'}).join('');
-rEl.rreps.addEventListener('change',function(e){if(e.target&&e.target.name==='rrep'){RD.rep=e.target.value;rsave();rhref()}});
+/* ---------- rep sign-in (a convenience lock, not strong security) ---------- */
+var AUTHK='vf-rep-auth-v1',RLK='vf-rep-rl-v1',AUTH=null,vBusy=false,lockT=0,swTarget='';
+function authLoad(){try{var o=JSON.parse(localStorage.getItem(AUTHK)||'null');if(o&&(o.rep==='naeem'||o.rep==='hans'))AUTH=o.rep}catch(e){}}
+function authSet(r){AUTH=r;try{if(r)localStorage.setItem(AUTHK,JSON.stringify({rep:r,t:Date.now()}));else localStorage.removeItem(AUTHK)}catch(e){}}
+function rlGet(){try{var o=JSON.parse(localStorage.getItem(RLK)||'{}');return {f:Math.max(0,+o.f||0),u:+o.u||0}}catch(e){return {f:0,u:0}}}
+function rlSet(o){try{localStorage.setItem(RLK,JSON.stringify(o))}catch(e){}}
+function rlWait(){return Math.max(0,Math.ceil((rlGet().u-Date.now())/1000))}
+function rlFail(){var o=rlGet();o.f++;if(o.f>=5)o.u=Date.now()+Math.min(900,15*Math.pow(2,o.f-5))*1000;rlSet(o)} // 5 free tries, then 15s, 30s, 60s ... up to 15 min
+function lockMsg(el){clearInterval(lockT);var f=function(){var w=rlWait();if(w>0)el.textContent='Too many wrong tries. Try again in '+w+(w===1?' second.':' seconds.');else{el.textContent='You can try again now.';clearInterval(lockT)}};f();lockT=setInterval(f,1000)}
+function hexBytes(h){var a=new Uint8Array(h.length/2);for(var i=0;i<a.length;i++)a[i]=parseInt(h.substr(i*2,2),16);return a}
+function toHex(b){var u=new Uint8Array(b),o='';for(var i=0;i<u.length;i++)o+=(u[i]<16?'0':'')+u[i].toString(16);return o}
+function pinCheck(rep,pin){return new Promise(function(res){
+ try{if(!(window.crypto&&crypto.subtle&&typeof TextEncoder==='function')){res('nocrypto');return}
+  var c=PINCFG[rep];if(!c||!c.h){res('nocrypto');return}
+  crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveBits'])
+   .then(function(k){return crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:hexBytes(c.s),iterations:PINCFG.it},k,256)})
+   .then(function(b){res(toHex(b)===c.h?'ok':'bad')},function(){res('nocrypto')})}catch(e){res('nocrypto')}})}
+function verifyPin(rep,pin,errEl,done){
+ if(vBusy)return;if(rlWait()>0){lockMsg(errEl);return}
+ if(!pin){errEl.textContent='Enter your PIN.';return}
+ vBusy=true;errEl.textContent='Checking\u2026';
+ pinCheck(rep,pin).then(function(r){vBusy=false;
+  if(r==='ok'){rlSet({f:0,u:0});clearInterval(lockT);errEl.textContent='';done()}
+  else if(r==='nocrypto')errEl.textContent='Sign-in is not available in this browser. Open this page in Safari or Chrome.';
+  else{rlFail();if(rlWait()>0)lockMsg(errEl);else{var left=5-rlGet().f;errEl.textContent='That PIN is not right.'+(left<=2?' '+left+(left===1?' try':' tries')+' left before a delay.':'')}}})}
+function rseg(){var h='';[['naeem','Na\u2019eem'],['hans','Hans']].forEach(function(r){var on=r[0]===RD.rep;h+='<button type="button" class="rsegb'+(on?' on':'')+'" data-rr="'+r[0]+'" aria-pressed="'+(on?'true':'false')+'">'+r[1]+'</button>'});rEl.rreps.innerHTML=h}
+function rview(){var on=!!AUTH;rEl.rgate.hidden=on;rEl.rform.hidden=!on;
+ if(on){RD.rep=AUTH;rEl.rwhotxt.textContent='Signed in as '+REPS[AUTH].name+' \u00b7';rseg();rEl.rswitch.hidden=true;swTarget='';rEl.rswpin.value=''}
+ else{rEl.rgpin.value='';rEl.rgerr.textContent='';if(rlWait()>0)lockMsg(rEl.rgerr)}
+ logStatus()}
+function rsignedIn(rep,focusEl){authSet(rep);RD.rep=rep;rsave();rview();rsync();rrenderItems(false);rhref();logStatus();logFlush();try{(focusEl||rEl.rclose).focus({preventScroll:true})}catch(e){}}
+authLoad();if(AUTH)RD.rep=AUTH;
+rEl.rgwho.innerHTML=[['naeem','Na\u2019eem Ward'],['hans','Hans Attys']].map(function(r){return '<label class="qrep"><input type="radio" name="rgw" value="'+r[0]+'"><span>'+esc(r[1])+'</span></label>'}).join('');
+rEl.rgwho.addEventListener('change',function(){rEl.rgerr.textContent='';rEl.rgpin.focus()});
+rEl.rgsign.addEventListener('click',function(){var c=rEl.rgwho.querySelector('input:checked');if(!c){rEl.rgerr.textContent='Choose who you are first.';return}
+ var rep=c.value,pin=rEl.rgpin.value;verifyPin(rep,pin,rEl.rgerr,function(){rEl.rgpin.value='';RD.rep=rep;rsignedIn(rep)})});
+rEl.rgpin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();rEl.rgsign.click()}});
+rEl.rsignout.addEventListener('click',function(){authSet(null);RD={rep:'naeem',name:'',phone:'',email:'',zip:'',needed:'',notes:'',ref:'',qn:'',items:[rblank()]};rstamp();try{localStorage.removeItem(RS)}catch(e){}
+ rEl.rpaste.value='';rEl.rfillmsg.textContent='';rEl.rerr.textContent='';rview();rsync();rrenderItems(false);try{rEl.rclose.focus({preventScroll:true})}catch(e){}});
+rEl.rreps.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rr]'):null;if(!b||!AUTH)return;var r=b.getAttribute('data-rr');
+ if(r===AUTH){rEl.rswitch.hidden=true;swTarget='';return}
+ swTarget=r;rEl.rswlab.textContent='Enter '+REPS[r].name+'\u2019s PIN to switch';rEl.rswitch.hidden=false;rEl.rswpin.value='';rEl.rswerr.textContent='';if(rlWait()>0)lockMsg(rEl.rswerr);try{rEl.rswpin.focus()}catch(er){}});
+rEl.rswgo.addEventListener('click',function(){if(!AUTH||!swTarget)return;var r=swTarget;verifyPin(r,rEl.rswpin.value,rEl.rswerr,function(){rEl.rswpin.value='';rsignedIn(r,rEl.rreps)})});
+rEl.rswpin.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();rEl.rswgo.click()}});
+rEl.rswcancel.addEventListener('click',function(){rEl.rswitch.hidden=true;swTarget='';rEl.rswpin.value='';rEl.rswerr.textContent=''});
 [['rname','name'],['rphone','phone'],['remail','email'],['rnotes','notes'],['rzip','zip'],['rneeded','needed'],['rref','ref']].forEach(function(a){['input','change'].forEach(function(ev){rEl[a[0]].addEventListener(ev,function(){RD[a[1]]=rEl[a[0]].value;rEl.rerr.textContent='';rEl[a[0]].removeAttribute('aria-invalid');rhref()})})});
 rEl.ritems.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-rf');if(!k)return;var i=+t.getAttribute('data-i');
  if(k==='q'){var cl=t.value.replace(/\D/g,'').slice(0,3);if(cl!==t.value)t.value=cl;RD.items[i][k]=cl}else RD.items[i][k]=t.value;rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rltxt(i);rhref()});
@@ -907,7 +979,7 @@ rEl.rfill.addEventListener('click',function(){var o=rparse(rEl.rpaste.value),got
  ['rname','rphone','remail'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});rEl.rerr.textContent='';rsync();rrenderItems(false);rhref();
  rEl.rfillmsg.textContent='Filled in: '+got.join(', ')+'. Add prices and delivery estimates below, and check the rest.'+(o.contact||o.time?' Customer prefers '+[o.contact,o.time&&'best time '+o.time].filter(Boolean).join(', ')+'.':'')});
 rEl.rclear.addEventListener('click',function(){RD={rep:RD.rep,name:'',phone:'',email:'',zip:'',needed:'',notes:'',ref:'',qn:newQno(),items:[rblank()]};rEl.rpaste.value='';rEl.rfillmsg.textContent='';rEl.rerr.textContent='';rsync();rrenderItems(false);rhref()});
-function rsend(kind){return function(ev){var a=ev.currentTarget,m=rvalid(kind);
+function rsend(kind){return function(ev){if(!AUTH){ev.preventDefault();return}var a=ev.currentTarget,m=rvalid(kind);
  ['rname','rphone','remail','rneeded'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});
  if(m.length){ev.preventDefault();var f=document.getElementById(m[0][0]);m.forEach(function(x){var el=document.getElementById(x[0]);if(el)el.setAttribute('aria-invalid','true')});rEl.rerr.textContent=m[0][1];try{f.focus()}catch(e){}return}
  rEl.rerr.textContent='';rstamp();a.setAttribute('href',kind==='sms'?rhrefs().sms:rhrefs().mail);rsave();
