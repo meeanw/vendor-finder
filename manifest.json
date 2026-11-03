@@ -24,5 +24,14 @@
    "purpose": "maskable"
   }
  ],
- "id": "/vendor-finder/"
+ "id": "/vendor-finder/",
+ "share_target": {
+  "action": "./",
+  "method": "GET",
+  "params": {
+   "title": "title",
+   "text": "text",
+   "url": "url"
+  }
+ }
 }
