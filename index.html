@@ -610,7 +610,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"af854781544876378268501566a4cb4c","h":"69eee3624bd2487badfc9b1f60212fa5ed5eeaf3cbffbca1cf2d305585d5f6d6"},"hans":{"s":"6b18f188754ac512aba97ce6d7ad3a04","h":"90cf0ed70943893f450b10cd727daca0f1b3c0f8758cee9f57ebf5089298f57e"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"5407d52a65b6583270bf9022bd14ebe8","h":"15f50dac3c94920330fa74de5747e03f2d947844062a08dd9d56efbf54fa7b5d"},"hans":{"s":"b20966012bd55c1ed71673a217469886","h":"c387298c0af717737f63f27b07ab1635d63be8273c10d970216137c61fb663e2"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -982,6 +982,7 @@ function rparts(x){var q=qtyOf(x.q),n=pnum(x.p),a=[];if(x.d.trim())a.push(x.d.tr
 function rItemHead(x){var v=x.v.trim(),d=x.d.trim();if(/^raymour\s*(?:&|and)\s*flanigan$/i.test(v))v='';var h=[v,d].filter(Boolean).join(' ');if(!h)h=x.v.trim();if(!h)h=(x.ph&&x.ph.length&&!x.sku.trim()?'Item (see photo)':'Item');return h}
 function rPriceTxt(x,full){var q=qtyOf(x.q),n=pnum(x.p);if(n!==null)return (full?'Price: ':'')+(q>1?money(n)+(full?' each = ':' ea = ')+money(rcents(x)/100):money(n));return x.p.trim()?'Price: '+x.p.trim():''}
 // Quote message (v1.7.1 wording). full=true: email (one detail per line); false: text message (compact). The vendor # is never included.
+function rExpiry(){var d=new Date();d.setDate(d.getDate()+3);return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]+', '+MON[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear()}
 function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0],AP='\u2019';rstamp();
  var qline='Quote #'+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn));
  var dl=[];if(RD.zip.trim())dl.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));if(RD.needed&&validIso(RD.needed))dl.push('Needed by: '+dshow(RD.needed));
@@ -996,8 +997,8 @@ function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().
  if(full)L.push('------------------------------','SUBTOTAL: '+sub);else L.push('Subtotal: '+sub);
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
  L.push('');
- if(full)L.push('NEXT STEPS','- Reply YES to this email (or text me) and I'+AP+'ll hold these items for you.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours. Prices, taxes, delivery fees and availability are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
- else L.push('Reply YES and I'+AP+'ll hold these items for you. Call or text me anytime with questions.','','Quote valid for 72 hours. Prices, taxes, delivery fees and availability are confirmed at time of purchase.');
+ if(full)L.push('NEXT STEPS','- Reply YES to this email (or text me) and I'+AP+'ll hold these items for you.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours, until '+rExpiry()+'. Prices, taxes, delivery fees and availability are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
+ else L.push('Reply YES and I'+AP+'ll hold these items for you. Call or text me anytime with questions.','','Quote valid for 72 hours, until '+rExpiry()+'. Prices, taxes, delivery fees and availability are confirmed at time of purchase.');
  L.push('',r.name);
  if(full&&r.title)L.push(r.title);
  L.push('Raymour & Flanigan Bridgewater');
