@@ -210,7 +210,7 @@ body.hasupd main{padding-bottom:calc(210px + var(--safe-b))}
 .qsheet.open{transform:none;visibility:visible}
 .qsheet .sheethead{z-index:2}
 .qlist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.qitem{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.qitem{display:grid;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .qtxt{min-width:0;display:grid;gap:2px;overflow-wrap:anywhere}
 .qtxt b{font:700 1.0625rem/1.25 Georgia,"Times New Roman",serif;color:var(--navy)}
 .qtxt span{font-size:.9375rem;line-height:1.35}
@@ -223,7 +223,7 @@ body.hasupd main{padding-bottom:calc(210px + var(--safe-b))}
 .qf{min-width:0;border:0;margin:0;padding:0}
 .qf label,.qf legend{display:block;font-size:.875rem;font-weight:600;color:var(--muted);margin-bottom:5px;padding:0}
 .qf .req{color:#8a6a2c}.qf .opt{font-weight:400}
-.qf input[type=text],.qf input[type=tel],.qf input[type=email],.qf textarea{display:block;width:100%;min-height:2.875rem;font-size:1rem;line-height:1.3;font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:12px;padding:10px 14px;-webkit-appearance:none;appearance:none}
+.qf input[type=text],.qf input[type=tel],.qf input[type=email],.qf input[type=date],.qf textarea{display:block;width:100%;min-height:2.875rem;font-size:1rem;line-height:1.3;font-family:inherit;color:var(--ink);background:#fff;border:1px solid var(--line2);border-radius:12px;padding:10px 14px;-webkit-appearance:none;appearance:none}
 .qf textarea{resize:vertical;min-height:5rem}
 .qf input:focus,.qf textarea:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,51,80,.18)}
 .qf input[aria-invalid=true]{border-color:#a3281c;box-shadow:0 0 0 3px rgba(163,40,28,.15)}
@@ -259,7 +259,7 @@ html.big .qfab span{display:inline}
 .ritop{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--navy)}
 .rpair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .rpair>.qf{min-width:0}
-.qform input[type=text],.qform input[type=tel],.qform input[type=email],.qform textarea{min-width:0}
+.qform input[type=text],.qform input[type=tel],.qform input[type=email],.qform input[type=date],.qform textarea{min-width:0}
 .rsub{display:flex;justify-content:space-between;align-items:baseline;gap:10px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:12px;padding:10px 14px;font-size:1rem}
 .rsub b{font:700 1.375rem/1.2 Georgia,serif;color:var(--navy);text-align:right;overflow-wrap:anywhere}
 @media(max-width:479px){.rpair{grid-template-columns:1fr}}
@@ -275,6 +275,20 @@ html.big .rpair{grid-template-columns:1fr}
 @media(max-width:479px){.wl{grid-template-columns:1fr}}
 html.big .wl{grid-template-columns:1fr}
 .room{min-width:0;overflow-wrap:anywhere}
+
+/* v1.3 */
+.qrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;min-width:0}
+.qxf{display:grid;gap:8px;min-width:0}
+.rpair-q{grid-template-columns:5.5rem 1fr}
+html.big .rpair-q{grid-template-columns:1fr}
+@media(max-width:479px){.rpair-q{grid-template-columns:5.5rem 1fr}}
+.qf input[type=date]{min-height:2.875rem;max-width:100%}
+.qnum{font-size:.875rem;font-weight:600;color:var(--navy);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:0 0 8px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.qconsent{font-size:.9375rem;line-height:1.45;color:var(--ink);margin:2px 0 0;overflow-wrap:anywhere}
+.rlt{margin:0;font-size:.875rem;font-weight:600;color:var(--navy);text-align:right;overflow-wrap:anywhere}
+.rlogbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#fff7e0;border:1px solid #e0c36a;border-radius:12px;padding:8px 12px;font-size:.875rem;line-height:1.35;color:#5a4410}
+.rlogbar[hidden]{display:none}
+.rlogretry{min-height:2.5rem;padding:0 12px;border-radius:10px;border:1px solid var(--line2);background:#fff;color:var(--navy);font:600 .875rem/1 inherit;font-family:inherit;cursor:pointer}
 
 </style></head><body>
 <header class="hero"><div class="brand"><span class="mono" aria-hidden="true">VF</span><div><h1>Furniture Vendor Finder</h1><p>for Na&rsquo;eem Ward &middot; Bridgewater</p></div><button type="button" class="aa" id="aa" aria-pressed="false" aria-label="Large text" title="Large text"><span aria-hidden="true">A<small>a</small></span></button></div></header>
@@ -383,7 +397,7 @@ html.big .wl{grid-template-columns:1fr}
 </div>
 <footer><details><summary>Full notes</summary><p><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use, budget tier and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p><b>Important:</b> Price tiers and styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.2</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.3</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span>Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -392,13 +406,19 @@ html.big .wl{grid-template-columns:1fr}
 <div class="sheethead"><span class="grab" aria-hidden="true"></span><h2 id="qtitle">Request a quote</h2><button type="button" class="x" id="qclose" aria-label="Close quote list">Close</button></div>
 <ul class="qlist" id="qlist"></ul>
 <div class="qtools"><button type="button" class="clear" id="qclearall">Clear all</button></div>
+<p class="qnum" id="qnum"></p>
 <form class="qform" id="qform" novalidate autocomplete="on">
 <div class="qf"><label for="qname">Your name <span class="req">(required)</span></label><input id="qname" name="name" type="text" autocomplete="name" autocapitalize="words" enterkeyhint="next" maxlength="100"></div>
 <div class="qf"><label for="qphone">Phone <span class="req">(required)</span></label><input id="qphone" name="tel" type="tel" inputmode="tel" autocomplete="tel" enterkeyhint="next" maxlength="30"></div>
 <div class="qf"><label for="qemail">Email <span class="opt">(optional)</span></label><input id="qemail" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" enterkeyhint="next" maxlength="120"></div>
+<div class="rpair"><div class="qf"><label for="qzip">Delivery ZIP or town <span class="opt">(optional)</span></label><input id="qzip" name="postal" type="text" autocomplete="postal-code" enterkeyhint="next" maxlength="60"></div>
+<div class="qf"><label for="qneeded">Needed by <span class="opt">(optional)</span></label><input id="qneeded" name="needed" type="date"></div></div>
+<fieldset class="qf qfs"><legend>Best way to reach you</legend><div class="qreps" id="qcontact"></div></fieldset>
+<div class="qf"><label for="qtime">Best time to reach you <span class="opt">(optional)</span></label><input id="qtime" name="besttime" type="text" autocomplete="off" enterkeyhint="next" maxlength="100" placeholder="e.g. weekdays after 5pm"></div>
 <div class="qf"><label for="qnotes">Notes <span class="opt">(optional)</span></label><textarea id="qnotes" name="notes" rows="3" maxlength="1000" placeholder="Room, timing, colors, anything helpful"></textarea></div>
 <fieldset class="qf qfs"><legend>Your sales rep</legend><div class="qreps" id="qreps"></div><p class="qgoes" id="qgoes"></p></fieldset>
 <p class="qerr" id="qerr" role="alert"></p>
+<p class="qconsent" id="qconsent">By sending, you agree to be contacted by Raymour &amp; Flanigan about this quote by text, call, or email.</p>
 <div class="qsend"><a class="btn1 qb" id="qtext" href="#" role="button">Send by text</a><a class="btn1 qb alt" id="qmail" href="#" role="button">Send by email</a></div>
 <p class="qfine">This opens your text or email app with your list filled in. Prices and availability are confirmed by your Raymour &amp; Flanigan rep. Nothing is sent automatically &mdash; you press send in your own app.</p>
 </form>
@@ -408,17 +428,22 @@ html.big .wl{grid-template-columns:1fr}
 <div class="qform" id="rform">
 <fieldset class="qf qfs"><legend>I am</legend><div class="qreps" id="rreps"></div></fieldset>
 <details class="rload"><summary>Load from request</summary><div class="qf"><label for="rpaste">Paste the customer&rsquo;s quote-request text</label><textarea id="rpaste" rows="4" placeholder="Quote request from&hellip;"></textarea></div><button type="button" class="btn2 rbtn" id="rfill">Fill in from text</button><p class="qfine" id="rfillmsg" role="status"></p></details>
+<p class="qnum" id="rnum"></p>
 <div class="qf"><label for="rname">Customer name <span class="req">(required)</span></label><input id="rname" type="text" autocomplete="off" autocapitalize="words" maxlength="100"></div>
 <div class="rpair"><div class="qf"><label for="rphone">Customer phone <span class="opt">(to text)</span></label><input id="rphone" type="tel" inputmode="tel" autocomplete="off" maxlength="30"></div>
 <div class="qf"><label for="remail">Customer email <span class="opt">(to email)</span></label><input id="remail" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="120"></div></div>
+<div class="rpair"><div class="qf"><label for="rzip">Delivery ZIP or town <span class="opt">(optional)</span></label><input id="rzip" type="text" autocomplete="off" maxlength="60"></div>
+<div class="qf"><label for="rneeded">Needed by <span class="opt">(optional)</span></label><input id="rneeded" type="date"></div></div>
+<div class="qf"><label for="rref">Customer request # <span class="opt">(reference, optional)</span></label><input id="rref" type="text" autocomplete="off" autocapitalize="characters" maxlength="30" placeholder="Q-YYMMDD-XXXX"></div>
 <div id="ritems"></div>
 <datalist id="rvlist"></datalist>
 <div class="rrow"><button type="button" class="btn2 rbtn" id="radd">+ Add item</button><button type="button" class="btn2 rbtn" id="raddq">Add quote list items</button></div>
 <div class="qf"><label for="rnotes">Notes <span class="opt">(optional)</span></label><textarea id="rnotes" rows="3" maxlength="1000"></textarea></div>
 <p class="rsub"><span>Subtotal</span><b id="rsub">$0.00</b></p>
 <p class="qerr" id="rerr" role="alert"></p>
+<div class="rlogbar" id="rlogbar" hidden><span id="rlog" role="status"></span><button type="button" class="rlogretry" id="rlogretry">Retry now</button></div>
 <div class="qsend"><a class="btn1 qb" id="rtext" href="#" role="button">Text quote to customer</a><a class="btn1 qb alt" id="rmail" href="#" role="button">Email quote to customer</a></div>
-<p class="qfine">This opens your own text or email app with the quote filled in. Nothing is sent automatically. Drafts are saved on this device only.</p>
+<p class="qfine">This opens your own text or email app with the quote filled in. Nothing is sent automatically. Drafts are saved on this device only.<span id="rlogfine"></span></p>
 <div class="qtools"><button type="button" class="clear" id="rclear">Clear draft</button></div>
 </div>
 </div>
@@ -451,6 +476,13 @@ var REPS={
  naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com'},
  hans:{name:'Hans Attys',phone:'+19736871864',email:'hansraymourflanigan@gmail.com'}};
 var REPOPTS=[{id:'either',label:'Either one',to:['naeem','hans']},{id:'naeem',label:'Na\u2019eem Ward',to:['naeem']},{id:'hans',label:'Hans Attys',to:['hans']}];
+// Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md). Leave an endpoint EMPTY to switch that rep's logging off (skipped quietly).
+// The tokens only filter stray POSTs - they sit in this public page, so they are NOT strong security.
+var LOG_ENDPOINT_NAEEM='';
+var LOG_ENDPOINT_HANS='';
+var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
+var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
+var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
 var D=JSON.parse(document.getElementById('data').textContent);
@@ -464,7 +496,7 @@ var CHANCLS={'Stocked':'st-stocked','Special order':'st-special','Custom':'st-cu
 var USEORDER=['Commercial / contract','Senior living','Outdoor','Kids','Seasonal','Theater / media','Functional (motion, massage, lift)'];
 var TIERNAMES=TIER_LEGEND.map(function(t){return t.n});
 var V=D.V,els={};V.forEach(function(v,i){v._i=i});
-['search','room','type','style','use','budget','channel','sort','results','count','clear','chips','ftoggle','fpanel','more','totop','picksnote','tabs','backdrop','fdone','fclear','fclose','qfab','qcount','qsheet','qback','qclose','qlist','qform','qname','qphone','qemail','qnotes','qreps','qtext','qmail','qclearall','qerr','qlive','qgoes'].forEach(function(k){els[k]=document.getElementById(k)});
+['search','room','type','style','use','budget','channel','sort','results','count','clear','chips','ftoggle','fpanel','more','totop','picksnote','tabs','backdrop','fdone','fclear','fclose','qfab','qcount','qsheet','qback','qclose','qlist','qform','qname','qphone','qemail','qnotes','qreps','qtext','qmail','qclearall','qerr','qlive','qgoes','qzip','qneeded','qcontact','qtime','qnum'].forEach(function(k){els[k]=document.getElementById(k)});
 var selEl={};KEYS.forEach(function(k){selEl[k]=document.getElementById(ID[k])});
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 function tiersOf(v){return TIER_OVERRIDES[v.n]||v.t}
@@ -579,19 +611,46 @@ function card(r,i,f){
  h+='<button type="button" class="qadd'+(on?' on':'')+'" data-q="'+i+'" aria-pressed="'+(on?'true':'false')+'" aria-label="'+esc((on?'Remove from quote list: ':'Add to quote list: ')+v.n)+'">'+qlabel(on)+'</button></div></article>';
  return h}
 
-/* ---------- quote-request list ---------- */
-var QI={},QL=[],QF={name:'',phone:'',email:'',notes:'',rep:'either'};
+/* ---------- helpers shared by the customer list and the rep quote ---------- */
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function p2(n){return n<10?'0'+n:''+n}
+function isoToday(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate())}
+function validIso(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');if(!m)return false;var d=new Date(+m[1],+m[2]-1,+m[3]);return d.getFullYear()===+m[1]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[3]}
+function dshow(iso){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?MON[+m[2]-1]+' '+(+m[3])+', '+m[1]:''}
+function dparse(t){ // "Nov 20, 2026" or 2026-11-20 -> ISO, or ''
+ t=String(t||'').trim();if(validIso(t))return t;
+ var m=/^([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})$/.exec(t);if(!m)return '';
+ var mi=MON.map(function(x){return x.toLowerCase()}).indexOf(m[1].toLowerCase());if(mi<0)return '';
+ var iso=m[3]+'-'+p2(mi+1)+'-'+p2(+m[2]);return validIso(iso)?iso:''}
+// Quote / request numbers: Q-YYMMDD-XXXX, made on this device (date = today, XXXX = random, no look-alike characters)
+var QNO=/^Q-(\d{2})(\d{2})(\d{2})-[A-Z2-9]{4}$/,QCH='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+function newQno(){var d=new Date(),b=new Uint8Array(4),s='',i;
+ try{crypto.getRandomValues(b)}catch(e){for(i=0;i<4;i++)b[i]=Math.floor(Math.random()*256)}
+ for(i=0;i<4;i++)s+=QCH.charAt(b[i]%32);
+ return 'Q-'+String(d.getFullYear()).slice(2)+p2(d.getMonth()+1)+p2(d.getDate())+'-'+s}
+function qnoDate(n){var m=QNO.exec(n||'');return m?'20'+m[1]+'-'+m[2]+'-'+m[3]:''}
+function qnoOk(n){return QNO.test(n||'')&&qnoDate(n)===isoToday()}
+function qtyOf(v){var n=parseInt(String(v==null?'':v).replace(/\D/g,''),10);return n>=1?Math.min(n,999):1}
+function clip(v,n){return String(v==null?'':v).slice(0,n)}
+
+/* ---------- quote-request list (customer) ---------- */
+var QI={},QL=[],QF={name:'',phone:'',email:'',zip:'',needed:'',contact:'Text',time:'',notes:'',rep:'either',qn:''};
+var CONTACTS=['Text','Call','Email'];
 function qlabel(on){return on?'<span aria-hidden="true">\u2713</span> Added to quote':'<span aria-hidden="true">+</span> Add to quote'}
 function qkey(r){return String(r.v._i)}
 function qitem(r){var v=r.v,t;
  if(S.mode==='vendors')t='All product lines: '+v.p.join('; ');
  else{t=r.rooms.map(function(g){return g.room+': '+g.cats.map(function(c){return c.subs.length?c.subs.join(', '):c.c}).join(', ')}).join(' | ');if(t.length>700)t=t.slice(0,697)+'...'}
- return {k:qkey(r),n:v.n,i:t,s:r.style.join(', ')||'not specified',t:r.tier.join(' / '),u:v.w||''}}
+ return {k:qkey(r),n:v.n,i:t,s:r.style.join(', ')||'not specified',t:r.tier.join(' / '),u:v.w||'',sku:'',q:'1',f:''}}
 function qload(){try{var o=JSON.parse(localStorage.getItem(QSTORE)||'null');if(!o)return;
- if(Array.isArray(o.items))o.items.forEach(function(x){if(x&&typeof x.k==='string'&&typeof x.n==='string'&&!QI[x.k]){var it={k:x.k,n:x.n,i:String(x.i||''),s:String(x.s||''),t:String(x.t||''),u:/^https?:\/\//.test(x.u||'')?x.u:''};QI[it.k]=it;QL.push(it)}});
- if(o.form){['name','phone','email','notes'].forEach(function(k){if(typeof o.form[k]==='string')QF[k]=o.form[k].slice(0,2000)});
+ if(Array.isArray(o.items))o.items.forEach(function(x){if(x&&typeof x.k==='string'&&typeof x.n==='string'&&!QI[x.k]){var it={k:x.k,n:x.n,i:String(x.i||''),s:String(x.s||''),t:String(x.t||''),u:/^https?:\/\//.test(x.u||'')?x.u:'',sku:clip(x.sku,120),q:String(qtyOf(x.q)),f:clip(x.f,80)};QI[it.k]=it;QL.push(it)}});
+ if(o.form){['name','phone','email','notes','zip','time'].forEach(function(k){if(typeof o.form[k]==='string')QF[k]=o.form[k].slice(0,2000)});
+  if(validIso(o.form.needed))QF.needed=o.form.needed;
+  if(CONTACTS.indexOf(o.form.contact)>=0)QF.contact=o.form.contact;
+  if(typeof o.form.qn==='string'&&QNO.test(o.form.qn))QF.qn=o.form.qn;
   if(REPOPTS.some(function(r){return r.id===o.form.rep}))QF.rep=o.form.rep}}catch(e){}}
 function qsave(){try{localStorage.setItem(QSTORE,JSON.stringify({items:QL,form:QF}))}catch(e){}}
+function qstamp(){if(!qnoOk(QF.qn))QF.qn=newQno()}
 function qrep(){return REPOPTS.filter(function(r){return r.id===QF.rep})[0]||REPOPTS[0]}
 function qrecips(){return qrep().to.map(function(k){return REPS[k]})}
 function qdigits(s){return String(s||'').replace(/\D/g,'')}
@@ -599,36 +658,50 @@ function qvalid(){var e={};
  if(!QF.name.trim())e.name='Please enter your name.';
  var d=qdigits(QF.phone);if(d.length<10||d.length>15)e.phone='Please enter a phone number with area code.';
  if(QF.email.trim()&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(QF.email.trim()))e.email='That email address does not look right.';
+ if(QF.needed){if(!validIso(QF.needed))e.needed='Please pick a valid \u201cNeeded by\u201d date.';else if(QF.needed<isoToday())e.needed='That \u201cNeeded by\u201d date has already passed.'}
  return e}
-function qbody(full){var L=[],rp=qrep();
+function qattrs(x){var a=[];if(x.sku.trim())a.push('Item/SKU: '+x.sku.trim());var q=qtyOf(x.q);if(q>1)a.push('Qty: '+q);if(x.f.trim())a.push('Finish: '+x.f.trim());return a}
+function qbody(full){var L=[],rp=qrep();qstamp();
  L.push('Quote request from '+QF.name.trim());
+ L.push('Request #: '+QF.qn);
+ L.push('Date: '+dshow(qnoDate(QF.qn)));
  L.push('Phone: '+QF.phone.trim());
  if(QF.email.trim())L.push('Email: '+QF.email.trim());
+ L.push('Preferred contact: '+QF.contact);
+ if(QF.time.trim())L.push('Best time to reach me: '+QF.time.trim().replace(/\r?\n/g,' '));
+ if(QF.zip.trim())L.push('Delivery ZIP/town: '+QF.zip.trim().replace(/\r?\n/g,' '));
+ if(QF.needed&&validIso(QF.needed))L.push('Needed by: '+dshow(QF.needed));
  L.push('Sales rep: '+(rp.id==='either'?'Either Na\u2019eem Ward or Hans Attys':rp.label));
  if(QF.notes.trim())L.push('Notes: '+QF.notes.trim().replace(/\r?\n/g,' / '));
  L.push('','Items ('+QL.length+'):');
- QL.forEach(function(x,n){
-  if(full){L.push((n+1)+'. '+x.n+' \u2013 '+x.i);L.push('   Style: '+x.s+' | Budget tier: '+x.t);if(x.u)L.push('   Link: '+x.u)}
-  else L.push((n+1)+'. '+x.n+' \u2013 '+x.i+' ('+x.t+')')});
+ QL.forEach(function(x,n){var a=qattrs(x);
+  if(full){L.push((n+1)+'. '+x.n+' \u2013 '+x.i);if(a.length)L.push('   '+a.join(' | '));L.push('   Style: '+x.s+' | Budget tier: '+x.t);if(x.u)L.push('   Link: '+x.u)}
+  else{L.push((n+1)+'. '+x.n+' \u2013 '+x.i+' ('+x.t+')');if(a.length)L.push('   '+a.join(' | '))}});
  L.push('','Sent from Furniture Vendor Finder');
  return L.join('\n')}
 function qhrefs(){var rc=qrecips();
  return {sms:'sms:'+rc.map(function(r){return r.phone}).join(',')+'?&body='+encodeURIComponent(qbody(false)),
-  mail:'mailto:'+rc.map(function(r){return r.email}).join(',')+'?subject='+encodeURIComponent('Quote request \u2013 '+QF.name.trim())+'&body='+encodeURIComponent(qbody(true))}}
+  mail:'mailto:'+rc.map(function(r){return r.email}).join(',')+'?subject='+encodeURIComponent('Quote request '+QF.qn+' \u2013 '+QF.name.trim())+'&body='+encodeURIComponent(qbody(true))}}
 function qlive(msg){els.qlive.textContent='';setTimeout(function(){els.qlive.textContent=msg},30)}
-function qsync(){ // update every Add-to-quote button, the badge and the sheet
- var n=QL.length;
+function qitemHtml(x,i){
+ return '<li class="qitem"><div class="qrow"><div class="qtxt"><b>'+esc(x.n)+'</b><span>'+esc(x.i)+'</span><small>'+esc(x.t)+(x.s?' \u00b7 '+esc(x.s):'')+'</small></div><button type="button" class="qrm" data-qrm="'+i+'" aria-label="Remove '+esc(x.n+', '+x.i)+' from quote list">Remove</button></div>'
+ +'<div class="qxf"><div class="qf"><label for="qs'+i+'">Item / SKU <span class="opt">(optional)</span></label><input id="qs'+i+'" data-qf="sku" data-i="'+i+'" type="text" autocomplete="off" maxlength="120" placeholder="e.g. Bella queen bed, or showroom tag #" value="'+esc(x.sku)+'"></div>'
+ +'<div class="rpair rpair-q"><div class="qf"><label for="qq'+i+'">Qty</label><input id="qq'+i+'" data-qf="q" data-i="'+i+'" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="3" value="'+esc(x.q)+'"></div>'
+ +'<div class="qf"><label for="qfn'+i+'">Finish / color <span class="opt">(optional)</span></label><input id="qfn'+i+'" data-qf="f" data-i="'+i+'" type="text" autocomplete="off" maxlength="80" placeholder="e.g. espresso" value="'+esc(x.f)+'"></div></div></div></li>'}
+function qsync(noList){ // update every Add-to-quote button, the badge and (unless noList) the sheet's item list
+ var n=QL.length;qstamp();
  els.qcount.textContent=n;els.qcount.className='badge'+(n?'':' zero');
  els.qfab.setAttribute('aria-label','Quote list, '+n+(n===1?' item':' items'));
  var bs=els.results.querySelectorAll('.qadd');
  for(var i=0;i<bs.length;i++){var r=CUR[+bs[i].getAttribute('data-q')];if(!r)continue;var on=!!QI[qkey(r)];
   bs[i].className='qadd'+(on?' on':'');bs[i].setAttribute('aria-pressed',on?'true':'false');bs[i].innerHTML=qlabel(on);
   bs[i].setAttribute('aria-label',(on?'Remove from quote list: ':'Add to quote list: ')+r.v.n)}
- var h='';
- if(!n)h='<p class="qempty">Your quote list is empty. Tap <b>Add to quote</b> on any card to build it.</p>';
- else QL.forEach(function(x,i){h+='<li class="qitem"><div class="qtxt"><b>'+esc(x.n)+'</b><span>'+esc(x.i)+'</span><small>'+esc(x.t)+(x.s?' \u00b7 '+esc(x.s):'')+'</small></div><button type="button" class="qrm" data-qrm="'+i+'" aria-label="Remove '+esc(x.n+', '+x.i)+' from quote list">Remove</button></li>'});
- els.qlist.innerHTML=h;
+ if(!noList){var h='';
+  if(!n)h='<p class="qempty">Your quote list is empty. Tap <b>Add to quote</b> on any card to build it.</p>';
+  else QL.forEach(function(x,i){h+=qitemHtml(x,i)});
+  els.qlist.innerHTML=h}
  els.qclearall.style.display=n?'':'none';
+ els.qnum.textContent='Request # '+QF.qn+' \u00b7 '+dshow(qnoDate(QF.qn));
  var rp=qrep();els.qgoes.textContent='Goes to: '+(rp.id==='either'?'Na\u2019eem Ward and Hans Attys':rp.label);
  var hr=qhrefs();els.qtext.setAttribute('href',hr.sms);els.qmail.setAttribute('href',hr.mail);
  els.qtext.setAttribute('aria-disabled',n?'false':'true');els.qmail.setAttribute('aria-disabled',n?'false':'true');
@@ -641,29 +714,36 @@ var qLast=null;
 function qopen(on){
  els.qsheet.className=on?'qsheet open':'qsheet';els.qback.className=on?'qback on':'qback';
  document.body.classList.toggle('sheet-open',on);els.qfab.setAttribute('aria-expanded',on?'true':'false');
- if(on){qLast=document.activeElement;els.qerr.textContent='';setTimeout(function(){try{els.qclose.focus({preventScroll:true})}catch(e){}},60)}
+ if(on){qLast=document.activeElement;els.qerr.textContent='';els.qneeded.setAttribute('min',isoToday());qsync();setTimeout(function(){try{els.qclose.focus({preventScroll:true})}catch(e){}},60)}
  else{try{(qLast&&document.body.contains(qLast)&&qLast!==document.body?qLast:els.qfab).focus({preventScroll:true})}catch(e){}}}
 function qopened(){return els.qsheet.className.indexOf('open')>=0}
-qload();
-els.qname.value=QF.name;els.qphone.value=QF.phone;els.qemail.value=QF.email;els.qnotes.value=QF.notes;
+qload();qstamp();
+els.qname.value=QF.name;els.qphone.value=QF.phone;els.qemail.value=QF.email;els.qnotes.value=QF.notes;els.qzip.value=QF.zip;els.qneeded.value=QF.needed;els.qtime.value=QF.time;
+els.qneeded.setAttribute('min',isoToday());
+els.qcontact.innerHTML=CONTACTS.map(function(c){return '<label class="qrep"><input type="radio" name="qcontact" value="'+c+'"'+(c===QF.contact?' checked':'')+'><span>'+c+'</span></label>'}).join('');
 els.qreps.innerHTML=REPOPTS.map(function(r){return '<label class="qrep"><input type="radio" name="qrep" value="'+r.id+'"'+(r.id===QF.rep?' checked':'')+'><span>'+esc(r.label)+'</span></label>'}).join('');
-function qfield(id,k){els[id].addEventListener('input',function(){QF[k]=els[id].value;els.qerr.textContent='';els[id].removeAttribute('aria-invalid');qsync()})}
-qfield('qname','name');qfield('qphone','phone');qfield('qemail','email');qfield('qnotes','notes');
-els.qreps.addEventListener('change',function(e){if(e.target&&e.target.name==='qrep'){QF.rep=e.target.value;qsync()}});
+function qfield(id,k){els[id].addEventListener('input',function(){QF[k]=els[id].value;els.qerr.textContent='';els[id].removeAttribute('aria-invalid');qsync(true)});
+ if(k==='needed')els[id].addEventListener('change',function(){QF[k]=els[id].value;els.qerr.textContent='';els[id].removeAttribute('aria-invalid');qsync(true)})}
+qfield('qname','name');qfield('qphone','phone');qfield('qemail','email');qfield('qnotes','notes');qfield('qzip','zip');qfield('qneeded','needed');qfield('qtime','time');
+els.qreps.addEventListener('change',function(e){if(e.target&&e.target.name==='qrep'){QF.rep=e.target.value;qsync(true)}});
+els.qcontact.addEventListener('change',function(e){if(e.target&&e.target.name==='qcontact'){QF.contact=e.target.value;qsync(true)}});
 els.qfab.addEventListener('click',function(){qopen(!qopened())});
 els.qback.addEventListener('click',function(){qopen(false)});
 els.qclose.addEventListener('click',function(){qopen(false)});
-els.qclearall.addEventListener('click',function(){if(!QL.length)return;QL=[];QI={};qsync();qlive('Quote list cleared.')});
+els.qclearall.addEventListener('click',function(){if(!QL.length)return;QL=[];QI={};QF.qn=newQno();qsync();qlive('Quote list cleared.')});
 els.qlist.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-qrm]'):null;if(!b)return;
  var x=QL[+b.getAttribute('data-qrm')];if(!x)return;QL.splice(+b.getAttribute('data-qrm'),1);delete QI[x.k];qsync();qlive('Removed '+x.n+'. '+QL.length+(QL.length===1?' item':' items')+' left.');
  try{(els.qlist.querySelector('.qrm')||els.qclose).focus({preventScroll:true})}catch(er){}});
-function qsend(ev){var a=ev.currentTarget,err=qvalid(),msg='';
- ['name','phone','email'].forEach(function(k){var el=els['q'+k];if(err[k]){el.setAttribute('aria-invalid','true')}else el.removeAttribute('aria-invalid')});
+els.qlist.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-qf');if(!k)return;var x=QL[+t.getAttribute('data-i')];if(!x)return;
+ if(k==='q'){var cl=t.value.replace(/\D/g,'').slice(0,3);if(cl!==t.value)t.value=cl;x[k]=cl}else x[k]=t.value;els.qerr.textContent='';qsync(true)});
+els.qlist.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttribute||t.getAttribute('data-qf')!=='q')return;var x=QL[+t.getAttribute('data-i')];if(!x)return;x.q=String(qtyOf(x.q));t.value=x.q;qsync(true)});
+function qsend(ev){var a=ev.currentTarget,err=qvalid(),msg='',ks=['name','phone','email','needed'];
+ ks.forEach(function(k){var el=els['q'+k];if(err[k]){el.setAttribute('aria-invalid','true')}else el.removeAttribute('aria-invalid')});
  if(!QL.length)msg='Add at least one item to your quote list first.';
- else{var first=['name','phone','email'].filter(function(k){return err[k]});
+ else{var first=ks.filter(function(k){return err[k]});
   if(first.length){msg=err[first[0]];try{els['q'+first[0]].focus()}catch(e){}}}
  if(msg){ev.preventDefault();els.qerr.textContent=msg;return}
- els.qerr.textContent='';a.setAttribute('href',a===els.qtext?qhrefs().sms:qhrefs().mail)}
+ els.qerr.textContent='';a.setAttribute('href',a===els.qtext?qhrefs().sms:qhrefs().mail)} // customer requests are never logged
 els.qtext.addEventListener('click',qsend);els.qmail.addEventListener('click',qsend);
 els.qform.addEventListener('submit',function(e){e.preventDefault()});
 els.qsheet.addEventListener('keydown',function(e){if(e.key!=='Tab')return;
@@ -672,30 +752,49 @@ els.qsheet.addEventListener('keydown',function(e){if(e.key!=='Tab')return;
  if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
 
 /* ---------- rep quote screen (#rep) ---------- */
-var RS='vf-rep-v1',RD={rep:'naeem',name:'',phone:'',email:'',notes:'',items:[{d:'',p:'',e:''}]};
+var RS='vf-rep-v1',LOGQ='vf-logq-v1';
+function rblank(){return {d:'',sku:'',vn:'',q:'1',fin:'',p:'',e:''}}
+var RD={rep:'naeem',name:'',phone:'',email:'',zip:'',needed:'',notes:'',ref:'',qn:'',items:[rblank()]};
 var STORE_ADDR='Raymour & Flanigan Bridgewater, 744 US Hwy 202 S, Bridgewater, NJ 08807';
 var rsh=document.getElementById('rsheet'),rbk=document.getElementById('qback'),rEl={};
-['rclose','rreps','rpaste','rfill','rfillmsg','rname','rphone','remail','ritems','radd','raddq','rnotes','rsub','rerr','rtext','rmail','rclear','rvlist','rlink'].forEach(function(k){rEl[k]=document.getElementById(k)});
+['rclose','rreps','rpaste','rfill','rfillmsg','rname','rphone','remail','rzip','rneeded','rref','rnum','ritems','radd','raddq','rnotes','rsub','rerr','rtext','rmail','rclear','rvlist','rlink','rlogbar','rlog','rlogretry','rlogfine'].forEach(function(k){rEl[k]=document.getElementById(k)});
+function ritemClean(x){x=x||{};return {d:clip(x.d,400),sku:clip(x.sku,80),vn:clip(x.vn,60),q:String(qtyOf(x.q)),fin:clip(x.fin,80),p:clip(x.p,30),e:clip(x.e,100)}}
 function rload(){try{var o=JSON.parse(localStorage.getItem(RS)||'null');if(!o)return;
  if(o.rep==='naeem'||o.rep==='hans')RD.rep=o.rep;
  ['name','phone','email','notes'].forEach(function(k){if(typeof o[k]==='string')RD[k]=o[k].slice(0,2000)});
- if(Array.isArray(o.items)&&o.items.length)RD.items=o.items.slice(0,40).map(function(x){return {d:String((x&&x.d)||'').slice(0,400),p:String((x&&x.p)||'').slice(0,30),e:String((x&&x.e)||'').slice(0,100)}})}catch(e){}}
+ if(typeof o.zip==='string')RD.zip=o.zip.slice(0,60);
+ if(validIso(o.needed))RD.needed=o.needed;
+ if(typeof o.ref==='string')RD.ref=o.ref.slice(0,30);
+ if(typeof o.qn==='string'&&QNO.test(o.qn))RD.qn=o.qn;
+ if(Array.isArray(o.items)&&o.items.length)RD.items=o.items.slice(0,40).map(ritemClean)}catch(e){}}
 function rsave(){try{localStorage.setItem(RS,JSON.stringify(RD))}catch(e){}}
+function rstamp(){if(!qnoOk(RD.qn)){RD.qn=newQno();return true}return false}
 function money(n){var a=Math.abs(n).toFixed(2).split('.');return (n<0?'-':'')+'$'+a[0].replace(/\B(?=(\d{3})+(?!\d))/g,',')+'.'+a[1]}
 function pnum(t){var x=String(t||'').replace(/[$,\s]/g,'');if(!/^-?\d+(\.\d+)?$|^-?\.\d+$/.test(x))return null;var n=parseFloat(x);return isFinite(n)?n:null}
 function pshow(t){var n=pnum(t);return n===null?(String(t||'').trim()||'Price to be confirmed'):money(n)}
-function rsubtotal(){var s=0,miss=0,cnt=0;RD.items.forEach(function(x){if(!x.d.trim())return;cnt++;var n=pnum(x.p);if(n===null)miss++;else s+=n});return {sum:s,miss:miss,cnt:cnt}}
+function rcents(x){var n=pnum(x.p);return n===null?null:Math.round(n*100)*qtyOf(x.q)}
+function rsubtotal(){var c=0,miss=0,cnt=0;RD.items.forEach(function(x){if(!x.d.trim())return;cnt++;var k=rcents(x);if(k===null)miss++;else c+=k});return {sum:c/100,miss:miss,cnt:cnt}}
+function rline(x){var q=qtyOf(x.q),n=pnum(x.p);
+ if(n===null)return (q>1?'Qty '+q+' \u2013 ':'')+pshow(x.p);
+ return q+' \u00d7 '+money(n)+(q>1?' = '+money(rcents(x)/100):'')}
 function rtotxt(){var t=rsubtotal();rEl.rsub.textContent=money(t.sum)+(t.miss?' (+ '+t.miss+(t.miss===1?' item':' items')+' without a numeric price)':'')}
+function rltxt(i){var el=document.getElementById('rl'+i);if(el&&RD.items[i])el.textContent=pnum(RD.items[i].p)===null?'Line total: enter a price':'Line total: '+money(rcents(RD.items[i])/100)}
 function rrenderItems(focusLast){var h='';
  RD.items.forEach(function(x,i){var n=i+1;
   h+='<div class="ritem"><div class="ritop"><b>Item '+n+'</b>'+(RD.items.length>1?'<button type="button" class="qrm" data-rrm="'+i+'" aria-label="Remove item '+n+'">Remove</button>':'')+'</div>'
-  +'<div class="qf"><label for="rd'+i+'">Item / vendor description</label><input id="rd'+i+'" data-rf="d" data-i="'+i+'" type="text" list="rvlist" autocomplete="off" maxlength="400" placeholder="Pick a vendor or type anything" value="'+esc(x.d)+'"></div>'
-  +'<div class="rpair"><div class="qf"><label for="rp'+i+'">Price</label><input id="rp'+i+'" data-rf="p" data-i="'+i+'" type="text" inputmode="decimal" autocomplete="off" maxlength="30" placeholder="$0.00" value="'+esc(x.p)+'"></div>'
-  +'<div class="qf"><label for="re'+i+'">Est. delivery</label><input id="re'+i+'" data-rf="e" data-i="'+i+'" type="text" autocomplete="off" maxlength="100" placeholder="e.g. 2-4 weeks" value="'+esc(x.e)+'"></div></div></div>'});
- rEl.ritems.innerHTML=h;rtotxt();
+  +'<div class="qf"><label for="rd'+i+'">Item name / description</label><input id="rd'+i+'" data-rf="d" data-i="'+i+'" type="text" list="rvlist" autocomplete="off" maxlength="400" placeholder="Pick a vendor or type anything" value="'+esc(x.d)+'"></div>'
+  +'<div class="rpair"><div class="qf"><label for="rsk'+i+'">SKU</label><input id="rsk'+i+'" data-rf="sku" data-i="'+i+'" type="text" autocomplete="off" autocapitalize="characters" maxlength="80" value="'+esc(x.sku)+'"></div>'
+  +'<div class="qf"><label for="rvn'+i+'">Vendor # <span class="opt">(internal, not sent to customer)</span></label><input id="rvn'+i+'" data-rf="vn" data-i="'+i+'" type="text" autocomplete="off" autocapitalize="characters" maxlength="60" value="'+esc(x.vn)+'"></div></div>'
+  +'<div class="rpair"><div class="qf"><label for="rq'+i+'">Qty</label><input id="rq'+i+'" data-rf="q" data-i="'+i+'" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="3" value="'+esc(x.q)+'"></div>'
+  +'<div class="qf"><label for="rfn'+i+'">Finish / color</label><input id="rfn'+i+'" data-rf="fin" data-i="'+i+'" type="text" autocomplete="off" maxlength="80" value="'+esc(x.fin)+'"></div></div>'
+  +'<div class="rpair"><div class="qf"><label for="rp'+i+'">Unit price</label><input id="rp'+i+'" data-rf="p" data-i="'+i+'" type="text" inputmode="decimal" autocomplete="off" maxlength="30" placeholder="$0.00" value="'+esc(x.p)+'"></div>'
+  +'<div class="qf"><label for="re'+i+'">Est. delivery</label><input id="re'+i+'" data-rf="e" data-i="'+i+'" type="text" autocomplete="off" maxlength="100" placeholder="e.g. 2-4 weeks" value="'+esc(x.e)+'"></div></div>'
+  +'<p class="rlt" id="rl'+i+'"></p></div>'});
+ rEl.ritems.innerHTML=h;rtotxt();RD.items.forEach(function(x,i){rltxt(i)});
  if(focusLast){var f=document.getElementById('rd'+(RD.items.length-1));if(f)try{f.focus({preventScroll:false})}catch(e){}}}
 function rsync(){ // everything except item rows
- rEl.rname.value=RD.name;rEl.rphone.value=RD.phone;rEl.remail.value=RD.email;rEl.rnotes.value=RD.notes;
+ rEl.rname.value=RD.name;rEl.rphone.value=RD.phone;rEl.remail.value=RD.email;rEl.rnotes.value=RD.notes;rEl.rzip.value=RD.zip;rEl.rneeded.value=RD.needed;rEl.rref.value=RD.ref;
+ rEl.rneeded.setAttribute('min',isoToday());
  var rs=rEl.rreps.querySelectorAll('input');for(var i=0;i<rs.length;i++)rs[i].checked=(rs[i].value===RD.rep);
  rEl.raddq.style.display=QL.length?'':'none';rEl.raddq.textContent='Add the '+QL.length+(QL.length===1?' item':' items')+' on this device\u2019s quote list'}
 function rhasVendors(){var seen={},h='';V.forEach(function(v){if(!seen[v.n]){seen[v.n]=1;h+='<option value="'+esc(v.n)+'">'}});rEl.rvlist.innerHTML=h}
@@ -705,12 +804,20 @@ function rvalid(kind){var m=[];
  if(kind==='sms'&&!rphoneSms(RD.phone))m.push(['rphone','Please enter the customer\u2019s phone number to text the quote.']);
  if(kind==='mail'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(RD.email.trim()))m.push(['remail','Please enter a valid customer email to email the quote.']);
  if(RD.email.trim()&&kind==='sms'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(RD.email.trim()))m.push(['remail','That email address does not look right.']);
+ if(RD.needed&&!validIso(RD.needed))m.push(['rneeded','Please pick a valid \u201cNeeded by\u201d date.']);
  if(!rsubtotal().cnt)m.push(['rd0','Add at least one item with a description.']);
  return m}
-function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0];
- L.push('Hi '+first+',','','Here is your quote from Raymour & Flanigan:','');
- var n=0;RD.items.forEach(function(x){if(!x.d.trim())return;n++;
-  var l=n+'. '+x.d.trim()+' \u2013 '+pshow(x.p);if(x.e.trim())l+=' \u2013 Est. delivery: '+x.e.trim();L.push(l)});
+function rattrs(x){var a=[];if(x.sku.trim())a.push('SKU: '+x.sku.trim());if(x.fin.trim())a.push('Finish: '+x.fin.trim());return a} // vendor # is never included
+function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0];rstamp();
+ L.push('Hi '+first+',','','Here is your quote from Raymour & Flanigan:');
+ L.push('Quote #: '+RD.qn+' | Date: '+dshow(qnoDate(RD.qn)));
+ if(RD.ref.trim())L.push('In reply to your request #: '+RD.ref.trim());
+ var dl=[];if(RD.zip.trim())dl.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));if(RD.needed&&validIso(RD.needed))dl.push('Needed by: '+dshow(RD.needed));
+ if(dl.length)L.push(dl.join(' | '));
+ L.push('');
+ var n=0;RD.items.forEach(function(x){if(!x.d.trim())return;n++;var a=rattrs(x);
+  if(full){L.push(n+'. '+x.d.trim());if(a.length)L.push('   '+a.join(' | '));L.push('   '+rline(x));if(x.e.trim())L.push('   Est. delivery: '+x.e.trim())}
+  else{var l=n+'. '+x.d.trim()+(a.length?' ('+a.join('; ')+')':'')+' \u2013 '+rline(x);if(x.e.trim())l+=' \u2013 Est. delivery: '+x.e.trim();L.push(l)}});
  L.push('','Subtotal: '+money(t.sum)+(t.miss?' (plus items above without a price)':''));
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
  L.push('','Prices, taxes, delivery fees and availability are confirmed at time of purchase. Quote valid 7 days.','');
@@ -719,45 +826,92 @@ function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().
  else L.push('Raymour & Flanigan Bridgewater',r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3'));
  return L.join('\n')}
 function rhrefs(){return {sms:'sms:'+rphoneSms(RD.phone)+'?&body='+encodeURIComponent(rbody(false)),
- mail:'mailto:'+RD.email.trim()+'?subject='+encodeURIComponent('Your Raymour & Flanigan quote - '+RD.name.trim())+'&body='+encodeURIComponent(rbody(true))}}
-function rhref(){var h=rhrefs();rEl.rtext.setAttribute('href',h.sms);rEl.rmail.setAttribute('href',h.mail)}
+ mail:'mailto:'+RD.email.trim()+'?subject='+encodeURIComponent('Your Raymour & Flanigan quote '+RD.qn+' - '+RD.name.trim())+'&body='+encodeURIComponent(rbody(true))}}
+function rhref(){var h=rhrefs();rEl.rtext.setAttribute('href',h.sms);rEl.rmail.setAttribute('href',h.mail);
+ rEl.rnum.textContent='Quote # '+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn))+(RD.ref.trim()?' \u00b7 Ref: request '+RD.ref.trim():'');rsave()}
 function ropened(){return rsh.className.indexOf('open')>=0}
 var rLast=null;
 function ropen(on){
  rsh.className=on?'qsheet rsheet open':'qsheet rsheet';rbk.className=on?'qback on':'qback';
  document.body.classList.toggle('sheet-open',on);
- if(on){if(qopened()){els.qsheet.className='qsheet'}rLast=document.activeElement;rsync();rrenderItems(false);rhref();rEl.rerr.textContent='';setTimeout(function(){try{rEl.rclose.focus({preventScroll:true})}catch(e){}},60)}
+ if(on){if(qopened()){els.qsheet.className='qsheet'}rLast=document.activeElement;rsync();rrenderItems(false);rhref();rEl.rerr.textContent='';logStatus();logFlush();setTimeout(function(){try{rEl.rclose.focus({preventScroll:true})}catch(e){}},60)}
  else{if(location.hash==='#rep'){try{history.replaceState(null,'',location.pathname+location.search)}catch(e){location.hash=''}}
   try{(rLast&&document.body.contains(rLast)&&rLast!==document.body?rLast:rEl.rlink||document.body).focus({preventScroll:true})}catch(e){}}}
 function rhash(){if(location.hash==='#rep'&&!ropened())ropen(true)}
-// parse a pasted customer request (the text this site's customers send) - best effort
-function rparse(t){var o={name:'',phone:'',email:'',items:[]},m;
+// parse a pasted customer request (the text this site's customers send) - best effort. Works on the short text-message form and the long email form.
+function rparse(t){var o={name:'',phone:'',email:'',zip:'',needed:'',ref:'',contact:'',time:'',items:[]},m;
  if(m=t.match(/Quote request from\s+(.+)/i))o.name=m[1].trim();
  else if(m=t.match(/^\s*(?:Name|Customer)\s*:\s*(.+)$/im))o.name=m[1].trim();
  if(m=t.match(/^\s*Phone\s*:\s*(.+)$/im))o.phone=m[1].trim();
  if(m=t.match(/^\s*Email\s*:\s*(\S+@\S+\.\S+)/im))o.email=m[1].trim();
- t.split(/\r?\n/).forEach(function(l){var x=l.match(/^\s*\d+[.)]\s+(.+?)\s*$/);if(x){var d=x[1].replace(/\s*\((?:Affordable|Mid-Range|Premium|Luxury)(?:\s*\/\s*(?:Affordable|Mid-Range|Premium|Luxury))*\)\s*$/,'');o.items.push({d:d,p:'',e:''})}});
+ if(m=t.match(/^\s*Request\s*#\s*:?\s*(Q-\d{6}-[A-Za-z0-9]{4})/im))o.ref=m[1].toUpperCase();
+ if(m=t.match(/^\s*Delivery ZIP\/town\s*:\s*(.+)$/im))o.zip=m[1].trim().slice(0,60);
+ if(m=t.match(/^\s*Needed by\s*:\s*(.+)$/im))o.needed=dparse(m[1]);
+ if(m=t.match(/^\s*Preferred contact\s*:\s*(.+)$/im))o.contact=m[1].trim();
+ if(m=t.match(/^\s*Best time to reach(?: me)?\s*:\s*(.+)$/im))o.time=m[1].trim();
+ var cur=null;
+ t.split(/\r?\n/).forEach(function(l){var x=l.match(/^\s*\d+[.)]\s+(.+?)\s*$/);
+  if(x){var d=x[1].replace(/\s*\((?:Affordable|Mid-Range|Premium|Luxury)(?:\s*\/\s*(?:Affordable|Mid-Range|Premium|Luxury))*\)\s*$/,'');cur=ritemClean({d:d});o.items.push(cur);return}
+  if(cur&&/^\s+\S/.test(l)){l.trim().split('|').forEach(function(seg){var k=seg.match(/^\s*(Item\/SKU|Qty|Finish)\s*:\s*(.+?)\s*$/i);if(!k)return;
+   var key=k[1].toLowerCase();if(key==='qty')cur.q=String(qtyOf(k[2]));else if(key==='finish')cur.fin=clip(k[2],80);else cur.d=clip(k[2]+' \u2013 '+cur.d,400)})}});
  return o}
-rhasVendors();rload();
+/* ---- Google Sheet logs: ONLY rep quotes the rep taps Send on, one separate log (endpoint + offline queue) per rep. Customer requests are never logged. ---- */
+var LOGREPS=['naeem','hans'];
+function logOn(rep){var c=LOGCFG[rep];return !!c&&/^https:\/\/\S+$/.test(c.url||'')}
+function logKey(rep){return LOGQ+'-'+rep}
+function logLoad(rep){try{var a=JSON.parse(localStorage.getItem(logKey(rep))||'[]');return Array.isArray(a)?a.filter(function(x){return x&&x.rep===REPS[rep].name}):[]}catch(e){return []}}
+function logSave(rep,a){try{localStorage.setItem(logKey(rep),JSON.stringify(a.slice(-50)))}catch(e){}}
+var logBusy={naeem:false,hans:false},logTimer={naeem:0,hans:0};
+function logStatus(){var parts=[];
+ LOGREPS.forEach(function(rep){var n=logOn(rep)&&!logBusy[rep]?logLoad(rep).length:0;if(n)parts.push(REPS[rep].name.split(' ')[0]+(n>1?' ('+n+')':''))});
+ rEl.rlogbar.hidden=!parts.length;rEl.rlog.textContent=parts.length?'Not logged yet \u2013 '+parts.join(', ')+'. Will retry automatically.':''}
+function logSummary(){var a=[];RD.items.forEach(function(x){if(!x.d.trim())return;var q=qtyOf(x.q),n=pnum(x.p),m=[];
+ if(x.sku.trim())m.push('SKU '+x.sku.trim());if(x.vn.trim())m.push('Vendor # '+x.vn.trim());if(x.fin.trim())m.push(x.fin.trim());
+ a.push(q+' \u00d7 '+x.d.trim()+(m.length?' ('+m.join('; ')+')':'')+' @ '+(n===null?'price TBC':money(n)))});return a.join('; ').slice(0,3000)}
+function logEntry(rep,kind){var t=rsubtotal();
+ return {id:RD.qn+'|'+kind+'|'+Date.now(),ts:new Date().toISOString(),quote:RD.qn,ref:RD.ref.trim(),repKey:rep,rep:REPS[rep].name,name:RD.name.trim(),phone:RD.phone.trim(),email:RD.email.trim(),zip:RD.zip.trim(),items:logSummary(),subtotal:t.sum,via:kind==='sms'?'text':'email',token:LOGCFG[rep].token}}
+function logFlush(rep){
+ if(!rep){LOGREPS.forEach(logFlush);return}
+ if(!logOn(rep)||logBusy[rep])return;clearTimeout(logTimer[rep]);
+ var q=logLoad(rep);if(!q.length){logStatus();return}
+ if(navigator.onLine===false||typeof fetch!=='function'){logStatus();return}
+ var e=q[0],ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},15000);logBusy[rep]=true;logStatus();
+ var fin=function(ok){clearTimeout(to);logBusy[rep]=false;
+  if(ok){var cur=logLoad(rep).filter(function(x){return x.id!==e.id});logSave(rep,cur);logStatus();if(cur.length)logFlush(rep)}
+  else{logStatus();logTimer[rep]=setTimeout(function(){logFlush(rep)},60000)}};
+ try{fetch(LOGCFG[rep].url,{method:'POST',mode:'no-cors',keepalive:true,body:JSON.stringify(e),signal:ctl?ctl.signal:undefined}).then(function(){fin(true)},function(){fin(false)})}catch(er){fin(false)}}
+var logLast={};
+function logSend(kind){try{var rep=RD.rep;if(!logOn(rep))return;var lk=rep+'|'+RD.qn+'|'+kind,nw=Date.now();if(logLast[lk]&&nw-logLast[lk]<8000)return;logLast[lk]=nw;var q=logLoad(rep),e=logEntry(rep,kind);if(!q.some(function(x){return x.id===e.id})){q.push(e);logSave(rep,q)}logFlush(rep)}catch(er){}}
+window.addEventListener('online',function(){logFlush()});
+document.addEventListener('visibilitychange',function(){if(!document.hidden)logFlush()});
+rEl.rlogretry.addEventListener('click',function(){logFlush()});
+rhasVendors();rload();rstamp();
 var rrep=[['naeem','Na\u2019eem Ward'],['hans','Hans Attys']];
 rEl.rreps.innerHTML=rrep.map(function(r){return '<label class="qrep"><input type="radio" name="rrep" value="'+r[0]+'"'+(r[0]===RD.rep?' checked':'')+'><span>'+esc(r[1])+'</span></label>'}).join('');
 rEl.rreps.addEventListener('change',function(e){if(e.target&&e.target.name==='rrep'){RD.rep=e.target.value;rsave();rhref()}});
-[['rname','name'],['rphone','phone'],['remail','email'],['rnotes','notes']].forEach(function(a){rEl[a[0]].addEventListener('input',function(){RD[a[1]]=rEl[a[0]].value;rEl.rerr.textContent='';rEl[a[0]].removeAttribute('aria-invalid');rsave();rhref()})});
-rEl.ritems.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-rf');if(!k)return;RD.items[+t.getAttribute('data-i')][k]=t.value;rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rsave();rhref()});
-rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rrm]'):null;if(!b)return;RD.items.splice(+b.getAttribute('data-rrm'),1);if(!RD.items.length)RD.items.push({d:'',p:'',e:''});rsave();rrenderItems(false);rhref()});
-rEl.radd.addEventListener('click',function(){if(RD.items.length>=40)return;RD.items.push({d:'',p:'',e:''});rsave();rrenderItems(true);rhref()});
+[['rname','name'],['rphone','phone'],['remail','email'],['rnotes','notes'],['rzip','zip'],['rneeded','needed'],['rref','ref']].forEach(function(a){['input','change'].forEach(function(ev){rEl[a[0]].addEventListener(ev,function(){RD[a[1]]=rEl[a[0]].value;rEl.rerr.textContent='';rEl[a[0]].removeAttribute('aria-invalid');rhref()})})});
+rEl.ritems.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-rf');if(!k)return;var i=+t.getAttribute('data-i');
+ if(k==='q'){var cl=t.value.replace(/\D/g,'').slice(0,3);if(cl!==t.value)t.value=cl;RD.items[i][k]=cl}else RD.items[i][k]=t.value;rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rltxt(i);rhref()});
+rEl.ritems.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttribute||t.getAttribute('data-rf')!=='q')return;var i=+t.getAttribute('data-i');RD.items[i].q=String(qtyOf(RD.items[i].q));t.value=RD.items[i].q;rtotxt();rltxt(i);rhref()});
+rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rrm]'):null;if(!b)return;RD.items.splice(+b.getAttribute('data-rrm'),1);if(!RD.items.length)RD.items.push(rblank());rrenderItems(false);rhref()});
+rEl.radd.addEventListener('click',function(){if(RD.items.length>=40)return;RD.items.push(rblank());rrenderItems(true);rhref()});
 rEl.raddq.addEventListener('click',function(){var only=RD.items.length===1&&!RD.items[0].d.trim()&&!RD.items[0].p.trim();if(only)RD.items=[];
- QL.forEach(function(x){if(RD.items.length<40)RD.items.push({d:x.n+' \u2013 '+x.i,p:'',e:''})});if(!RD.items.length)RD.items.push({d:'',p:'',e:''});rsave();rrenderItems(false);rhref()});
+ QL.forEach(function(x){if(RD.items.length<40)RD.items.push(ritemClean({d:(x.sku.trim()?x.sku.trim()+' \u2013 ':'')+x.n+' \u2013 '+x.i,q:x.q,fin:x.f}))});
+ if(!RD.zip.trim()&&QF.zip.trim())RD.zip=QF.zip.trim().slice(0,60);if(!RD.needed&&validIso(QF.needed))RD.needed=QF.needed;
+ if(!RD.items.length)RD.items.push(rblank());rsync();rrenderItems(false);rhref()});
 rEl.rfill.addEventListener('click',function(){var o=rparse(rEl.rpaste.value),got=[];
  if(!o.name&&!o.phone&&!o.email&&!o.items.length){rEl.rfillmsg.textContent='Could not find a name, phone, email or numbered items in that text. You can still enter everything below.';return}
  if(o.name){RD.name=o.name;got.push('name')}if(o.phone){RD.phone=o.phone;got.push('phone')}if(o.email){RD.email=o.email;got.push('email')}
+ if(o.zip){RD.zip=o.zip;got.push('ZIP/town')}if(o.needed){RD.needed=o.needed;got.push('needed-by date')}if(o.ref){RD.ref=o.ref;got.push('request #')}
  if(o.items.length){var only=RD.items.every(function(x){return !x.d.trim()&&!x.p.trim()&&!x.e.trim()});RD.items=(only?[]:RD.items).concat(o.items).slice(0,40);got.push(o.items.length+(o.items.length===1?' item':' items'))}
- ['rname','rphone','remail'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});rEl.rerr.textContent='';rsave();rsync();rrenderItems(false);rhref();rEl.rfillmsg.textContent='Filled in: '+got.join(', ')+'. Add prices and delivery estimates below, and check the rest.'});
-rEl.rclear.addEventListener('click',function(){RD={rep:RD.rep,name:'',phone:'',email:'',notes:'',items:[{d:'',p:'',e:''}]};rEl.rpaste.value='';rEl.rfillmsg.textContent='';rEl.rerr.textContent='';rsave();rsync();rrenderItems(false);rhref()});
+ ['rname','rphone','remail'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});rEl.rerr.textContent='';rsync();rrenderItems(false);rhref();
+ rEl.rfillmsg.textContent='Filled in: '+got.join(', ')+'. Add prices and delivery estimates below, and check the rest.'+(o.contact||o.time?' Customer prefers '+[o.contact,o.time&&'best time '+o.time].filter(Boolean).join(', ')+'.':'')});
+rEl.rclear.addEventListener('click',function(){RD={rep:RD.rep,name:'',phone:'',email:'',zip:'',needed:'',notes:'',ref:'',qn:newQno(),items:[rblank()]};rEl.rpaste.value='';rEl.rfillmsg.textContent='';rEl.rerr.textContent='';rsync();rrenderItems(false);rhref()});
 function rsend(kind){return function(ev){var a=ev.currentTarget,m=rvalid(kind);
- ['rname','rphone','remail'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});
+ ['rname','rphone','remail','rneeded'].forEach(function(k){rEl[k].removeAttribute('aria-invalid')});
  if(m.length){ev.preventDefault();var f=document.getElementById(m[0][0]);m.forEach(function(x){var el=document.getElementById(x[0]);if(el)el.setAttribute('aria-invalid','true')});rEl.rerr.textContent=m[0][1];try{f.focus()}catch(e){}return}
- rEl.rerr.textContent='';a.setAttribute('href',kind==='sms'?rhrefs().sms:rhrefs().mail)}}
+ rEl.rerr.textContent='';rstamp();a.setAttribute('href',kind==='sms'?rhrefs().sms:rhrefs().mail);rsave();
+ logSend(kind)}} // background POST; never delays or blocks the send link
 rEl.rtext.addEventListener('click',rsend('sms'));rEl.rmail.addEventListener('click',rsend('mail'));
 rEl.rclose.addEventListener('click',function(){ropen(false)});
 rbk.addEventListener('click',function(){if(ropened())ropen(false)});
@@ -768,7 +922,9 @@ rsh.addEventListener('keydown',function(e){if(e.key!=='Tab')return;
 rsh.addEventListener('submit',function(e){e.preventDefault()});
 window.addEventListener('hashchange',rhash);
 rEl.rlink.addEventListener('click',function(e){e.preventDefault();if(location.hash!=='#rep'){try{history.replaceState(null,'','#rep')}catch(er){}}ropen(true)});
-rrenderItems(false);rhref();
+rrenderItems(false);rhref();logStatus();
+if(logOn('naeem')||logOn('hans'))rEl.rlogfine.textContent=' When you tap a send button, the customer\u2019s name, contact details and quote total are also added to your own private quote log.';
+setTimeout(function(){logFlush()},800);
 setTimeout(rhash,0);
 var CUR=[];
 function tierText(r){return r.tier.map(function(t){var l=TIER_LEGEND.filter(function(x){return x.n===t})[0];return t+(l?' ('+l.r+')':'')}).join(' / ')}
