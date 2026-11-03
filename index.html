@@ -504,7 +504,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use, budget tier and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p><b>Important:</b> Price tiers and styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.7</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v1.7.1</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -610,7 +610,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"0561380119e2a02b1030c8c214602710","h":"e0f0d40fe728e71f9989707299112b39f7d9db79fdb1bbcded1faceeae114866"},"hans":{"s":"35981b6f539f9e0bdb4328a849c68150","h":"019c8e420048fe0a7858619220cdea1f0636ae85d44bdb01a8b2c39108f6aa49"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"af854781544876378268501566a4cb4c","h":"69eee3624bd2487badfc9b1f60212fa5ed5eeaf3cbffbca1cf2d305585d5f6d6"},"hans":{"s":"6b18f188754ac512aba97ce6d7ad3a04","h":"90cf0ed70943893f450b10cd727daca0f1b3c0f8758cee9f57ebf5089298f57e"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -979,23 +979,31 @@ function rvalid(kind){var m=[];
  return m}
 function rparts(x){var q=qtyOf(x.q),n=pnum(x.p),a=[];if(x.d.trim())a.push(x.d.trim());if(x.sku.trim())a.push('SKU '+x.sku.trim());if(x.c.trim())a.push('Collection: '+x.c.trim());if(x.fin.trim())a.push('Finish: '+x.fin.trim());a.push('Qty '+q);
  if(n!==null)a.push(q>1?money(n)+' ea = '+money(rcents(x)/100):money(n));else if(x.p.trim())a.push('Price: '+x.p.trim());return a} // vendor # is never included
-function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0];rstamp();
- L.push('Hi '+first+',','','Here is your quote from Raymour & Flanigan:');
- L.push('Quote #: '+RD.qn+' | Date: '+dshow(qnoDate(RD.qn)));
- if(RD.ref.trim())L.push('In reply to your request #: '+RD.ref.trim());
+function rItemHead(x){var v=x.v.trim(),d=x.d.trim();if(/^raymour\s*(?:&|and)\s*flanigan$/i.test(v))v='';var h=[v,d].filter(Boolean).join(' ');if(!h)h=x.v.trim();if(!h)h=(x.ph&&x.ph.length&&!x.sku.trim()?'Item (see photo)':'Item');return h}
+function rPriceTxt(x,full){var q=qtyOf(x.q),n=pnum(x.p);if(n!==null)return (full?'Price: ':'')+(q>1?money(n)+(full?' each = ':' ea = ')+money(rcents(x)/100):money(n));return x.p.trim()?'Price: '+x.p.trim():''}
+// Quote message (v1.7.1 wording). full=true: email (one detail per line); false: text message (compact). The vendor # is never included.
+function rbody(full){var r=REPS[RD.rep],L=[],t=rsubtotal(),first=RD.name.trim().split(/\s+/)[0],AP='\u2019';rstamp();
+ var qline='Quote #'+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn));
  var dl=[];if(RD.zip.trim())dl.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));if(RD.needed&&validIso(RD.needed))dl.push('Needed by: '+dshow(RD.needed));
- if(dl.length)L.push(dl.join(' | '));
- L.push('');
- var n=0;RD.items.forEach(function(x){if(!ritemOn(x))return;n++;var l=n+'. '+itemHead(x.v.trim()||(x.ph&&x.ph.length&&!x.d.trim()&&!x.sku.trim()?'Item (see photo)':''),rparts(x));
-  if(full){L.push(l);if(x.e.trim())L.push('   Est. delivery: '+x.e.trim());if(x.nt.trim())L.push('   Notes: '+x.nt.trim())}
-  else{if(x.e.trim())l+=' \u2013 Est. delivery: '+x.e.trim();if(x.nt.trim())l+=' \u2013 Note: '+x.nt.trim();L.push(l)}
-  if(x.u)L.push('   Link: '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)')});
- L.push('','Subtotal: '+money(t.sum)+(t.miss?' (plus items above without a price)':''));
+ if(full){L.push('Hi '+first+',','','Thanks for stopping by Raymour & Flanigan Bridgewater! Here'+AP+'s the quote we talked about.','','YOUR QUOTE',qline);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(dl.length)L.push(dl.join(' \u00b7 '));L.push('------------------------------','')}
+ else{L.push('Hi '+first+', thanks for stopping by Raymour & Flanigan Bridgewater! Here'+AP+'s the quote we talked about.','',qline);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(dl.length)L.push(dl.join(' \u00b7 '));L.push('')}
+ var n=0;RD.items.forEach(function(x){if(!ritemOn(x))return;n++;L.push(n+'. '+rItemHead(x));var pr=rPriceTxt(x,full);
+  if(full){if(x.sku.trim())L.push('   SKU: '+x.sku.trim());if(x.c.trim())L.push('   Collection: '+x.c.trim());if(x.fin.trim())L.push('   Finish: '+x.fin.trim());L.push('   Qty: '+qtyOf(x.q));if(pr)L.push('   '+pr)}
+  else{var d=[];if(x.sku.trim())d.push('SKU '+x.sku.trim());if(x.c.trim())d.push('Collection: '+x.c.trim());if(x.fin.trim())d.push(x.fin.trim());d.push('Qty '+qtyOf(x.q));L.push('   '+d.join(' \u00b7 '));if(pr)L.push('   '+pr)}
+  if(x.e.trim())L.push('   Est. delivery: '+x.e.trim());if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));
+  if(x.u)L.push('   '+(full?'View it online: ':'')+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)');L.push('')});
+ var sub=money(t.sum)+(t.miss?' (plus items above without a price)':'');
+ if(full)L.push('------------------------------','SUBTOTAL: '+sub);else L.push('Subtotal: '+sub);
  if(RD.notes.trim())L.push('','Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '));
- L.push('','Prices, taxes, delivery fees and availability are confirmed at time of purchase. Quote valid 7 days.','');
- L.push(r.name);
- if(full){L.push('Raymour & Flanigan Bridgewater','744 US Hwy 202 S, Bridgewater, NJ 08807');if(r.work)L.push('Cell '+fmtPh(r.phone)+' \u00b7 Work '+fmtPh(r.work),r.email);else L.push(r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3')+' | '+r.email)}
- else L.push('Raymour & Flanigan Bridgewater',r.phone.replace(/^\+1(\d{3})(\d{3})(\d{4})$/,'$1-$2-$3'));
+ L.push('');
+ if(full)L.push('NEXT STEPS','- Reply YES to this email (or text me) and I'+AP+'ll hold these items for you.','- Call or text me anytime with questions, finishes, delivery timing or anything else.','','Quote valid for 72 hours. Prices, taxes, delivery fees and availability are confirmed at time of purchase.','','Thank you, '+first+'. I look forward to helping you finish the room!');
+ else L.push('Reply YES and I'+AP+'ll hold these items for you. Call or text me anytime with questions.','','Quote valid for 72 hours. Prices, taxes, delivery fees and availability are confirmed at time of purchase.');
+ L.push('',r.name);
+ if(full&&r.title)L.push(r.title);
+ L.push('Raymour & Flanigan Bridgewater');
+ if(full)L.push('744 US Hwy 202 S, Bridgewater, NJ 08807');
+ L.push('Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
+ if(full&&r.email)L.push(r.email);
  return L.join('\n')}
 function rhrefs(){return {sms:'sms:'+rphoneSms(RD.phone)+'?&body='+encodeURIComponent(rbody(false)),
  mail:'mailto:'+RD.email.trim()+'?subject='+encodeURIComponent('Your Raymour & Flanigan quote '+RD.qn+' - '+RD.name.trim())+'&body='+encodeURIComponent(rbody(true))}}
