@@ -551,7 +551,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v2.1</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v2.2</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>New version available &mdash;</span><button type="button" id="updbtn">Reload</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -656,8 +656,8 @@ var STORE='rf-vendor-finder-v2';
 var QSTORE='vf-quote-v1';
 // Quote-request routing. Nothing is sent automatically: the customer's own text/email app opens with the list filled in.
 var REPS={
- naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com',mono:'NW',photo:'naeem.jpg',title:'Home Furnishing Lead & Sleep Consultant',badge:'President\u2019s Club',work:'+19088952445',li:'https://www.linkedin.com/in/naeemward/'},
- hans:{name:'Hans Attys',phone:'+19736871864',email:'hansraymourflanigan@gmail.com',mono:'HA',photo:'',title:'',badge:'',work:'',li:''}};
+ naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com',mono:'NW',photo:'naeem.jpg',title:'Home Furnishing Lead & Sleep Consultant',badge:'President\u2019s Club',work:'+19088952445',li:'https://www.linkedin.com/in/naeemward/',store:'Bridgewater',addr:'744 US Highway 202 South, Bridgewater, NJ 08807'},
+ hans:{name:'Hans Attys',phone:'+19736871864',email:'HAttys@raymourflanigan.com',mono:'HA',photo:'',title:'Home Furnishing & Sleep Consultant',badge:'President\u2019s Club',work:'+18563211817',li:'',store:'Cherry Hill',addr:'2100 Route 38 Mall Drive, Cherry Hill, NJ 08002'}};
 var REPOPTS=[{id:'either',label:'Either one',to:['naeem','hans']},{id:'naeem',label:'Na\u2019eem Ward',to:['naeem']},{id:'hans',label:'Hans Attys',to:['hans']}];
 // Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md). Leave an endpoint EMPTY to switch that rep's logging off (skipped quietly).
 // The tokens only filter stray POSTs - they sit in this public page, so they are NOT strong security.
@@ -665,7 +665,7 @@ var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
 var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
-var PINCFG={"it":150000,"naeem":{"s":"3b6b272434e2e1c598456d266e7b9689","h":"3c07c56c42b8845362b9287cc16466906d650750da1cef7caa52c6d988312f23"},"hans":{"s":"0a87fd163b6e7c569be8045f86f627e4","h":"d78d28c962aad87d9ccebc77f0cc062f04d30a14fd9ad1da44b0f95ad6c4994a"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
+var PINCFG={"it":150000,"naeem":{"s":"af254b5eac6674d1e59ae9a8b34e6951","h":"4e1d77c1c039bbbab9a36bd3a5dc49f6c25efa5afe505cfc4eb3221a5faee4cc"},"hans":{"s":"c5a5beaad6d655750d851b655b5d7360","h":"ab96857b1c6b8728c7a8690a72620d0b3fd20fb462b8a2855eae869a89b356ea"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 function boot(){
@@ -837,16 +837,16 @@ function cardHtml(k){var r=REPS[k];if(!r)return '';
  h+='<li><span class="rc-k">Cell</span><a href="tel:'+r.phone+'">'+fmtPh(r.phone)+'</a><a class="rc-sms" href="sms:'+r.phone+'">Text</a></li>';
  if(r.work)h+='<li><span class="rc-k">Work</span><a href="tel:'+r.work+'">'+fmtPh(r.work)+'</a></li>';
  h+='<li><span class="rc-k">Email</span><a href="mailto:'+r.email+'">'+esc(r.email)+'</a></li>';
- h+='<li><span class="rc-k">Visit</span><a href="https://www.google.com/maps/search/?api=1&amp;query='+encodeURIComponent(CARD_ADDR)+'" target="_blank" rel="noopener">'+esc(CARD_ADDR)+'</a></li>';
+ h+='<li><span class="rc-k">Visit</span><a href="https://www.google.com/maps/search/?api=1&amp;query='+encodeURIComponent(r.addr||CARD_ADDR)+'" target="_blank" rel="noopener">'+esc(r.addr||CARD_ADDR)+'</a></li>';
  if(r.li)h+='<li><span class="rc-k">Social</span><a href="'+r.li+'" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>';
  h+='<li><span class="rc-k">Web</span><a href="https://www.raymourflanigan.com" target="_blank" rel="noopener">raymourflanigan.com</a></li></ul><div class="rc-brand">Raymour &amp; Flanigan</div>';
  return h}
-function miniHtml(k){var r=REPS[k];return avHtml(r,'rc-av rc-sm')+'<div class="rc-mid"><b>'+esc(r.name)+'</b><span>'+esc(r.title||'Raymour & Flanigan \u00b7 Bridgewater')+'</span></div><a class="rc-pill" href="tel:'+r.phone+'">Call</a><a class="rc-pill" href="sms:'+r.phone+'">Text</a>'}
+function miniHtml(k){var r=REPS[k];return avHtml(r,'rc-av rc-sm')+'<div class="rc-mid"><b>'+esc(r.name)+'</b><span>'+esc(r.title||'Raymour & Flanigan \u00b7 '+(r.store||'Bridgewater'))+'</span></div><a class="rc-pill" href="tel:'+r.phone+'">Call</a><a class="rc-pill" href="sms:'+r.phone+'">Text</a>'}
 function asgRefresh(){var au=(typeof AUTH!=='undefined'&&AUTH)||asgAuth();
  try{var o=JSON.parse(localStorage.getItem(ASGK)||'null');ASGS=o&&(o.rep==='naeem'||o.rep==='hans')?o.rep:ASGS}catch(e){}
  ASG=au||ASGS||'';
  var ml=document.getElementById('mlink');if(ml)ml.setAttribute('href',ASG?'manifest-'+ASG+'.json':'manifest.json'); // per-rep manifest: the installed app's start_url keeps the rep
- var hs=document.getElementById('hsub');if(hs)hs.textContent=au?'Rep mode \u00b7 signed in as '+REPS[au].name:ASG?'for '+REPS[ASG].name+' \u00b7 Bridgewater':'Raymour & Flanigan \u00b7 Bridgewater';
+ var hs=document.getElementById('hsub');if(hs)hs.textContent=au?'Rep mode \u00b7 signed in as '+REPS[au].name:ASG?'for '+REPS[ASG].name+' \u00b7 '+(REPS[ASG].store||'Bridgewater'):'Raymour & Flanigan \u00b7 Bridgewater';
  var qc=document.getElementById('qcard');if(qc){qc.hidden=!ASG;qc.innerHTML=ASG?cardHtml(ASG):''}
  var hc=document.getElementById('hcard');if(hc){hc.hidden=!ASG;hc.innerHTML=ASG?miniHtml(ASG):''}
  var nt=document.getElementById('rasgnote');if(nt){var d=!!au&&!!ASGS&&ASGS!==au;nt.hidden=!d;nt.textContent=d?'Note: this device was opened from '+REPS[ASGS].name.split(' ')[0]+'\u2019s customer link. While you are signed in, customers here see you; after you sign out they see '+REPS[ASGS].name.split(' ')[0]+'.':''}
@@ -891,7 +891,7 @@ function qbody(full){var L=[],rp=qrep();qstamp();
  if(QF.time.trim())L.push('Best time to reach me: '+QF.time.trim().replace(/\r?\n/g,' '));
  if(QF.zip.trim())L.push('Delivery ZIP/town: '+QF.zip.trim().replace(/\r?\n/g,' '));
  if(QF.needed&&validIso(QF.needed))L.push('Needed by: '+dshow(QF.needed));
- L.push('Sales rep: '+(ASG?rp.label:'Bridgewater sales team'));
+ L.push('Sales rep: '+(ASG?rp.label:'Raymour & Flanigan sales team (Na\u2019eem or Hans)'));
  if(QF.notes.trim())L.push('Notes: '+QF.notes.trim().replace(/\r?\n/g,' / '));
  L.push('','Items ('+QL.length+'):');
  QL.forEach(function(x,n){L.push((n+1)+'. '+itemHead(x.n.trim()||(x.ph&&x.ph.length&&!x.d.trim()&&!x.sku.trim()?'Item (see photo)':''),qparts(x)));qTgLines(x).forEach(function(l){L.push('   '+l)});if(x.nt.trim())L.push('   Notes: '+x.nt.trim().replace(/\r?\n/g,' / '));if(x.u)L.push('   Link: '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)')});
@@ -929,7 +929,7 @@ function qsync(noList){ // update every Add-to-quote button, the badge and (unle
   els.qlist.innerHTML=h}
  els.qclearall.style.display=n?'':'none';
  els.qnum.textContent='Request # '+QF.qn+' \u00b7 '+dshow(qnoDate(QF.qn));
- var rp=qrep();els.qgoes.textContent=ASG?'Your rep: '+rp.label:'Your request goes to our Bridgewater sales team';
+ var rp=qrep();els.qgoes.textContent=ASG?'Your rep: '+rp.label:'Your request goes to our sales team (Na\u2019eem or Hans)';
  var hr=qhrefs();els.qtext.setAttribute('href',hr.sms);els.qmail.setAttribute('href',hr.mail);phNoteRefresh('q');phGCsoon();
  els.qtext.setAttribute('aria-disabled',n?'false':'true');els.qmail.setAttribute('aria-disabled',n?'false':'true');
  qsave()}
@@ -1184,7 +1184,7 @@ function rsms(){ // v2.1 warmer text message (the email keeps the long form in r
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
  var pm=rPlatMode();if(pm!=='none')L.push('Spills and pets happen. 5-year Platinum Protection'+(pm==='some'?' (not available on floor sample items)':'')+':',RF_PROT,'');L.push('Want to spread out the payments? Financing options:',RF_FIN,'');
  L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll lock in your order'+(RD.needed&&validIso(RD.needed)?' and work on getting it to you by '+dshow(RD.needed):'')+'. Call or text me anytime.','','Prices, availability and the final amount are confirmed at time of purchase.','');
- L.push(r.name+' \u00b7 Raymour & Flanigan Bridgewater','Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
+ L.push(r.name+' \u00b7 Raymour & Flanigan '+(r.store||'Bridgewater'),'Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
  return L.join('\n')}
 function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
  var cl=rcalc(),to=rTotals(cl,true),pn=rPnote(),nd=RD.needed&&validIso(RD.needed)?dshow(RD.needed):'';

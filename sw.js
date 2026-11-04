@@ -1,5 +1,5 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.1, content hash beb48efbff). */
-var VERSION='2.1-beb48efbff';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.2, content hash eb1f833f2b). */
+var VERSION='2.2-eb1f833f2b';
 var CACHE='vf-'+VERSION;
 var PRECACHE=['./','index.html','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico'];
 self.addEventListener('install',function(e){
