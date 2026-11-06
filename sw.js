@@ -1,5 +1,5 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.4.1, content hash f95fd345dc). */
-var VERSION='2.4.1-f95fd345dc';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.4.2, content hash dc0e9f1107). */
+var VERSION='2.4.2-dc0e9f1107';
 var CACHE='vf-'+VERSION;
 var PRECACHE=['./','index.html','quote-rules.js','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico','ocr/tesseract-5.1.1/tesseract.min.js','ocr/tesseract-5.1.1/worker.min.js','ocr/core-5.1.1/tesseract-core-lstm.wasm.js','ocr/core-5.1.1/tesseract-core-simd-lstm.wasm.js','ocr/lang/eng.traineddata.gz'];
 self.addEventListener('install',function(e){

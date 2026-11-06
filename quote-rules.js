@@ -250,18 +250,27 @@
   function productNameState(name){
     var s=String(name==null?'':name).replace(/\s+/g,' ').trim();
     var letters=(s.match(/[A-Za-z]/g)||[]).join('');
-    if(letters.length<=1) return s?'incomplete':'missing';
+    if(!s) return 'missing';
+    if(!letters.length) return 'unresolved';
+    if(letters.length===1) return 'incomplete';
     return 'ok';
+  }
+  function productNameBlocks(name, nameOk){
+    var st=productNameState(name);
+    if(st==='ok') return false;
+    if(st==='incomplete' && nameOk===true) return false;
+    return true;
   }
   function preferProductName(previous, next){
     var a=String(previous==null?'':previous).replace(/\s+/g,' ').trim();
     var b=String(next==null?'':next).replace(/\s+/g,' ').trim();
     if(!b) return a;
     if(!a) return b;
+    var rank={missing:0, unresolved:1, incomplete:2, ok:3};
     var sa=productNameState(a), sb=productNameState(b);
-    if(sa==='ok' && sb!=='ok') return a;
-    if(sb==='ok' && sa!=='ok') return b;
-    if(sa==='ok' && sb==='ok') return b;
+    if(rank[sa]>rank[sb]) return a;
+    if(rank[sb]>rank[sa]) return b;
+    if(sa==='ok') return b;
     return b.length>a.length?b:a;
   }
   // Accept only the public delivery-timeline shape for showroom ZIP 08807.
@@ -302,6 +311,7 @@
     cartPreviewVisible:cartPreviewVisible,
     SHOWROOM_ZIP:SHOWROOM_ZIP,
     productNameState:productNameState,
+    productNameBlocks:productNameBlocks,
     preferProductName:preferProductName,
     showroomDeliveryFromTimeline:showroomDeliveryFromTimeline
   };

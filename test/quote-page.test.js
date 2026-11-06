@@ -208,6 +208,37 @@ test('a one-letter name cannot be sent until the rep confirms it, and a short re
   assert.equal(text.indexOf('November 9'), -1);
 });
 
+test('punctuation-only cart names are flagged before add and cannot be confirmed', function(){
+  var page = loadPage();
+  var cart = page.dom.window.vfCart;
+  var doc = page.dom.window.document;
+  cart.seedReview([
+    {sku:'750015022', name:'Magdalena Server', price:'714.97', reg:'714.97', color:''},
+    {sku:'797015027', name:'- -', price:'1099.00', reg:'1099.00', color:'Golden Brown Mango'}
+  ]);
+  var panel = doc.getElementById('rcartpanel').textContent;
+  assert.match(panel, /Name not readable/);
+  assert.match(panel, /- - is not a product name/);
+  assert.match(panel, /cannot find a product from the SKU number alone/);
+  var add = doc.querySelector('[data-cart=add]');
+  assert.equal(add.disabled, true);
+  assert.equal(add.textContent, 'Add checked pieces (2)');
+  assert.equal(doc.querySelector('[data-cartfield=nameOk]'), null);
+  var name = doc.querySelector('[data-cartrow="1"][data-cartfield=name]');
+  name.value = 'Magdalena 7pc Dining set';
+  name.dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+  cart.seedReview([
+    {sku:'797015027', name:'A', price:'1099.00', reg:'1099.00'}
+  ]);
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, true);
+  assert.ok(doc.querySelector('[data-cartfield=nameOk]'));
+  cart.seedReview([
+    {sku:'797015027', name:'A', price:'1099.00', reg:'1099.00', nameOk:true}
+  ]);
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+});
+
 test('mobile layout keeps preview actions in the quote sheet', function(){
   var dom = loadPage().dom;
   var doc = dom.window.document;
