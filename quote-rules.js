@@ -246,6 +246,39 @@
     return !!(s && s.added && s.rows && s.rows.length);
   }
 
+  var SHOWROOM_ZIP='08807';
+  function productNameState(name){
+    var s=String(name==null?'':name).replace(/\s+/g,' ').trim();
+    var letters=(s.match(/[A-Za-z]/g)||[]).join('');
+    if(letters.length<=1) return s?'incomplete':'missing';
+    return 'ok';
+  }
+  function preferProductName(previous, next){
+    var a=String(previous==null?'':previous).replace(/\s+/g,' ').trim();
+    var b=String(next==null?'':next).replace(/\s+/g,' ').trim();
+    if(!b) return a;
+    if(!a) return b;
+    var sa=productNameState(a), sb=productNameState(b);
+    if(sa==='ok' && sb!=='ok') return a;
+    if(sb==='ok' && sa!=='ok') return b;
+    if(sa==='ok' && sb==='ok') return b;
+    return b.length>a.length?b:a;
+  }
+  // Accept only the public delivery-timeline shape for showroom ZIP 08807.
+  // A range stays a range. A stock/restock message is never a delivery promise.
+  function showroomDeliveryFromTimeline(payload, sku){
+    var want=sku9(sku);
+    if(!payload||typeof payload!=='object'||!want) return {ok:false, reason:'missing'};
+    if(String(payload.code||'')!==want) return {ok:false, reason:'sku-mismatch'};
+    if(String(payload.postalCode||'')!==SHOWROOM_ZIP) return {ok:false, reason:'zip-mismatch'};
+    var d=payload.date||{}, text=String(d.text||'').trim();
+    if(d.isDelivery===true && String(d.label||'')==='Get it by' && d.year && d.month && d.day && text && d.isTimeline!==true)
+      return {ok:true, kind:'date', text:'Get it by '+text, zip:SHOWROOM_ZIP, basis:'08807'};
+    if(d.isTimeline===true && text && !d.year && !d.month && !d.day)
+      return {ok:true, kind:'range', text:'Get it in '+text, zip:SHOWROOM_ZIP, basis:'08807'};
+    return {ok:false, reason:'not-a-verified-timeframe'};
+  }
+
   return {
     FINANCE_DISCLOSURE:FINANCE_DISCLOSURE,
     restrictsSale:restrictsSale,
@@ -266,6 +299,10 @@
     composeGate:composeGate,
     preview:preview,
     canCompose:canCompose,
-    cartPreviewVisible:cartPreviewVisible
+    cartPreviewVisible:cartPreviewVisible,
+    SHOWROOM_ZIP:SHOWROOM_ZIP,
+    productNameState:productNameState,
+    preferProductName:preferProductName,
+    showroomDeliveryFromTimeline:showroomDeliveryFromTimeline
   };
 });

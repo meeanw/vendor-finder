@@ -1,0 +1,67 @@
+{
+  "kind": "live",
+  "fetchedAt": "2026-11-06T22:22:50Z",
+  "endpoint": "https://www.raymourflanigan.com/api/custom/product-delivery-timeline",
+  "query": "code={exact 9-digit SKU}&postalCode=08807",
+  "showroomZip": "08807",
+  "cors": {
+    "origin": "https://meeanw.github.io",
+    "accessControlAllowOrigin": null,
+    "browserFetchFromLiveSite": {
+      "read": false,
+      "name": "TypeError",
+      "message": "Failed to fetch"
+    },
+    "note": "Measured from Chrome on https://meeanw.github.io/vendor-finder/. The response body is not readable. This is not a fixture."
+  },
+  "samples": [
+    {
+      "sku": "219092234",
+      "postalCode": "08807",
+      "isDelivery": true,
+      "isTimeline": false,
+      "label": "Get it by",
+      "text": "Monday, November 9",
+      "parserWouldDisplayIfReadable": "Get it by Monday, November 9",
+      "kind": "date"
+    },
+    {
+      "sku": "233012360",
+      "name": "Bray Sofa",
+      "postalCode": "08807",
+      "isDelivery": false,
+      "isTimeline": true,
+      "label": "Delivery Timeline",
+      "text": "3-5 Weeks",
+      "parserWouldDisplayIfReadable": "Get it in 3-5 Weeks",
+      "kind": "range",
+      "note": "Constructor marked this variation special-order. WebOnlyItem was false. Displayed Online Only was not used to classify it."
+    },
+    {
+      "sku": "218092233",
+      "postalCode": "08807",
+      "isDelivery": false,
+      "isTimeline": true,
+      "label": "Delivery Timeline",
+      "text": "3 Days or Less",
+      "stockSubheadingPresent": true,
+      "stockDateNotUsed": "Back in stock 11/30/2026"
+    },
+    {
+      "sku": "219092234",
+      "postalCode": "33101",
+      "isDelivery": false,
+      "isTimeline": true,
+      "text": "3-5 Weeks",
+      "rejectedBecause": "postal code is not the showroom ZIP 08807"
+    }
+  ],
+  "notUsed": [
+    "shipping rate on the response",
+    "quoteId",
+    "restock subheading as a delivery date",
+    "customer delivery ZIP",
+    "website remembered ZIP"
+  ],
+  "pwa": "Does not call this endpoint. Auto-fill is not implemented because the static page cannot read the response."
+}

@@ -152,6 +152,62 @@ test('applying website prices while financing is longer than 18 months does not 
   assert.match(text, /Ask the warehouse/);
 });
 
+test('added-items confirmation follows the quote item, not the stale import name', function(){
+  var page = loadPage();
+  var api = page.api;
+  var cart = page.dom.window.vfCart;
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[
+      {v:'Raymour & Flanigan', d:'Magdalena Server', sku:'750015022', q:'1', p:'714.97', rg:'714.97'},
+      {v:'Raymour & Flanigan', d:'Magdalena 7pc Dining set', sku:'797015027', q:'2', p:'1099.00', rg:'1099.00'}
+    ]
+  });
+  cart.seed([
+    {sku:'750015022', name:'Magdalena Server', price:'714.97', reg:'714.97'},
+    {sku:'797015027', name:'A', price:'10.00', reg:'10.00'}
+  ]);
+  var shown = cart.confirmText();
+  assert.match(shown, /Magdalena 7pc Dining set/);
+  assert.match(shown, /2 × \$1,099\.00/);
+  assert.equal(shown.indexOf('\nA\n'), -1);
+  assert.doesNotMatch(shown, /^A$/m);
+  var preview = cart.previewText();
+  assert.match(preview, /Magdalena 7pc Dining set/);
+  assert.doesNotMatch(preview, /\n1\. A\n/);
+  page.dom.window.document.getElementById('rq1').value = '1';
+  page.dom.window.document.getElementById('rq1').dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  assert.match(cart.confirmText(), /1 × \$1,099\.00/);
+  page.dom.window.document.querySelector('[data-rrm="1"]').click();
+  assert.equal(cart.confirmText().indexOf('797015027'), -1);
+  assert.match(cart.confirmText(), /Magdalena Server/);
+});
+
+test('a one-letter name cannot be sent until the rep confirms it, and a short real name can', function(){
+  var api = loadPage().api;
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[{v:'Raymour & Flanigan', d:'A', sku:'797015027', q:'1', p:'1099.00', rg:'1099.00'}]
+  });
+  assert.equal(api.preview('sms').sms, '');
+  assert.ok(api.valid('sms').some(function(row){return /incomplete/i.test(row[1])}));
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[{v:'Raymour & Flanigan', d:'A', sku:'797015027', q:'1', p:'1099.00', rg:'1099.00', nameOk:true}]
+  });
+  assert.match(api.text(), /\n1\. A\n/);
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[{v:'Raymour & Flanigan', d:'TV', sku:'797015027', q:'1', p:'1099.00', rg:'1099.00', e:'Get it in 3-5 Weeks'}]
+  });
+  var text = api.text();
+  var email = api.email();
+  assert.match(text, /Est\. delivery \(showroom ZIP 08807\): Get it in 3-5 Weeks/);
+  assert.match(email, /showroom ZIP 08807/);
+  assert.match(text, /subject to confirmation and is not a guarantee/);
+  assert.equal(text.indexOf('November 9'), -1);
+});
+
 test('mobile layout keeps preview actions in the quote sheet', function(){
   var dom = loadPage().dom;
   var doc = dom.window.document;
