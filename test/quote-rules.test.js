@@ -230,6 +230,39 @@ test('preview is required per channel and any edit invalidates it', function(){
   assert.equal(missing.reason, 'missing-regular');
 });
 
+test('a single-letter import name is incomplete, and a later crop cannot replace a real name with it', function(){
+  assert.equal(VFQ.productNameState('A'), 'incomplete');
+  assert.equal(VFQ.productNameState('A.'), 'incomplete');
+  assert.equal(VFQ.productNameState(''), 'missing');
+  assert.equal(VFQ.productNameState('TV'), 'ok');
+  assert.equal(VFQ.productNameState('XL'), 'ok');
+  assert.equal(VFQ.productNameState('Magdalena 7pc Dining set'), 'ok');
+  assert.equal(VFQ.preferProductName('Magdalena 7pc Dining set', 'A'), 'Magdalena 7pc Dining set');
+  assert.equal(VFQ.preferProductName('A', 'Magdalena 7pc Dining set'), 'Magdalena 7pc Dining set');
+  assert.equal(VFQ.preferProductName('TV', 'Television stand'), 'Television stand');
+});
+
+test('showroom delivery accepts a Get it by date or a Get it in range for ZIP 08807 only', function(){
+  var dateFixture = {code:'219092234', postalCode:'08807', date:{year:2026, month:11, day:9, text:'Monday, November 9', label:'Get it by', isDelivery:true, isTimeline:false}, addToCartOutOfStockSubheading:null};
+  var date = VFQ.showroomDeliveryFromTimeline(dateFixture, '219092234');
+  assert.equal(date.ok, true);
+  assert.equal(date.kind, 'date');
+  assert.equal(date.text, 'Get it by Monday, November 9');
+  assert.equal(date.zip, '08807');
+  var rangeFixture = {code:'233012360', postalCode:'08807', date:{year:null, month:null, day:null, text:'3-5 Weeks', label:'Delivery Timeline', isDelivery:false, isTimeline:true}, addToCartOutOfStockSubheading:'Back in stock 11/30/2026'};
+  var range = VFQ.showroomDeliveryFromTimeline(rangeFixture, '233012360');
+  assert.equal(range.ok, true);
+  assert.equal(range.kind, 'range');
+  assert.equal(range.text, 'Get it in 3-5 Weeks');
+  assert.equal(range.text.indexOf('November'), -1);
+  assert.equal(range.text.indexOf('11/30'), -1);
+  var otherZip = VFQ.showroomDeliveryFromTimeline({code:'219092234', postalCode:'14127', date:dateFixture.date}, '219092234');
+  assert.equal(otherZip.ok, false);
+  assert.equal(otherZip.reason, 'zip-mismatch');
+  var stockOnly = VFQ.showroomDeliveryFromTimeline({code:'218092233', postalCode:'08807', date:{year:2026, month:11, day:30, text:'Monday, November 30', label:'Get it by', isDelivery:false, isTimeline:false}}, '218092233');
+  assert.equal(stockOnly.ok, false);
+});
+
 test('cart importer preview stays hidden until pieces are added', function(){
   assert.equal(VFQ.cartPreviewVisible({rows: [], added: false}), false);
   assert.equal(VFQ.cartPreviewVisible({rows: [{on: true}], added: false}), false);
