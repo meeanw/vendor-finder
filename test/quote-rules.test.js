@@ -282,6 +282,30 @@ test('showroom delivery accepts a Get it by date or a Get it in range for ZIP 08
   assert.equal(stockOnly.ok, false);
 });
 
+test('every customer message states the pet exclusion and a retired preview cannot be sent', function(){
+  var quote = {
+    extended: false,
+    name: 'Jamie Cole',
+    zip: '08002',
+    items: [{name: 'Magdalena Server', qty: 1, price: 714.97, regular: 714.97, discounted: false}],
+    delivery: '0'
+  };
+  var out = VFQ.customerMessages(quote);
+  [out.text, out.email].forEach(function(msg){
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.equal(msg.indexOf('pets happen'), -1);
+    assert.equal(msg.indexOf('has you covered'), -1);
+    assert.equal(VFQ.coverageProblem(msg), '');
+  });
+  var retired = 'MAKE IT LAST\nSpills and pets happen. The 5-year Platinum Protection plan has you covered:\nhttps://www.raymourflanigan.com/raymour-services/platinum-protection';
+  assert.equal(VFQ.coverageProblem(retired), 'retired-pet-coverage');
+  assert.equal(VFQ.coverageProblem('5-year Platinum Protection:\nhttps://www.raymourflanigan.com/raymour-services/platinum-protection'), 'missing-pet-exclusion');
+  var preview = VFQ.preview(quote, 'mail');
+  assert.equal(VFQ.canCompose({mail:retired}, 'mail', quote), false);
+  assert.equal(VFQ.canCompose(preview.state, 'mail', quote), true);
+});
+
 test('cart importer preview stays hidden until pieces are added', function(){
   assert.equal(VFQ.cartPreviewVisible({rows: [], added: false}), false);
   assert.equal(VFQ.cartPreviewVisible({rows: [{on: true}], added: false}), false);

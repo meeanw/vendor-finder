@@ -265,6 +265,66 @@ test('SKU lookup starts for an unreadable name and does not replace a typed name
   assert.match(doc.getElementById('rcartpanel').textContent, /Magdalena 7-pc\. Dining Set/);
 });
 
+test('a saved quote regenerates the pet exclusion and a retired preview cannot be sent', function(){
+  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
+  var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  html = html.replace('<script src="quote-rules.js"></script>', '');
+  var draft = {rep:'naeem', name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', op:'stop', ext:false, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'Magdalena Server', sku:'750015022', q:'1', p:'714.97', rg:'714.97'}]};
+  var dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    url: 'https://meeanw.github.io/vendor-finder/',
+    pretendToBeVisual: true,
+    beforeParse: function(window){
+      window.eval(rules);
+      window.localStorage.setItem('vf-rep-auth-v1', JSON.stringify({rep:'naeem', t:1}));
+      window.localStorage.setItem('vf-rep-v1', JSON.stringify(draft));
+    }
+  });
+  var win = dom.window;
+  var doc = win.document;
+  var api = win.vfQuoteApi;
+  assert.ok(api);
+  var email = api.email();
+  var text = api.text();
+  var mail = api.preview('mail');
+  [email, text, mail.body || mail.mail].forEach(function(msg){
+    assert.match(msg, /Jamie Cole|Jamie/);
+    assert.match(msg, /Magdalena Server/);
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.equal(msg.indexOf('pets happen'), -1);
+  });
+  assert.equal(JSON.parse(win.localStorage.getItem('vf-rep-v1')).name, 'Jamie Cole');
+  assert.equal(win.localStorage.getItem('vf-rep-v1').indexOf('Spills and pets'), -1);
+  win.VFQ.coverageProblem = function(){return 'retired-pet-coverage'};
+  var link = doc.getElementById('rmail');
+  link.dispatchEvent(new win.MouseEvent('click', {bubbles:true, cancelable:true}));
+  assert.equal(link.getAttribute('href'), '#');
+  assert.match(doc.getElementById('rerr').textContent, /cannot be sent/);
+  assert.equal(JSON.parse(win.localStorage.getItem('vf-rep-v1')).name, 'Jamie Cole');
+  assert.match(sw, /skipWaiting\(\)/);
+  assert.match(sw, /then\(function\(\)\{return self\.skipWaiting\(\)\}\)/);
+  var update = html.slice(html.indexOf('controllerchange'), html.indexOf('try{boot()'));
+  assert.match(update, /location\.reload\(\)/);
+  assert.equal(update.indexOf('bar.hidden'), -1);
+  assert.match(html, /coverageProblem/);
+});
+
+test('a floor-sample quote still says pet damage is not covered', function(){
+  var api = loadPage().api;
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[{v:'Raymour & Flanigan', d:'Floor sofa', sku:'111111111', q:'1', p:'100.00', rg:'100.00', tg:{t:'floor'}}]
+  });
+  [api.text(), api.email(), api.preview('mail').body || api.preview('mail').mail].forEach(function(msg){
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.equal(msg.indexOf('has you covered'), -1);
+    assert.equal(msg.indexOf('platinum-protection'), -1);
+  });
+});
+
 test('customer text and email say pet damage is not covered', function(){
   var api = loadPage().api;
   api.load({

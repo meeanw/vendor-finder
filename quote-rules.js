@@ -5,6 +5,7 @@
   if(root) root.VFQ = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function(){
   var FINANCE_DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+  var PET_EXCLUSION = 'Damage caused by pets is not covered.';
   var COLOR_NAMES = {color:1, colour:1, finish:1, colorfamily:1, primarycolor:1, upholsterycolor:1, framecolor:1};
   var DISCOUNT_STYLES = {Sale:1, Outlet:1, Clearance:1};
 
@@ -183,6 +184,13 @@
     return lines;
   }
 
+  function coverageProblem(body){
+    var text = String(body || '');
+    if(/Spills and pets|pets happen|has you covered/i.test(text)) return 'retired-pet-coverage';
+    if(text.indexOf(PET_EXCLUSION) === -1) return 'missing-pet-exclusion';
+    return '';
+  }
+
   function composeGate(quote){
     if(deliveryCents(quote && quote.delivery) === null) return {ok:false, reason:'delivery'};
     var months = financeMonths(quote && quote.extended);
@@ -213,11 +221,13 @@
     var totals = quoteTotals(cents, deliveryCents(quote.delivery));
     var textLines = ['Hi ' + (quote.name || 'there') + ',', ''].concat(blocks).concat(['', 'YOUR INVESTMENT']).concat(totalLines(totals, quote.zip, false));
     textLines.push('');
+    textLines.push(PET_EXCLUSION);
     textLines.push('Want to spread out the payments? Financing options:');
     textLines.push('https://www.raymourflanigan.com/raymour-services/financing-options');
     customerFinanceLines(!!quote.extended).forEach(function(l){textLines.push(l)});
     var emailLines = ['Hi ' + (quote.name || 'there') + ',', ''].concat(blocks).concat(['', 'YOUR INVESTMENT']).concat(totalLines(totals, quote.zip, true));
     emailLines.push('');
+    emailLines.push(PET_EXCLUSION);
     emailLines.push('Want to spread out the payments? Here are your financing options:');
     emailLines.push('https://www.raymourflanigan.com/raymour-services/financing-options');
     customerFinanceLines(!!quote.extended).forEach(function(l){emailLines.push(l)});
@@ -239,6 +249,7 @@
     var msgs = customerMessages(quote);
     var body = kind === 'mail' ? msgs.email : msgs.text;
     var key = kind === 'mail' ? 'mail' : 'sms';
+    if(coverageProblem(body) || coverageProblem(state[key])) return false;
     return !!state[key] && state[key] === body;
   }
 
@@ -322,6 +333,8 @@
     websitePricePlan:websitePricePlan,
     quotedUnit:quotedUnit,
     customerFinanceLines:customerFinanceLines,
+    PET_EXCLUSION:PET_EXCLUSION,
+    coverageProblem:coverageProblem,
     customerMessages:customerMessages,
     composeGate:composeGate,
     preview:preview,
