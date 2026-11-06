@@ -1,0 +1,182 @@
+{
+  "kind": "live",
+  "fetchedAt": "2026-11-06T18:24:16.148Z",
+  "zipTried": "08807",
+  "skuOnlySearch": {
+    "query": "218092233",
+    "total": 0,
+    "note": "Public Constructor search does not return a product when the query is only the SKU."
+  },
+  "nameSearch": {
+    "query": "Lugano",
+    "pages": 2,
+    "total": 115
+  },
+  "items": [
+    {
+      "sku": "218092233",
+      "matched": true,
+      "source": "live-constructor",
+      "page": 1,
+      "name": "Lugano Microfiber Left Arm Facing Recliner",
+      "price": 365.75,
+      "regular": 385,
+      "priceStyle": "Outlet",
+      "colorState": "unconfirmed",
+      "color": "",
+      "deliveryState": "unconfirmed",
+      "deliveryText": "",
+      "deliveryReason": "No ZIP-based delivery estimate for 08807 is in the website search. Stock dates and lead times are not delivery promises.",
+      "publicFacetsKeptForAudit": [
+        "Fabrics=[\"Microfiber\"]",
+        "InStock=[\"False\"]",
+        "LeadTime=[3]",
+        "OOSDeliverableDate=[20261203]",
+        "HasDeliveryDate=false",
+        "DeliveryEligibleItem=true",
+        "NextDayEligibleItem=false"
+      ]
+    },
+    {
+      "sku": "217092232",
+      "matched": true,
+      "source": "live-constructor",
+      "page": 1,
+      "name": "Lugano Microfiber Wedge",
+      "price": 474.95,
+      "regular": 499.95,
+      "priceStyle": "Outlet",
+      "colorState": "unconfirmed",
+      "color": "",
+      "deliveryState": "unconfirmed",
+      "deliveryText": "",
+      "deliveryReason": "No ZIP-based delivery estimate for 08807 is in the website search. Stock dates and lead times are not delivery promises.",
+      "publicFacetsKeptForAudit": [
+        "Fabrics=[\"Microfiber\"]",
+        "InStock=[\"False\"]",
+        "LeadTime=[3]",
+        "OOSDeliverableDate=[20261120]",
+        "HasDeliveryDate=false",
+        "DeliveryEligibleItem=true",
+        "NextDayEligibleItem=false"
+      ]
+    },
+    {
+      "sku": "220092237",
+      "matched": true,
+      "source": "live-constructor",
+      "page": 2,
+      "name": "Lugano Microfiber Armless Recliner",
+      "price": 332.5,
+      "regular": 350,
+      "priceStyle": "Outlet",
+      "colorState": "unconfirmed",
+      "color": "",
+      "deliveryState": "unconfirmed",
+      "deliveryText": "",
+      "deliveryReason": "No ZIP-based delivery estimate for 08807 is in the website search. Stock dates and lead times are not delivery promises.",
+      "publicFacetsKeptForAudit": [
+        "Fabrics=[\"Microfiber\"]",
+        "InStock=[\"False\"]",
+        "LeadTime=[3]",
+        "OOSDeliverableDate=[20261120]",
+        "HasDeliveryDate=false",
+        "DeliveryEligibleItem=true",
+        "NextDayEligibleItem=false"
+      ]
+    },
+    {
+      "sku": "219092234",
+      "matched": true,
+      "source": "live-constructor",
+      "page": 1,
+      "name": "Lugano Microfiber Right Arm Facing Recliner",
+      "price": 365.75,
+      "regular": 385,
+      "priceStyle": "Outlet",
+      "colorState": "unconfirmed",
+      "color": "",
+      "deliveryState": "unconfirmed",
+      "deliveryText": "",
+      "deliveryReason": "No ZIP-based delivery estimate for 08807 is in the website search. Stock dates and lead times are not delivery promises.",
+      "publicFacetsKeptForAudit": [
+        "Fabrics=[\"Microfiber\"]",
+        "InStock=[\"True\"]",
+        "LeadTime=[3]",
+        "HasDeliveryDate=true",
+        "DeliveryEligibleItem=true",
+        "NextDayEligibleItem=false"
+      ]
+    },
+    {
+      "sku": "222092239",
+      "matched": true,
+      "source": "live-constructor",
+      "page": 1,
+      "name": "Lugano Microfiber Console",
+      "price": 123.5,
+      "regular": 130,
+      "priceStyle": "Outlet",
+      "colorState": "unconfirmed",
+      "color": "",
+      "deliveryState": "unconfirmed",
+      "deliveryText": "",
+      "deliveryReason": "No ZIP-based delivery estimate for 08807 is in the website search. Stock dates and lead times are not delivery promises.",
+      "publicFacetsKeptForAudit": [
+        "Fabrics=[\"Microfiber\"]",
+        "InStock=[\"False\"]",
+        "LeadTime=[3]",
+        "HasDeliveryDate=false",
+        "DeliveryEligibleItem=true",
+        "NextDayEligibleItem=false"
+      ]
+    }
+  ],
+  "productDocument": {
+    "fetched": true,
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "accessControlAllowOrigin": null,
+    "zipFieldPresent": false,
+    "fields": [
+      {
+        "field": "color",
+        "present": true,
+        "preview": "Gray"
+      },
+      {
+        "field": "defaultDeliveryTime",
+        "present": true,
+        "preview": "3 Days or Less"
+      },
+      {
+        "field": "localDeliveryTime",
+        "present": true,
+        "preview": "3 Days or Less"
+      },
+      {
+        "field": "extendedLocalDeliveryTime",
+        "present": true,
+        "preview": "2-4 Weeks"
+      },
+      {
+        "field": "nationwideDeliveryTime",
+        "present": true,
+        "preview": "3"
+      },
+      {
+        "field": "outOfMarketDeliveryTime",
+        "present": true,
+        "preview": "3-5 Weeks"
+      },
+      {
+        "field": "outOfStockDate",
+        "present": true,
+        "preview": "2026-10-30T05:26:46.86Z"
+      }
+    ],
+    "usedByApp": false,
+    "whyNotUsed": "The product document does not send Access-Control-Allow-Origin for https://meeanw.github.io, and it has no ZIP field. Catalog delivery bands are not a delivery estimate for the customer ZIP, so the quote does not copy them."
+  },
+  "appBehavior": "Exact 9-digit variation id from the name search. Color only if a color/finish facet exists. Delivery text only for an explicit ZIP estimate, which this response does not contain. LeadTime and OOSDeliverableDate are ignored."
+}

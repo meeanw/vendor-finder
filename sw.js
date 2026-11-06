@@ -1,7 +1,7 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.3.1, content hash 7cade6c29b). */
-var VERSION='2.3.1-7cade6c29b';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.4.0, content hash 337e900e5a). */
+var VERSION='2.4.0-337e900e5a';
 var CACHE='vf-'+VERSION;
-var PRECACHE=['./','index.html','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico','ocr/tesseract-5.1.1/tesseract.min.js','ocr/tesseract-5.1.1/worker.min.js','ocr/core-5.1.1/tesseract-core-lstm.wasm.js','ocr/core-5.1.1/tesseract-core-simd-lstm.wasm.js','ocr/lang/eng.traineddata.gz'];
+var PRECACHE=['./','index.html','quote-rules.js','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico','ocr/tesseract-5.1.1/tesseract.min.js','ocr/tesseract-5.1.1/worker.min.js','ocr/core-5.1.1/tesseract-core-lstm.wasm.js','ocr/core-5.1.1/tesseract-core-simd-lstm.wasm.js','ocr/lang/eng.traineddata.gz'];
 self.addEventListener('install',function(e){
   // fetch with cache:'reload' so we never precache a stale copy from the HTTP cache
   e.waitUntil(caches.open(CACHE).then(function(c){
