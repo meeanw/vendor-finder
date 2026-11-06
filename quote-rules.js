@@ -261,6 +261,24 @@
     if(st==='incomplete' && nameOk===true) return false;
     return true;
   }
+  function canStartSkuLookup(name, sku){
+    return !!sku9(sku);
+  }
+  function officialNameFromProductCard(payload, sku){
+    var want=sku9(sku);
+    var list=payload&&payload.products;
+    if(!want||!list||!list.length) return null;
+    for(var i=0;i<list.length;i++){
+      var p=list[i]||{};
+      if(String(p.code||'')!==want) continue;
+      var name=String(p.displayName||'').replace(/\s+/g,' ').trim();
+      if(!name) return null;
+      var path=String(p.url||'').split('?')[0];
+      if(!/^\/[A-Za-z0-9\/_.-]{3,200}$/.test(path)) path='';
+      return {sku:want, name:name.slice(0,200), url:path};
+    }
+    return null;
+  }
   function preferProductName(previous, next){
     var a=String(previous==null?'':previous).replace(/\s+/g,' ').trim();
     var b=String(next==null?'':next).replace(/\s+/g,' ').trim();
@@ -312,6 +330,8 @@
     SHOWROOM_ZIP:SHOWROOM_ZIP,
     productNameState:productNameState,
     productNameBlocks:productNameBlocks,
+    canStartSkuLookup:canStartSkuLookup,
+    officialNameFromProductCard:officialNameFromProductCard,
     preferProductName:preferProductName,
     showroomDeliveryFromTimeline:showroomDeliveryFromTimeline
   };

@@ -247,6 +247,16 @@ test('a single-letter import name is incomplete, and a later crop cannot replace
   assert.equal(VFQ.preferProductName('Magdalena 7pc Dining set', 'A'), 'Magdalena 7pc Dining set');
   assert.equal(VFQ.preferProductName('Magdalena 7pc Dining set', '- -'), 'Magdalena 7pc Dining set');
   assert.equal(VFQ.preferProductName('A', '- -'), 'A');
+  assert.equal(VFQ.canStartSkuLookup('- -', '797015027'), true);
+  assert.equal(VFQ.canStartSkuLookup('', '797015027'), true);
+  assert.equal(VFQ.canStartSkuLookup('A', '797015027'), true);
+  assert.equal(VFQ.canStartSkuLookup('Magdalena 7pc Dining set', '797015027'), true);
+  assert.equal(VFQ.canStartSkuLookup('- -', '7970150'), false);
+  var card = VFQ.officialNameFromProductCard({products:[{code:'797015027', displayName:'Magdalena 7-pc. Dining Set', url:'/dining-rooms/dining-sets/magdalena-7-pc-dining-set-797015027', analytics:'{"vendor":"hidden"}'}]}, '797015027');
+  assert.equal(card.name, 'Magdalena 7-pc. Dining Set');
+  assert.equal(card.sku, '797015027');
+  assert.equal(JSON.stringify(card).indexOf('vendor'), -1);
+  assert.equal(VFQ.officialNameFromProductCard({products:[{code:'750015022', displayName:'Other'}]}, '797015027'), null);
   assert.equal(VFQ.preferProductName('A', 'Magdalena 7pc Dining set'), 'Magdalena 7pc Dining set');
   assert.equal(VFQ.preferProductName('TV', 'Television stand'), 'Television stand');
 });
