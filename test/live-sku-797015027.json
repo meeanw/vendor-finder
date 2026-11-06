@@ -1,0 +1,25 @@
+{
+  "kind": "live",
+  "sku": "797015027",
+  "productCard": {
+    "url": "https://www.raymourflanigan.com/api/custom/product-card?codes=797015027&postalCode=08807",
+    "http": 200,
+    "accessControlAllowOrigin": null,
+    "code": "797015027",
+    "displayName": "Magdalena 7-pc. Dining Set",
+    "path": "/dining-rooms/dining-sets/magdalena-7-pc-dining-set-797015027",
+    "note": "Server-side read. Fields other than code, displayName, and path were not stored.",
+    "browserFetchFromLiveSite": {
+      "origin": "https://meeanw.github.io",
+      "read": false,
+      "name": "TypeError",
+      "message": "Failed to fetch"
+    }
+  },
+  "constructorSkuSearch": {
+    "query": "797015027",
+    "total": 0,
+    "accessControlAllowOrigin": "https://meeanw.github.io",
+    "note": "Name search by the SKU digits returns no product. This is not the product-card lookup."
+  }
+}

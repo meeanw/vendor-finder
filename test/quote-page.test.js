@@ -208,6 +208,76 @@ test('a one-letter name cannot be sent until the rep confirms it, and a short re
   assert.equal(text.indexOf('November 9'), -1);
 });
 
+test('punctuation-only cart names are flagged before add and cannot be confirmed', function(){
+  var page = loadPage();
+  var cart = page.dom.window.vfCart;
+  var doc = page.dom.window.document;
+  cart.seedReview([
+    {sku:'750015022', name:'Magdalena Server', price:'714.97', reg:'714.97', color:''},
+    {sku:'797015027', name:'- -', price:'1099.00', reg:'1099.00', color:'Golden Brown Mango'}
+  ]);
+  var panel = doc.getElementById('rcartpanel').textContent;
+  assert.match(panel, /Name not readable/);
+  assert.match(panel, /- - is not a product name/);
+  var lookup = doc.querySelector('[data-cart=skulookup]');
+  assert.ok(lookup);
+  assert.equal(lookup.disabled, false);
+  var add = doc.querySelector('[data-cart=add]');
+  assert.equal(add.disabled, true);
+  assert.equal(add.textContent, 'Add checked pieces (2)');
+  assert.equal(doc.querySelector('[data-cartfield=nameOk]'), null);
+  var name = doc.querySelector('[data-cartrow="1"][data-cartfield=name]');
+  name.value = 'Magdalena 7pc Dining set';
+  name.dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+  cart.seedReview([
+    {sku:'797015027', name:'A', price:'1099.00', reg:'1099.00'}
+  ]);
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, true);
+  assert.ok(doc.querySelector('[data-cartfield=nameOk]'));
+  cart.seedReview([
+    {sku:'797015027', name:'A', price:'1099.00', reg:'1099.00', nameOk:true}
+  ]);
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+  ['- -','','A'].forEach(function(name){
+    cart.seedReview([{sku:'797015027', name:name, price:'1099.00', reg:'1099.00'}]);
+    var btn = doc.querySelector('[data-cart=skulookup]');
+    assert.ok(btn, 'lookup missing for '+JSON.stringify(name));
+    assert.equal(btn.disabled, false);
+  });
+});
+
+test('SKU lookup starts for an unreadable name and does not replace a typed name', async function(){
+  var page = loadPage();
+  var doc = page.dom.window.document;
+  var win = page.dom.window;
+  var payload = {products:[{code:'797015027', displayName:'Magdalena 7-pc. Dining Set', url:'/dining-rooms/dining-sets/magdalena-7-pc-dining-set-797015027'}]};
+  win.fetch = function(){return Promise.resolve({ok:true, json:function(){return Promise.resolve(payload)}})};
+  page.dom.window.vfCart.seedReview([{sku:'797015027', name:'- -', price:'1099.00', reg:'1099.00'}]);
+  doc.querySelector('[data-cart=skulookup]').click();
+  await new Promise(function(r){setTimeout(r, 30)});
+  assert.equal(doc.querySelector('[data-cartfield=name]').value, 'Magdalena 7-pc. Dining Set');
+  page.dom.window.vfCart.seedReview([{sku:'797015027', name:'My edited name', price:'1099.00', reg:'1099.00'}]);
+  doc.querySelector('[data-cartfield=name]').dispatchEvent(new win.Event('input', {bubbles:true}));
+  doc.querySelector('[data-cart=skulookup]').click();
+  await new Promise(function(r){setTimeout(r, 30)});
+  assert.equal(doc.querySelector('[data-cartfield=name]').value, 'My edited name');
+  assert.match(doc.getElementById('rcartpanel').textContent, /Magdalena 7-pc\. Dining Set/);
+});
+
+test('customer text and email say pet damage is not covered', function(){
+  var api = loadPage().api;
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'',
+    items:[{v:'Raymour & Flanigan', d:'Magdalena Server', sku:'750015022', q:'1', p:'714.97', rg:'714.97'}]
+  });
+  [api.text(), api.email(), api.preview('sms').body || api.preview('sms').sms, api.preview('mail').mail].forEach(function(msg){
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.equal(msg.indexOf('pets happen'), -1);
+  });
+});
+
 test('mobile layout keeps preview actions in the quote sheet', function(){
   var dom = loadPage().dom;
   var doc = dom.window.document;
