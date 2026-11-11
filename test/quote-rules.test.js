@@ -35,6 +35,34 @@ test('blank delivery is not zero; explicit 0 is allowed; negatives are rejected'
   assert.equal(charged.totalCents, 10000 + 19900 + charged.taxCents);
 });
 
+test('Platinum tiers use inclusive upper bounds and the taxed Barbara order', function(){
+  assert.equal(VFQ.platinumTier(50000).priceCents, 3995);
+  assert.equal(VFQ.platinumTier(50000).code, 'P0000050P');
+  assert.equal(VFQ.platinumTier(50050).priceCents, 6995);
+  assert.equal(VFQ.platinumTier(75000).priceCents, 6995);
+  assert.equal(VFQ.platinumTier(75001).priceCents, 9995);
+  assert.equal(VFQ.platinumTier(9999900).priceCents, 119995);
+  assert.equal(VFQ.platinumTier(9999901).ok, false);
+  assert.equal(VFQ.platinumTier(9999901).reason, 'over');
+  assert.equal(VFQ.platinumTier(0).reason, 'none');
+  var barbara = VFQ.platinumTier(184995);
+  assert.equal(barbara.priceCents, 21995);
+  assert.equal(barbara.code, 'P1751200P');
+  var totals = VFQ.quoteTotals(184995, 19999, VFQ.salesTaxForZip('08807'), barbara.priceCents);
+  assert.equal(totals.taxCents, 15038);
+  assert.equal(totals.totalCents, 242027);
+  assert.deepEqual(VFQ.totalLines(totals, '08807', true), [
+    'Items: $1,849.95',
+    'Delivery to 08807: $199.99',
+    '5-Year Platinum Protection: $219.95',
+    'Sales tax (NJ 6.625%): $150.38',
+    'ESTIMATED TOTAL: $2,420.27'
+  ]);
+  var plain = VFQ.quoteTotals(184995, 19999, VFQ.salesTaxForZip('08807'));
+  assert.equal(plain.platinumCents, 0);
+  assert.equal(plain.totalCents, 184995 + 19999 + plain.taxCents);
+});
+
 test('customer lines itemize delivery, NJ tax, and the grand total', function(){
   var lines = VFQ.totalLines({itemsCents: 20000, deliveryCents: 10000, taxCents: 1988, totalCents: 31988}, '08002');
   assert.deepEqual(lines, [

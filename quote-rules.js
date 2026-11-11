@@ -89,27 +89,59 @@
     }
     return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:found.guessBp, deliveryTaxed:found.deliveryTaxed !== false, state:found.state, jurisdiction:found.jurisdiction || '', guess:!!found.guess, label:found.label || '', note:found.note};
   }
-  function quoteTotals(itemsCents, delCents, tax){
-    if(delCents === null || delCents === undefined) return {itemsCents:itemsCents, deliveryCents:null, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:''};
+  function quoteTotals(itemsCents, delCents, tax, platCents){
+    platCents = platCents > 0 ? Math.round(platCents) : 0;
+    if(delCents === null || delCents === undefined) return {itemsCents:itemsCents, deliveryCents:null, platinumCents:platCents, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:''};
     var rate = tax && Object.prototype.hasOwnProperty.call(tax, 'rateBp') ? tax.rateBp : NJ_RATE;
-    if(rate == null) return {itemsCents:itemsCents, deliveryCents:delCents, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:tax && tax.jurisdiction || ''};
+    if(rate == null) return {itemsCents:itemsCents, deliveryCents:delCents, platinumCents:platCents, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:tax && tax.jurisdiction || ''};
     var deliveryTaxed = !tax || tax.deliveryTaxed !== false;
     var label = tax && tax.label ? tax.label : 'Sales tax (NJ 6.625%)';
-    var base = itemsCents + (deliveryTaxed ? delCents : 0);
+    var base = itemsCents + platCents + (deliveryTaxed ? delCents : 0);
     var taxCents = Math.floor((base * rate + 50000) / 100000);
-    return {itemsCents:itemsCents, deliveryCents:delCents, taxCents:taxCents, totalCents:itemsCents + delCents + taxCents, taxLabel:label, rateBp:rate, jurisdiction:(tax && tax.jurisdiction) || 'NJ'};
+    return {itemsCents:itemsCents, deliveryCents:delCents, platinumCents:platCents, taxCents:taxCents, totalCents:itemsCents + delCents + platCents + taxCents, taxLabel:label, rateBp:rate, jurisdiction:(tax && tax.jurisdiction) || 'NJ'};
+  }
+
+  // 5-Year Platinum Protection. Upper bound of each tier is inclusive; a cent above it is the next tier.
+  // Codes stay internal. Customer quotes never show them. Basis is eligible merchandise only.
+  var PLATINUM_TIERS = [
+    [50000, 3995, 'P0000050P'],
+    [75000, 6995, 'P0050175P'],
+    [100000, 9995, 'P0751100P'],
+    [125000, 12995, 'P1001125P'],
+    [150000, 14995, 'P1251150P'],
+    [175000, 17995, 'P1501175P'],
+    [200000, 21995, 'P1751200P'],
+    [275000, 26995, 'P2001275P'],
+    [350000, 34995, 'P2751350P'],
+    [500000, 39995, 'P3501500P'],
+    [750000, 49995, 'P5001750P'],
+    [1000000, 64995, 'P0750110P'],
+    [1500000, 79995, 'P1000115P'],
+    [2000000, 94995, 'P1500200P'],
+    [9999900, 119995, 'P2000150P']
+  ];
+  function platinumTier(cents){
+    cents = Math.round(+cents || 0);
+    if(!(cents > 0)) return {ok:false, reason:'none', basisCents:cents, priceCents:0, code:''};
+    if(cents > 9999900) return {ok:false, reason:'over', basisCents:cents, priceCents:0, code:''};
+    for(var i = 0; i < PLATINUM_TIERS.length; i++){
+      if(cents <= PLATINUM_TIERS[i][0]) return {ok:true, reason:'', basisCents:cents, priceCents:PLATINUM_TIERS[i][1], code:PLATINUM_TIERS[i][2]};
+    }
+    return {ok:false, reason:'over', basisCents:cents, priceCents:0, code:''};
   }
 
   function totalLines(totals, zip, full){
     var z = String(zip || '').trim();
     var del = (z ? 'Delivery to ' + z + ': ' : 'Delivery: ') + moneyFromCents(totals.deliveryCents);
     var taxLabel = totals.taxLabel || 'Sales tax (NJ 6.625%)';
-    return [
+    var lines = [
       'Items: ' + moneyFromCents(totals.itemsCents),
-      del,
-      taxLabel + ': ' + moneyFromCents(totals.taxCents),
-      (full ? 'ESTIMATED TOTAL' : 'Estimated total') + ': ' + moneyFromCents(totals.totalCents)
+      del
     ];
+    if(totals.platinumCents > 0) lines.push('5-Year Platinum Protection: ' + moneyFromCents(totals.platinumCents));
+    lines.push(taxLabel + ': ' + moneyFromCents(totals.taxCents));
+    lines.push((full ? 'ESTIMATED TOTAL' : 'Estimated total') + ': ' + moneyFromCents(totals.totalCents));
+    return lines;
   }
 
   function sku9(raw){
@@ -482,6 +514,7 @@
     financeMonths:financeMonths,
     deliveryCents:deliveryCents,
     quoteTotals:quoteTotals,
+    platinumTier:platinumTier,
     salesTaxForZip:salesTaxForZip,
     appliedSalesTax:appliedSalesTax,
     rateBpFromPercent:rateBpFromPercent,
