@@ -60,7 +60,7 @@ test('both real text and email include the disclosure, and longer than 18 months
   assert.match(text, /Delivery to 08807: \$0\.00/);
   assert.match(text, /Sales tax \(NJ 6\.625%\)/);
   assert.match(text, /Estimated total:/);
-  assert.match(email, /ESTIMATED TOTAL:/);
+  assert.match(email, /Estimated total:/);
   assert.match(text, /72 hours/);
   assert.match(text, /Reply YES \(Quote #/);
   assert.match(email, /reply YES to this email \(Quote #/i);
@@ -340,13 +340,13 @@ test('Platinum Protection adds the tier for eligible furniture and each option h
     assert.equal(msg.indexOf('within three days'), -1);
     assert.equal(msg.indexOf('pet damage is covered'), -1);
   });
-  assert.match(email, /ESTIMATED TOTAL: \$2,420\.27/);
+  assert.match(email, /Estimated total: \$2,420\.27/);
   assert.match(text, /Estimated total: \$2,420\.27/);
   assert.match(email, /Amount saved: \$150\.00/);
-  var invest = email.slice(email.indexOf('YOUR INVESTMENT'), email.indexOf('This price is held'));
+  var invest = email.slice(email.indexOf('Your Investment'), email.indexOf('This price is held'));
   assert.ok(invest.indexOf('Delivery to 08807: $199.99') < invest.indexOf('5-Year Platinum Protection: $219.95'));
   assert.ok(invest.indexOf('5-Year Platinum Protection: $219.95') < invest.indexOf('Sales tax (NJ 6.625%): $150.38'));
-  assert.ok(invest.indexOf('Sales tax (NJ 6.625%): $150.38') < invest.indexOf('ESTIMATED TOTAL: $2,420.27'));
+  assert.ok(invest.indexOf('Sales tax (NJ 6.625%): $150.38') < invest.indexOf('Estimated total: $2,420.27'));
   var logged = api.logFields();
   assert.equal(logged.estTotal, 2420.27);
   assert.equal(logged.tax, 150.38);
@@ -433,6 +433,97 @@ test('Platinum Protection adds the tier for eligible furniture and each option h
   assert.equal(api.logFields().platinum, 'No');
 });
 
+test('the email is quieter by default, and a heads-up text is previewed before Messages opens', function(){
+  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
+  html = html.replace('<script src="quote-rules.js"></script>', '');
+  var dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    url: 'https://meeanw.github.io/vendor-finder/',
+    pretendToBeVisual: true,
+    beforeParse: function(window){
+      window.eval(rules);
+      window.localStorage.setItem('vf-rep-auth-v1', JSON.stringify({rep:'naeem', t:1}));
+    }
+  });
+  var win = dom.window;
+  var doc = win.document;
+  var api = win.vfQuoteApi;
+  var itemUrl = 'https://www.raymourflanigan.com/living-rooms/sofas/example-218092233';
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', notes:'', pn:'The gray one is the one we sat on',
+    items:[{v:'Raymour & Flanigan', d:'Example Sofa', sku:'218092233', q:'1', p:'1849.95', u:itemUrl}]
+  });
+  var email = api.email();
+  var text = api.text();
+  assert.equal(doc.getElementById('rlinks').checked, false);
+  assert.equal(email.indexOf('View online:'), -1);
+  assert.equal(email.indexOf(itemUrl), -1);
+  assert.match(email, /SKU 218092233/);
+  assert.match(text, /View online:/);
+  assert.match(text, new RegExp(itemUrl.replace(/[.]/g, '\\.')));
+  assert.match(email, /Could you reply to let me know this came through\?/);
+  assert.equal(text.indexOf('Could you reply to let me know this came through?'), -1);
+  assert.ok(email.indexOf('The gray one is the one we sat on') < email.indexOf('Could you reply to let me know this came through?'));
+  assert.ok(email.indexOf('Could you reply to let me know this came through?') < email.indexOf('What You Picked'));
+  assert.match(email, /What You Picked/);
+  assert.match(email, /Your Investment/);
+  assert.match(email, /Make It Last/);
+  assert.match(email, /Ready When You Are/);
+  assert.match(email, /Estimated total:/);
+  assert.equal(email.indexOf('WHAT YOU PICKED'), -1);
+  assert.equal(email.indexOf('YOUR INVESTMENT'), -1);
+  assert.equal(email.indexOf('ESTIMATED TOTAL'), -1);
+  assert.equal(email.indexOf('MAKE IT LAST'), -1);
+  assert.equal(email.indexOf('READY WHEN YOU ARE'), -1);
+  assert.match(text, /OTHER OPTIONS|Estimated total:/);
+  assert.match(email, /Damage caused by pets is not covered\./);
+  assert.match(email, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+  assert.match(email, /72 hours/);
+  assert.match(email, /Quote #/);
+  var urls = email.match(/https?:\/\/\S+/g);
+  assert.deepEqual(urls, [
+    'https://www.raymourflanigan.com/raymour-services/platinum-protection',
+    'https://www.raymourflanigan.com/raymour-services/financing-options'
+  ]);
+  var shown = api.preview('mail');
+  assert.match(shown.body, /^Subject: Barbara, the details from your Raymour & Flanigan visit \(Quote #Q-/);
+  assert.equal(shown.body.indexOf('ready'), -1);
+  assert.equal(shown.body.slice(0, shown.body.indexOf('\n')).indexOf('$'), -1);
+  assert.equal(shown.body.slice(0, shown.body.indexOf('\n')).indexOf('!'), -1);
+  assert.match(email, /What You Picked/);
+  doc.getElementById('rlinks').checked = true;
+  doc.getElementById('rlinks').dispatchEvent(new win.Event('change', {bubbles:true}));
+  email = api.email();
+  assert.match(email, /View online:/);
+  assert.match(email, new RegExp(itemUrl.replace(/[.]/g, '\\.')));
+  assert.match(email, /SKU 218092233/);
+  doc.getElementById('rlinks').checked = false;
+  doc.getElementById('rlinks').dispatchEvent(new win.Event('change', {bubbles:true}));
+  api.preview('mail');
+  assert.equal(doc.getElementById('rheadsupbox').hidden, true);
+  doc.getElementById('rmail').dispatchEvent(new win.MouseEvent('click', {bubbles:true, cancelable:true}));
+  assert.equal(doc.getElementById('rheadsupbox').hidden, false);
+  assert.match(doc.getElementById('rheadsup').textContent, /Text a heads-up to check email/);
+  var heads = doc.getElementById('rheadsup');
+  heads.dispatchEvent(new win.MouseEvent('click', {bubbles:true, cancelable:true}));
+  assert.equal(heads.getAttribute('href'), '#');
+  var preview = doc.getElementById('rpreviewbody').textContent;
+  assert.match(preview, /Hi Barbara, it.s Na.eem from Raymour & Flanigan\. I just emailed your quote \(Quote #Q-/);
+  assert.match(preview, /If you don.t see it, please check your Spam or Promotions folder and mark it Not spam\./);
+  assert.match(preview, /Na.eem Ward · Raymour & Flanigan Bridgewater/);
+  assert.match(preview, /Cell /);
+  assert.equal(preview.indexOf('http'), -1);
+  heads.dispatchEvent(new win.MouseEvent('click', {bubbles:true, cancelable:true}));
+  assert.match(heads.getAttribute('href'), /^sms:\+19085550100\?&body=/);
+  assert.match(decodeURIComponent(heads.getAttribute('href')), /Quote #Q-/);
+  assert.match(decodeURIComponent(heads.getAttribute('href')), /Spam or Promotions/);
+  api.load({name:'Barbara Cole', phone:'', email:'barbara@example.com', zip:'08807', dl:'0', items:[{v:'Raymour & Flanigan', d:'Example Sofa', q:'1', p:'100.00'}]});
+  api.preview('mail');
+  doc.getElementById('rmail').dispatchEvent(new win.MouseEvent('click', {bubbles:true, cancelable:true}));
+  assert.equal(doc.getElementById('rheadsupbox').hidden, true);
+});
+
 test('main quote stays full and alternatives are separate options', function(){
   var page = loadPage();
   var api = page.api;
@@ -459,9 +550,9 @@ test('main quote stays full and alternatives are separate options', function(){
     assert.match(msg, /This applies to the main quote and every option above\./);
     assert.equal(msg.indexOf('every option below'), -1);
     assert.equal(msg.indexOf('disclosure above'), -1);
-    assert.ok(msg.indexOf('72 hours') < msg.indexOf('OTHER OPTIONS'));
-    assert.ok(msg.indexOf('OTHER OPTIONS') < msg.indexOf('platinum-protection'));
-    assert.ok(msg.indexOf('OTHER OPTIONS') < msg.indexOf('Financing terms longer than 18 months'));
+    assert.ok(msg.indexOf('72 hours') < msg.indexOf(msg===email?'Other Options':'OTHER OPTIONS'));
+    assert.ok(msg.indexOf(msg===email?'Other Options':'OTHER OPTIONS') < msg.indexOf('platinum-protection'));
+    assert.ok(msg.indexOf(msg===email?'Other Options':'OTHER OPTIONS') < msg.indexOf('Financing terms longer than 18 months'));
     assert.match(msg, /72 hours/);
     assert.match(msg, /Quote #/);
     assert.match(msg, /Amount saved: \$400\.00/);
@@ -478,10 +569,10 @@ test('main quote stays full and alternatives are separate options', function(){
     assert.equal(msg.indexOf('SECRET-VENDOR'), -1);
   });
   assert.ok(text.indexOf('I also included') < text.indexOf('\nItems:'));
-  assert.ok(email.indexOf('I also included') < email.indexOf('WHAT YOU PICKED'));
-  assert.ok(email.indexOf('Quote #') < email.indexOf('OTHER OPTIONS'));
-  assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('MAKE IT LAST'));
-  assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('READY WHEN YOU ARE'));
+  assert.ok(email.indexOf('I also included') < email.indexOf('What You Picked'));
+  assert.ok(email.indexOf('Quote #') < email.indexOf('Other Options'));
+  assert.ok(email.indexOf('Other Options') < email.indexOf('Make It Last'));
+  assert.ok(email.indexOf('Other Options') < email.indexOf('Ready When You Are'));
   assert.ok(text.indexOf('\n1. Example Sofa A\n') < text.indexOf('OTHER OPTIONS'));
   assert.ok(text.indexOf('You’re saving') < text.indexOf('OTHER OPTIONS'));
   assert.ok(text.indexOf('OTHER OPTIONS') < text.indexOf('5-year Platinum'));
