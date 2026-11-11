@@ -1270,10 +1270,10 @@ function rsms(){ // v2.1 warmer text message (the email keeps the long form in r
  var heads=rOptHeadsUp();if(heads)L.push(heads,'');
  if(pn)L.push(pn,'');
  to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedLine=rSavedLine(rIsMain);if(savedLine)L.push(savedLine);if(rEstNote())L.push(rEstNote());L.push('Held for you for 72 hours, until '+exp+' \u00b7 Quote #'+RD.qn);
- rOptionLines(false).forEach(function(l){L.push(l)});
  if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(RD.zip.trim()&&!to.lines.some(function(l){return l.indexOf('Delivery to')===0}))L.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));if(dl.length)L.push(dl.join(' \u00b7 '));if(rBasis())L.push(rBasis());L.push('');
  var n=0;RD.items.forEach(function(x){if(!ritemOn(x)||!rIsMain(x))return;n++;rItemBlock(x,false,n).forEach(function(l){L.push(l)})});
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
+ rOptionLines(false).forEach(function(l){L.push(l)});
  var pm=rPlatMode();if(pm!=='none')L.push('5-year Platinum Protection'+(pm==='some'?' (not available on floor sample items)':'')+':',RF_PROT);L.push('Damage caused by pets is not covered.','');L.push('Want to spread out the payments? Financing options:',RF_FIN);VFQ.customerFinanceLines(!!RD.ext).forEach(function(l){L.push(l)});if(rOptGroups().length)L.push('This applies to the main quote and every option above.');L.push('');
  L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll lock in your order'+(RD.needed&&validIso(RD.needed)?' and work on getting it to you by '+dshow(RD.needed):'')+'. Call or text me anytime.','','Prices, availability and the final amount are confirmed at time of purchase.','');
  L.push(r.name+' \u00b7 Raymour & Flanigan '+(r.store||'Bridgewater'),'Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));

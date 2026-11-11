@@ -314,6 +314,8 @@ test('main quote stays full and alternatives are separate options', function(){
   assert.ok(email.indexOf('Quote #') < email.indexOf('OTHER OPTIONS'));
   assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('MAKE IT LAST'));
   assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('READY WHEN YOU ARE'));
+  assert.ok(text.indexOf('\n1. Example Sofa A\n') < text.indexOf('OTHER OPTIONS'));
+  assert.ok(text.indexOf('You’re saving') < text.indexOf('OTHER OPTIONS'));
   assert.ok(text.indexOf('OTHER OPTIONS') < text.indexOf('5-year Platinum'));
   assert.ok(text.indexOf('OTHER OPTIONS') < text.indexOf('Cell '));
   assert.match(text, /Reply YES \(Quote #/);
