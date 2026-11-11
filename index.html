@@ -582,7 +582,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v2.6.0</p>
+<p class="ver" id="ver">Data updated Nov 2, 2026 &middot; v2.6.1</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>Updated protection wording is ready. Your saved quote stays on this phone.</span><button type="button" id="updbtn">Update</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -1250,8 +1250,9 @@ function rOptCalc(group){var c=0,miss=0;group.items.forEach(function(x){var k=rc
  if(d===null)return {itemsC:c,delC:null,taxC:null,estC:null,miss:miss,needDel:true,needTax:false,taxLabel:'',raw:raw};
  if(tax.needsConfirm||tax.rateBp==null)return {itemsC:c,delC:d,taxC:null,estC:null,miss:miss,needDel:false,needTax:true,taxLabel:'',raw:raw};
  var totals=VFQ.quoteTotals(c,d,tax);return {itemsC:c,delC:d,taxC:totals.taxCents,estC:totals.totalCents,miss:miss,needDel:false,needTax:false,taxLabel:totals.taxLabel,raw:raw}}
+function rOptHeadsUp(){var n=rOptGroups().length;if(!n)return '';return 'I also included '+n+' other option'+(n===1?'':'s')+' below so you can compare.'}
 function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
- var L=['','OTHER OPTIONS','Each option is a separate choice. Its total is not added to the main quote. The financing disclosure above applies to every option.',''];
+ var L=['','OTHER OPTIONS','Each option is a separate choice. Its total is not added to the main quote.',''];
  var z=RD.zip.trim().replace(/\r?\n/g,' ');
  groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1))});
   var cl=rOptCalc(g);if(cl.needDel){L.push('Delivery: not entered');L.push((full?'ESTIMATED TOTAL':'Estimated total')+': enter the delivery charge');}
@@ -1266,20 +1267,22 @@ function rsms(){ // v2.1 warmer text message (the email keeps the long form in r
  var op=ROPEN[RD.op]||ROPEN.stop,cl=rcalc(),to=rTotals(cl,false),sh=rItemsShort(),pn=rPnote();
  var dl=[];if(RD.needed&&validIso(RD.needed))dl.push('Needed by: '+dshow(RD.needed));
  L.push('Hi '+first+', '+op+(sh?' Here'+AP+'s your quote for '+sh+'.':' Here'+AP+'s your quote.'),'');
+ var heads=rOptHeadsUp();if(heads)L.push(heads,'');
  if(pn)L.push(pn,'');
  to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedLine=rSavedLine(rIsMain);if(savedLine)L.push(savedLine);if(rEstNote())L.push(rEstNote());L.push('Held for you for 72 hours, until '+exp+' \u00b7 Quote #'+RD.qn);
+ rOptionLines(false).forEach(function(l){L.push(l)});
  if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(RD.zip.trim()&&!to.lines.some(function(l){return l.indexOf('Delivery to')===0}))L.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));if(dl.length)L.push(dl.join(' \u00b7 '));if(rBasis())L.push(rBasis());L.push('');
  var n=0;RD.items.forEach(function(x){if(!ritemOn(x)||!rIsMain(x))return;n++;rItemBlock(x,false,n).forEach(function(l){L.push(l)})});
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
- var pm=rPlatMode();if(pm!=='none')L.push('5-year Platinum Protection'+(pm==='some'?' (not available on floor sample items)':'')+':',RF_PROT);L.push('Damage caused by pets is not covered.','');L.push('Want to spread out the payments? Financing options:',RF_FIN);VFQ.customerFinanceLines(!!RD.ext).forEach(function(l){L.push(l)});if(rOptGroups().length)L.push('This applies to the main quote and every option below.');L.push('');
+ var pm=rPlatMode();if(pm!=='none')L.push('5-year Platinum Protection'+(pm==='some'?' (not available on floor sample items)':'')+':',RF_PROT);L.push('Damage caused by pets is not covered.','');L.push('Want to spread out the payments? Financing options:',RF_FIN);VFQ.customerFinanceLines(!!RD.ext).forEach(function(l){L.push(l)});if(rOptGroups().length)L.push('This applies to the main quote and every option above.');L.push('');
  L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll lock in your order'+(RD.needed&&validIso(RD.needed)?' and work on getting it to you by '+dshow(RD.needed):'')+'. Call or text me anytime.','','Prices, availability and the final amount are confirmed at time of purchase.','');
  L.push(r.name+' \u00b7 Raymour & Flanigan '+(r.store||'Bridgewater'),'Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
- rOptionLines(false).forEach(function(l){L.push(l)});
  return L.join('\n')}
 function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
  var cl=rcalc(),to=rTotals(cl,true),pn=rPnote(),nd=RD.needed&&validIso(RD.needed)?dshow(RD.needed):'';
  var greet=RD.op==='speak'?'It was great speaking with you today!':'It was great meeting you today!';
  L.push('Hi '+first+',','',greet+' I put together everything we picked out so you can picture it in your space'+(nd?' before '+nd:'')+'.','');
+ var headsMail=rOptHeadsUp();if(headsMail)L.push(headsMail,'');
  if(pn)L.push(pn,'');
  L.push('WHAT YOU PICKED');var n=0;RD.items.forEach(function(x){if(!ritemOn(x)||!rIsMain(x))return;n++;rItemBlock(x,true,n).forEach(function(l){L.push(l)})});
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
@@ -1287,14 +1290,14 @@ function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],first=RD.nam
  L.push('This price is held for you for 72 hours, until '+exp+'.');if(rBasis())L.push(rBasis());
  if(RD.zip.trim()&&!to.lines.some(function(l){return l.indexOf('Delivery to')===0}))L.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));
  L.push('Quote #'+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn))+' \u00b7 Prepared by '+r.name);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());L.push('');
+ rOptionLines(true).forEach(function(l){L.push(l)});
  var pm2=rPlatMode();L.push('MAKE IT LAST');
  // wording below is limited to what the two R&F pages state (5-year plan; financing and payment options): no prices, rates or terms
  if(pm2!=='none')L.push('5-year Platinum Protection'+(pm2==='some'?' (not available on floor sample items)':'')+':',RF_PROT);
  L.push('Damage caused by pets is not covered.','');
- L.push('Want to spread out the payments? Here are your financing options:',RF_FIN);VFQ.customerFinanceLines(!!RD.ext).forEach(function(l){L.push(l)});if(rOptGroups().length)L.push('This applies to the main quote and every option below.');L.push('');
+ L.push('Want to spread out the payments? Here are your financing options:',RF_FIN);VFQ.customerFinanceLines(!!RD.ext).forEach(function(l){L.push(l)});if(rOptGroups().length)L.push('This applies to the main quote and every option above.');L.push('');
  L.push('READY WHEN YOU ARE','Just reply YES to this email (Quote #'+RD.qn+') and I'+AP+'ll lock in your order'+(nd?' and work on getting it to you by '+nd:'')+'. Questions about fabric, sizing or delivery? Call or text me anytime.','');
  L.push('Prices, availability and the final amount are confirmed at time of purchase.','','I can'+AP+'t wait to see this room come together!','');
- rOptionLines(true).forEach(function(l){L.push(l)});
  // no signature block: the rep's phone mail app appends his own
  return L.join('\n')}
 function rhrefs(){return {sms:'sms:'+rphoneSms(RD.phone)+'?&body='+encodeURIComponent(rbody(false)),
