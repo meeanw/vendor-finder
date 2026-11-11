@@ -26,20 +26,88 @@
     return Math.round(n * 100);
   }
 
-  function quoteTotals(itemsCents, delCents){
-    if(delCents === null || delCents === undefined) return {itemsCents:itemsCents, deliveryCents:null, taxCents:null, totalCents:null};
-    var base = itemsCents + delCents;
-    var tax = Math.floor((base * 6625 + 50000) / 100000);
-    return {itemsCents:itemsCents, deliveryCents:delCents, taxCents:tax, totalCents:base + tax};
+  // Destination sales tax. Rates are not guessed.
+  // NJ 6.625%: NJ Division of Taxation, https://www.nj.gov/treasury/businesses/salestax/ (page states 6.625%). Delivery is part of the taxable receipt: N.J.A.C. 18:24-27.2 and Sales Tax Guide SU-4 (rev. 07/22). No Urban Enterprise Zone rate: UEZ depends on the seller's location, not the customer ZIP. ZIP range 07001–08999 is the owner's rule for a New Jersey delivery ZIP.
+  // PA state 6%, Allegheny County +1% (7% combined), Philadelphia +2% (8% combined): PA Department of Revenue, https://www.pa.gov/agencies/revenue/resources/tax-rates and local-sales-tax page. Destination sourcing for those local taxes is enforced from October 1, 2026 (Act 21 of 2026). Delivery of taxable goods is taxed: 61 Pa. Code § 54.1 and § 31.5(a)(3).
+  // Philadelphia ZIPs below are Philadelphia County codes from the City of Philadelphia ZIP map (Sept 2026) plus the Pennsylvania ZIP/county list that names Philadelphia County, excluding 19113 (that list places 19113 in Delaware County).
+  // Allegheny ZIPs below are the unstarred codes on the PA DPW "ZIP CODES—ALLEGHENY COUNTY" list. Starred codes on that list cross a county line, so they are not applied automatically.
+  // DE 0%: Delaware Division of Revenue, no state or local sales tax (https://revenue.delaware.gov/business-tax-forms/exemption-certificates/). ZIP prefixes 197–199.
+  // CT 6.35% statewide, no local sales tax, and the seller's delivery charge is in the sales price: Connecticut DRS, https://portal.ct.gov/drs/sales-tax/tax-information and DRS-143 (Aug 2023). ZIP prefixes 060–069, except 06390 (Fishers Island, New York).
+  // NY combined rates: Publication 718, effective March 1, 2025 (revised Feb 2025), https://www.tax.ny.gov/pdf/publications/sales/pub718.pdf. New York City is 8.875%. Delivery the seller bills is taxable: TB-ST-838. Publication 718 says ZIP codes do not match tax jurisdictions, so a New York ZIP is never applied automatically.
+  // USPS ZIP prefixes used only to choose a state: CT 060–069, NJ 070–089, NY 100–149, PA 150–196, DE 197–199.
+  var NJ_RATE = 6625;
+  var PHILADELPHIA_ZIPS = '19101 19102 19103 19104 19105 19106 19107 19108 19109 19110 19111 19112 19114 19115 19116 19118 19119 19120 19121 19122 19123 19124 19125 19126 19127 19128 19129 19130 19131 19132 19133 19134 19135 19136 19137 19138 19139 19140 19141 19142 19143 19144 19145 19146 19147 19148 19149 19150 19151 19152 19153 19154 19155 19160';
+  var ALLEGHENY_ZIPS = '15006 15007 15014 15015 15018 15020 15024 15025 15028 15030 15031 15032 15034 15035 15037 15045 15046 15047 15049 15051 15056 15064 15065 15071 15075 15076 15082 15084 15086 15088 15090 15091 15095 15101 15102 15104 15106 15108 15110 15112 15116 15120 15122 15127 15129 15132 15133 15134 15135 15136 15137 15139 15140 15142 15144 15145 15146 15147 15148 15201 15202 15203 15204 15205 15206 15207 15208 15209 15210 15211 15212 15213 15214 15215 15216 15217 15218';
+  var ALLEGHENY_SHARED_ZIPS = '15003 15005 15012 15017 15026 15044 15057 15063 15068 15083 15085 15089 15126 15131 15143';
+
+  function formatPct(bp){
+    return (bp / 1000).toFixed(3).replace(/0+$/, '').replace(/\.$/, '') + '%';
+  }
+  function zip5(raw){
+    var m = String(raw == null ? '' : raw).match(/(\d{5})(?:-\d{4})?/);
+    return m ? m[1] : '';
+  }
+  function zipListed(list, zip){return list.indexOf(zip) !== -1}
+  function taxResult(o){
+    o.deliveryTaxed = o.deliveryTaxed !== false;
+    o.label = o.label || ('Sales tax (' + (o.place || o.state || 'confirmed') + ' ' + formatPct(o.rateBp) + ')');
+    return o;
+  }
+  function salesTaxForZip(raw){
+    var zip = zip5(raw);
+    var typed = String(raw == null ? '' : raw).trim();
+    if(!typed) return taxResult({zip:'', confident:true, needsConfirm:false, rateBp:NJ_RATE, deliveryTaxed:true, state:'NJ', jurisdiction:'NJ', place:'NJ', guess:false, note:''});
+    if(!zip) return {zip:'', confident:false, needsConfirm:true, rateBp:null, guessBp:null, deliveryTaxed:true, state:'', jurisdiction:'', guess:false, label:'', note:'Enter a 5-digit delivery ZIP, or type the sales tax rate and confirm it. New Jersey’s 6.625% is not used for this entry.'};
+    var n = +zip;
+    if(n >= 7001 && n <= 8999) return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:NJ_RATE, deliveryTaxed:true, state:'NJ', jurisdiction:'NJ', place:'NJ', guess:false, note:''});
+    if(n >= 19700 && n <= 19999) return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:0, deliveryTaxed:true, state:'DE', jurisdiction:'DE', place:'DE', guess:false, note:''});
+    if(zip === '06390') return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:null, deliveryTaxed:true, state:'NY', jurisdiction:'', guess:false, label:'', note:'ZIP 06390 is Fishers Island, New York, not Connecticut. Enter the combined New York rate from Publication 718 (effective March 1, 2025). It is not applied until you confirm it.'};
+    if(n >= 6000 && n <= 6999) return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:6350, deliveryTaxed:true, state:'CT', jurisdiction:'CT', place:'CT', guess:false, note:''});
+    if(zipListed(PHILADELPHIA_ZIPS, zip)) return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:8000, deliveryTaxed:true, state:'PA', jurisdiction:'Philadelphia', place:'PA, Philadelphia', guess:false, note:''});
+    if(zipListed(ALLEGHENY_ZIPS, zip)) return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:7000, deliveryTaxed:true, state:'PA', jurisdiction:'Allegheny County', place:'PA, Allegheny County', guess:false, note:''});
+    if(zipListed(ALLEGHENY_SHARED_ZIPS, zip)) return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:7000, deliveryTaxed:true, state:'PA', jurisdiction:'Allegheny County', guess:true, label:'Sales tax (PA, Allegheny County 7%)', note:'Best guess for ZIP ' + zip + ': 7% if this address is in Allegheny County, or 6% if it is across the county line. The Pennsylvania list marks this ZIP as shared. Confirm the rate before preview. It is not applied yet.'};
+    if(n >= 10000 && n <= 10282) return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:8875, deliveryTaxed:true, state:'NY', jurisdiction:'New York City', guess:true, label:'Sales tax (NY, New York City 8.875%)', note:'Best guess for ZIP ' + zip + ': New York City 8.875% (Publication 718, effective March 1, 2025). New York says a ZIP code is not a tax boundary, so confirm it before preview. It is not applied yet.'};
+    if(n >= 10000 && n <= 14999) return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:null, deliveryTaxed:true, state:'NY', jurisdiction:'', guess:false, label:'', note:'ZIP ' + zip + ' is in New York. Publication 718 (effective March 1, 2025) sets a combined state and local rate by city or county, and it says not to use the ZIP code alone. Enter that combined rate. New Jersey’s 6.625% is not used.'};
+    if(n >= 15000 && n <= 19699) return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:6000, deliveryTaxed:true, state:'PA', jurisdiction:'PA', guess:true, label:'Sales tax (PA 6%)', note:'Best guess for ZIP ' + zip + ': Pennsylvania state rate 6%. This ZIP is not in the Philadelphia or single-county Allegheny lists. Confirm it before preview. It is not applied yet.'};
+    return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:null, deliveryTaxed:true, state:'', jurisdiction:'', guess:false, label:'', note:'ZIP ' + zip + ' is not a New Jersey delivery ZIP in this table. Enter the destination combined sales tax rate. New Jersey’s 6.625% is not used.'};
+  }
+  function rateBpFromPercent(raw){
+    var s = String(raw == null ? '' : raw).replace(/%/g, '').trim();
+    if(!s || !/^\d+(\.\d+)?$/.test(s)) return null;
+    var n = parseFloat(s);
+    if(!isFinite(n) || n < 0 || n > 20) return null;
+    return Math.round(n * 1000);
+  }
+  function appliedSalesTax(raw, confirm){
+    var found = salesTaxForZip(raw);
+    if(!found.needsConfirm && found.rateBp != null) return found;
+    var zip = found.zip || zip5(raw);
+    var rate = confirm ? confirm.rateBp : null;
+    if(confirm && confirm.ok && confirm.zip === zip && rate != null){
+      var sameGuess = found.guessBp != null && rate === found.guessBp && found.label;
+      return taxResult({zip:zip, confident:true, needsConfirm:false, rateBp:rate, deliveryTaxed:found.deliveryTaxed !== false, state:found.state, jurisdiction:found.jurisdiction || ('ZIP ' + zip), place: sameGuess ? '' : ('ZIP ' + zip), label: sameGuess ? found.label : '', confirmed:true, guess:false, note:''});
+    }
+    return {zip:zip, confident:false, needsConfirm:true, rateBp:null, guessBp:found.guessBp, deliveryTaxed:found.deliveryTaxed !== false, state:found.state, jurisdiction:found.jurisdiction || '', guess:!!found.guess, label:found.label || '', note:found.note};
+  }
+  function quoteTotals(itemsCents, delCents, tax){
+    if(delCents === null || delCents === undefined) return {itemsCents:itemsCents, deliveryCents:null, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:''};
+    var rate = tax && Object.prototype.hasOwnProperty.call(tax, 'rateBp') ? tax.rateBp : NJ_RATE;
+    if(rate == null) return {itemsCents:itemsCents, deliveryCents:delCents, taxCents:null, totalCents:null, taxLabel:'', rateBp:null, jurisdiction:tax && tax.jurisdiction || ''};
+    var deliveryTaxed = !tax || tax.deliveryTaxed !== false;
+    var label = tax && tax.label ? tax.label : 'Sales tax (NJ 6.625%)';
+    var base = itemsCents + (deliveryTaxed ? delCents : 0);
+    var taxCents = Math.floor((base * rate + 50000) / 100000);
+    return {itemsCents:itemsCents, deliveryCents:delCents, taxCents:taxCents, totalCents:itemsCents + delCents + taxCents, taxLabel:label, rateBp:rate, jurisdiction:(tax && tax.jurisdiction) || 'NJ'};
   }
 
   function totalLines(totals, zip, full){
     var z = String(zip || '').trim();
     var del = (z ? 'Delivery to ' + z + ': ' : 'Delivery: ') + moneyFromCents(totals.deliveryCents);
+    var taxLabel = totals.taxLabel || 'Sales tax (NJ 6.625%)';
     return [
       'Items: ' + moneyFromCents(totals.itemsCents),
       del,
-      'NJ sales tax (6.625%): ' + moneyFromCents(totals.taxCents),
+      taxLabel + ': ' + moneyFromCents(totals.taxCents),
       (full ? 'ESTIMATED TOTAL' : 'Estimated total') + ': ' + moneyFromCents(totals.totalCents)
     ];
   }
@@ -215,37 +283,7 @@
     return {ok:true, months:months};
   }
 
-  function simpleCustomerMessages(quote){
-    var months = financeMonths(quote && quote.extended);
-    var cents = 0;
-    var blocks = [];
-    var rows = [];
-    ((quote && quote.items) || []).forEach(function(item, i){
-      var q = quotedUnit(months, item);
-      var amount = q.ok ? q.amount : 0;
-      var qty = item.qty > 0 ? item.qty : 1;
-      var quotedCents = Math.round(amount * 100);
-      cents += quotedCents * qty;
-      var wasCents = item.regular > 0 ? Math.round(item.regular * 100) : null;
-      rows.push({qty:qty, quotedCents:quotedCents, wasCents:wasCents});
-      var title = (item.name || 'Item') + (item.label ? ', ' + item.label : '');
-      var price = moneyFromCents(quotedCents);
-      blocks.push((i + 1) + '. ' + title + ' — ' + (qty > 1 ? price + ' each, Qty ' + qty + ' = ' + moneyFromCents(quotedCents * qty) : price));
-    });
-    var totals = quoteTotals(cents, deliveryCents(quote.delivery));
-    var saved = amountSavedCents(rows);
-    function finish(full){
-      var lines = ['Hi ' + (quote.name || 'there') + ',', ''].concat(blocks).concat(['']).concat(totalLines(totals, quote.zip, full));
-      if(saved > 0) lines.push('Amount saved: ' + moneyFromCents(saved));
-      lines.push('');
-      customerFinanceLines(!!quote.extended).forEach(function(l){ lines.push(l); });
-      return lines.join('\n');
-    }
-    return {text:finish(false), email:finish(true)};
-  }
-
   function customerMessages(quote){
-    if(quote && quote.simple) return simpleCustomerMessages(quote);
     var gate = composeGate(quote);
     var months = gate.months || financeMonths(quote && quote.extended);
     var items = (quote && quote.items) || [];
@@ -261,7 +299,8 @@
       blocks.push((i + 1) + '. ' + (item.name || 'Item'));
       blocks.push('   ' + label + moneyFromCents(Math.round(amount * 100)) + (qty > 1 ? ' each, Qty ' + qty : ', Qty ' + qty));
     });
-    var totals = quoteTotals(cents, deliveryCents(quote.delivery));
+    var tax = appliedSalesTax(quote && quote.zip, quote && quote.taxConfirm);
+    var totals = quoteTotals(cents, deliveryCents(quote.delivery), tax.needsConfirm ? {rateBp:null, jurisdiction:tax.jurisdiction} : tax);
     var textLines = ['Hi ' + (quote.name || 'there') + ',', ''].concat(blocks).concat(['', 'YOUR INVESTMENT']).concat(totalLines(totals, quote.zip, false));
     textLines.push('');
     textLines.push(PET_EXCLUSION);
@@ -366,6 +405,11 @@
     financeMonths:financeMonths,
     deliveryCents:deliveryCents,
     quoteTotals:quoteTotals,
+    salesTaxForZip:salesTaxForZip,
+    appliedSalesTax:appliedSalesTax,
+    rateBpFromPercent:rateBpFromPercent,
+    formatPct:formatPct,
+    zip5:zip5,
     totalLines:totalLines,
     moneyFromCents:moneyFromCents,
     sku9:sku9,

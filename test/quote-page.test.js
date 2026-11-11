@@ -58,7 +58,7 @@ test('both real text and email include the disclosure, and longer than 18 months
   assert.equal(text.indexOf('Displayed prices are regular prices.'), -1);
   assert.match(text, /\$100\.00/);
   assert.match(text, /Delivery to 08807: \$0\.00/);
-  assert.match(text, /NJ sales tax \(6\.625%\)/);
+  assert.match(text, /Sales tax \(NJ 6\.625%\)/);
   assert.match(text, /Estimated total:/);
   assert.match(email, /ESTIMATED TOTAL:/);
   assert.match(text, /72 hours/);
@@ -265,79 +265,82 @@ test('SKU lookup starts for an unreadable name and does not replace a typed name
   assert.match(doc.getElementById('rcartpanel').textContent, /Magdalena 7-pc\. Dining Set/);
 });
 
-test('simple quote lists four example items, tax, delivery, total, and amount saved', function(){
+test('main quote stays full and alternatives are separate options', function(){
   var page = loadPage();
   var api = page.api;
   var doc = page.dom.window.document;
-  var box = doc.getElementById('rsimple');
-  assert.ok(box);
-  assert.equal(box.checked, false);
-  var items = [
-    {v:'Raymour & Flanigan', d:'Example Chair', sku:'100000002', vn:'SECRET-VENDOR', q:'2', p:'400.00', rg:'500.00', tg:{t:'sale'}, fin:'Gray'},
-    {v:'Raymour & Flanigan', d:'Example Sofa', sku:'100000003', q:'1', p:'100.00', tg:{t:'floor', w:'250'}},
-    {v:'Raymour & Flanigan', d:'Example Ottoman', sku:'100000005', q:'1', p:'80.00', tg:{t:'outlet'}},
-    {v:'Raymour & Flanigan', d:'Example Lamp', sku:'100000004', q:'1', p:'40.00', tg:{t:'accessory'}}
-  ];
+  assert.equal(doc.getElementById('rsimple'), null);
   api.load({
-    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'50', ext:false, simple:false, notes:'', pn:'Personal note stays on the full quote',
-    items: items
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'199', ext:false, notes:'', pn:'The gray one is the one we sat on',
+    items:[
+      {v:'Raymour & Flanigan', d:'Example Sofa A', sku:'200000001', vn:'SECRET-VENDOR', q:'1', p:'1099.00', rg:'1499.00', tg:{t:'sale'}},
+      {v:'Raymour & Flanigan', d:'Example Sofa B', sku:'200000002', q:'1', p:'899.00', rg:'1199.00', tg:{t:'sale'}, opt:2, adl:'149'},
+      {v:'Raymour & Flanigan', d:'Example Sofa C', sku:'200000003', q:'1', p:'100.00', tg:{t:'floor', w:'250'}, opt:3},
+      {v:'Raymour & Flanigan', d:'Example Sofa D', sku:'200000004', q:'1', p:'80.00', tg:{t:'outlet'}, opt:4}
+    ]
   });
-  var full = api.email();
-  assert.match(full, /Damage caused by pets is not covered\./);
-  assert.match(full, /platinum-protection/);
-  assert.match(full, /financing-options/);
-  assert.match(full, /Personal note stays on the full quote/);
-  assert.match(full, /SKU 100000002/);
-  assert.equal(full.indexOf('SECRET-VENDOR'), -1);
-  api.load({
-    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'50', ext:false, simple:true, notes:'Internal note stays off the simple quote', pn:'Personal note stays off the simple quote',
-    items: items
-  });
-  assert.equal(doc.getElementById('rsimple').checked, true);
   var text = api.text();
   var email = api.email();
-  var mail = api.preview('mail');
-  var sms = api.preview('sms');
-  [text, email, mail.body || mail.mail, sms.body || sms.sms].forEach(function(msg){
-    assert.match(msg, /Example Chair/);
-    assert.match(msg, /\$400\.00 each, Qty 2 = \$800\.00/);
-    assert.match(msg, /Sale/);
-    assert.match(msg, /Example Sofa/);
-    assert.match(msg, /Floor sample/);
-    assert.match(msg, /\$100\.00/);
-    assert.match(msg, /Example Ottoman/);
-    assert.match(msg, /Outlet/);
-    assert.match(msg, /\$80\.00/);
-    assert.match(msg, /Example Lamp/);
-    assert.match(msg, /Accessory/);
-    assert.match(msg, /\$40\.00/);
-    assert.match(msg, /Delivery to 08002: \$50\.00/);
-    assert.match(msg, /NJ sales tax \(6\.625%\): \$70\.89/);
-    assert.match(msg, /Amount saved: \$350\.00/);
+  [text, email].forEach(function(msg){
+    assert.match(msg, /Example Sofa A/);
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.match(msg, /platinum-protection/);
+    assert.match(msg, /financing-options/);
+    assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+    assert.match(msg, /This applies to the main quote and every option below\./);
     assert.match(msg, /72 hours/);
     assert.match(msg, /Quote #/);
-    assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
-    assert.equal(msg.indexOf('Platinum'), -1);
-    assert.equal(msg.indexOf('platinum-protection'), -1);
-    assert.equal(msg.indexOf('financing-options'), -1);
-    assert.equal(msg.indexOf('Damage caused by pets'), -1);
-    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.match(msg, /Amount saved: \$400\.00/);
+    assert.match(msg, /Sales tax \(NJ 6\.625%\)/);
+    assert.match(msg, /Delivery to 08002: \$199\.00/);
+    assert.match(msg, /Option 2/);
+    assert.match(msg, /Example Sofa B, Sale/);
+    assert.match(msg, /\$899\.00/);
+    assert.match(msg, /Delivery to 08002: \$149\.00/);
+    assert.match(msg, /Option 3/);
+    assert.match(msg, /Floor sample/);
+    assert.match(msg, /Option 4/);
+    assert.match(msg, /Outlet/);
     assert.equal(msg.indexOf('SECRET-VENDOR'), -1);
-    assert.equal(msg.indexOf('100000002'), -1);
-    assert.equal(msg.indexOf('Personal note stays off'), -1);
-    assert.equal(msg.indexOf('Internal note stays off'), -1);
+    var opt = msg.slice(msg.indexOf('OTHER OPTIONS'));
+    assert.equal(opt.indexOf('platinum-protection'), -1);
+    assert.equal(opt.indexOf('financing-options'), -1);
+    assert.equal(opt.indexOf('Damage caused by pets'), -1);
   });
-  assert.match(text, /Estimated total: \$1,140\.89/);
-  assert.match(email, /ESTIMATED TOTAL: \$1,140\.89/);
   assert.match(text, /Reply YES \(Quote #/);
   assert.match(email, /reply YES to this email \(Quote #/i);
   assert.match(text, /Cell /);
   assert.equal(email.indexOf('Cell '), -1);
-  assert.match(page.dom.window.document.documentElement.innerHTML, /v2\.5\.0/);
-  var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  assert.match(sw, /2\.5\.0-/);
-  assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /amountSaved:/);
-  assert.match(fs.readFileSync(path.join(root, 'index.html'), 'utf8'), /format:RD\.simple\?'simple':'full'/);
+  assert.match(email, /The gray one is the one we sat on/);
+  var preview = api.preview('mail');
+  assert.match(preview.body || preview.mail, /Option 2/);
+  assert.equal(doc.getElementById('rplace1').value, '2');
+});
+
+test('quote tax label follows a known ZIP and an unknown ZIP must be confirmed', function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  function loadZip(zip){
+    api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:zip, dl:'0', ext:false, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'Example Sofa', q:'1', p:'100.00'}]});
+  }
+  loadZip('19103');
+  assert.match(api.text(), /Sales tax \(PA, Philadelphia 8%\)/);
+  loadZip('15213');
+  assert.match(api.email(), /Sales tax \(PA, Allegheny County 7%\)/);
+  loadZip('10001');
+  var blocked = api.preview('sms');
+  assert.equal(blocked.sms, '');
+  assert.match(doc.getElementById('rerr').textContent, /not applied yet|Confirm the sales tax/);
+  assert.equal(doc.getElementById('rtaxbox').hidden, false);
+  doc.getElementById('rtax').value = '8.875';
+  doc.getElementById('rtax').dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  doc.getElementById('rtaxok').checked = true;
+  doc.getElementById('rtaxok').dispatchEvent(new page.dom.window.Event('change', {bubbles:true}));
+  assert.match(api.text(), /Sales tax \(NY, New York City 8\.875%\)/);
+  loadZip('90210');
+  assert.equal(api.preview('mail').mail, '');
+  assert.match(doc.getElementById('rerr').textContent, /not used|Confirm the sales tax/);
 });
 
 test('a saved quote regenerates the pet exclusion and a retired preview cannot be sent', function(){
