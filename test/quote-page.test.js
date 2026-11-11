@@ -247,6 +247,56 @@ test('punctuation-only cart names are flagged before add and cannot be confirmed
   });
 });
 
+test('a protector code fills list details without erasing a typed name and keeps the code on the quote', async function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  var win = page.dom.window;
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'', sku:'', p:'', q:'1'}]});
+  var sku = doc.getElementById('rsk0');
+  sku.value = 'mat5verqu';
+  sku.dispatchEvent(new win.Event('input', {bubbles:true}));
+  sku.dispatchEvent(new win.Event('focusout', {bubbles:true}));
+  var panel = doc.getElementById('rprot0');
+  assert.match(panel.textContent, /Protector code MAT5VERQU: Ver-Tex Queen, \$279\.99\. Includes the 5-Year Platinum Mattress Plan\./);
+  assert.equal(panel.textContent.indexOf('pet'), -1);
+  assert.equal(doc.getElementById('rd0').value, '');
+  doc.querySelector('[data-protuse="0"]').click();
+  assert.equal(doc.getElementById('rd0').value, 'BEDGEAR Ver-Tex Performance® Mattress Protector, Queen');
+  assert.equal(doc.getElementById('rp0').value, '279.99');
+  assert.equal(doc.getElementById('rg0').value, '');
+  assert.equal(doc.getElementById('rsk0').value, 'mat5verqu');
+  assert.equal(doc.getElementById('rvn0').value, '');
+  assert.equal(doc.querySelector('[data-protuse="0"]'), null);
+  var seen = [];
+  win.VFQ.matchResults = function(j, looked){ seen.push(looked); return {ok:1, p:279.99, st:'Retail', u:'/mattresses/protectors/ver-tex-498141440', nm:'BEDGEAR Ver-Tex Performance Mattress Protector', color:'', colorState:'unconfirmed', delState:'website', delText:'Get it in 3-5 Weeks', sku:'498141440', zip:'08002', discounted:0}; };
+  win.fetch = function(){ return Promise.resolve({ok:true, json:function(){return Promise.resolve({})}}); };
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 40)});
+  assert.deepEqual(seen, ['498141440']);
+  assert.equal(doc.getElementById('rsk0').value, 'mat5verqu');
+  assert.match(doc.getElementById('rw0').textContent, /Get it in 3-5 Weeks/);
+  assert.match(api.text(), /SKU mat5verqu/);
+
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'Queen protector I typed', sku:'MAT5ACTQU', p:'300.00', q:'1'}]});
+  assert.equal(doc.getElementById('rd0').value, 'Queen protector I typed');
+  assert.ok(doc.querySelector('[data-protuse="0"]'));
+  assert.match(doc.getElementById('rprot0').textContent, /List price is \$329\.00/);
+  doc.querySelector('[data-wp="0"]').click();
+  assert.match(doc.getElementById('rw0').textContent, /This protector isn.t listed on the website, so confirm delivery in store\./);
+  assert.equal(doc.getElementById('rw0').textContent.indexOf('9-digit'), -1);
+  assert.equal(doc.getElementById('rd0').value, 'Queen protector I typed');
+  assert.equal(doc.getElementById('rp0').value, '300.00');
+  doc.querySelector('[data-protuse="0"]').click();
+  assert.equal(doc.getElementById('rd0').value, 'Tempur Queen Mattress Protector');
+  assert.equal(doc.getElementById('rp0').value, '300.00');
+
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'', sku:'MAT5NOPE', p:'', q:'1'}]});
+  doc.querySelector('[data-wp="0"]').click();
+  assert.match(doc.getElementById('rw0').textContent, /This code isn.t in the protector list\. Enter the 9-digit website SKU to check the website\./);
+  assert.equal(doc.getElementById('rprot0').textContent, '');
+});
+
 test('SKU lookup starts for an unreadable name and does not replace a typed name', async function(){
   var page = loadPage();
   var doc = page.dom.window.document;

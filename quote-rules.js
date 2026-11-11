@@ -117,6 +117,80 @@
     return /^\d{9}$/.test(d) ? d : '';
   }
 
+
+  // Raymour 5-Year Platinum Mattress Plan item codes. Store codes, not vendor stock numbers.
+  // 46 rows include a website SKU matched on product, size, and exact list price. 10 have no website listing.
+  var PROTECTOR_ROWS = [
+['MAT5DRITW','Dri-Tec Twin','Twin',109.99,'495173320','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRIXL','Dri-Tec Twin XL','Twin XL',119.99,'496173320','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRIFL','Dri-Tec Full','Full',119.99,'497173320','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRIQU','Dri-Tec Queen','Queen',159.99,'498173320','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRISQ','Dri-Tec Split Queen','Split Queen',169.99,'498173321','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRIQH','Dri-Tec Split Head Queen','Split Head Queen',179.99,'',''],
+['MAT5DRIKI','Dri-Tec King','King',189.99,'499173320','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5DRISH','Dri-Tec Split Head King','Split Head King',209.99,'478121230','BEDGEAR Dri-Tec Performance® Mattress Protector'],
+['MAT5VERTW','Ver-Tex Twin','Twin',249.99,'495141440','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5VERXL','Ver-Tex Twin XL','Twin XL',259.99,'496141440','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5VERFL','Ver-Tex Full','Full',259.99,'497141440','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5VERQU','Ver-Tex Queen','Queen',279.99,'498141440','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5VERKI','Ver-Tex King','King',329.99,'499141441','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5VERCA','Ver-Tex Cal King','Cal King',329.99,'499141440','BEDGEAR Ver-Tex Performance® Mattress Protector'],
+['MAT5BASTW','Basic Twin','Twin',59.99,'495156790','BEDGEAR Basic Mattress Protector'],
+['MAT5BASXL','Basic Twin XL','Twin XL',69.99,'496156790','BEDGEAR Basic Mattress Protector'],
+['MAT5BASFL','Basic Full','Full',79.99,'497156790','BEDGEAR Basic Mattress Protector'],
+['MAT5BASQU','Basic Queen','Queen',99.95,'498156790','BEDGEAR Basic Mattress Protector'],
+['MAT5BASKI','Basic King','King',119.95,'499156790','BEDGEAR Basic Mattress Protector'],
+['MAT5ENCTW','Encasement Twin','Twin',99.99,'495191150','BEDGEAR Performance® MattresSkin® Mattress Encasement'],
+['MAT5ENCXL','Encasement Twin XL','Twin XL',109.99,'496191150','BEDGEAR Performance® MattresSkin® Mattress Encasement'],
+['MAT5ENCFL','Encasement Full','Full',119.99,'497191150','BEDGEAR Performance® MattresSkin® Mattress Encasement'],
+['MAT5ENCQU','Encasement Queen','Queen',129.99,'497191151','BEDGEAR Performance® MattresSkin® Mattress Encasement'],
+['MAT5ENCKI','Encasement King','King',149.99,'499191150','BEDGEAR Performance® MattresSkin® Mattress Encasement'],
+['MAT5TEMTW','Tempur Protect Twin','Twin',189.00,'495284450','Tempur-Adapt Mattress Protector'],
+['MAT5TEMXL','Tempur Protect Twin XL','Twin XL',199.00,'496284450','Tempur-Adapt Mattress Protector'],
+['MAT5TEMQU','Tempur Protect Queen','Queen',229.00,'498284450','Tempur-Adapt Mattress Protector'],
+['MAT5TEMFL','Tempur Protect Full','Full',229.00,'497284450','Tempur-Adapt Mattress Protector'],
+['MAT5TEMSC','Tempur Protect Split Cal King','Split Cal King',239.00,'',''],
+['MAT5TEMKI','Tempur Protect King','King',249.00,'499284450','Tempur-Adapt Mattress Protector'],
+['MAT5TEMCA','Tempur Protect Cal King','Cal King',249.00,'499284451','Tempur-Adapt Mattress Protector'],
+['MAT5TEMSH','Tempur Protect Split Head King','Split Head King',329.00,'',''],
+['MAT5BRZTW','Tempur Breeze Twin','Twin',249.00,'495284440','Tempur-Protect BREEZE Mattress Protector'],
+['MAT5BRZXL','Tempur Breeze Twin XL','Twin XL',259.00,'496284440','Tempur-Protect BREEZE Mattress Protector'],
+['MAT5BRZCA','Tempur Breeze Cal King','Cal King',259.00,'',''],
+['MAT5BRZFL','Tempur Breeze Full','Full',269.00,'497284440','Tempur-Protect BREEZE Mattress Protector'],
+['MAT5BRZSC','Tempur Breeze Split Cal King','Split Cal King',279.00,'',''],
+['MAT5BRZQU','Tempur Breeze Queen','Queen',289.00,'498284440','Tempur-Protect BREEZE Mattress Protector'],
+['MAT5BRZKI','Tempur Breeze King','King',309.00,'499284440','Tempur-Protect BREEZE Mattress Protector'],
+['MAT5ACTXL','Tempur Twin XL','Twin XL',299.00,'',''],
+['MAT5ACTQU','Tempur Queen','Queen',329.00,'',''],
+['MAT5ACTKI','Tempur King','King',349.00,'',''],
+['MAT5ACTCA','Tempur Cal King','Cal King',349.00,'',''],
+['MAT5ACTSC','Tempur Split Cal King','Split Cal King',599.00,'',''],
+['MAT5AVDTW','Avocado Organic Twin','Twin',169.00,'494396065','Avocado Organic Waterproof Mattress Protector'],
+['MAT5AVDXL','Avocado Organic Twin XL','Twin XL',189.00,'495396066','Avocado Organic Waterproof Mattress Protector'],
+['MAT5AVDFL','Avocado Organic Full','Full',199.00,'496396067','Avocado Organic Waterproof Mattress Protector'],
+['MAT5AVDQU','Avocado Organic Queen','Queen',229.00,'497396068','Avocado Organic Waterproof Mattress Protector'],
+['MAT5AVDKI','Avocado Organic King','King',249.00,'498396069','Avocado Organic Waterproof Mattress Protector'],
+['MAT5AVDCA','Avocado Organic Cal King','Cal King',249.00,'499396060','Avocado Organic Waterproof Mattress Protector'],
+['MAT5PURXL','Purple Twin XL','Twin XL',119.00,'496212790','Purple Waterproof Mattress Protector'],
+['MAT5PURTW','Purple Twin','Twin',119.00,'495212670','Purple Waterproof Mattress Protector'],
+['MAT5PURFL','Purple Full','Full',129.00,'497212680','Purple Waterproof Mattress Protector'],
+['MAT5PURQU','Purple Queen','Queen',149.00,'498212810','Purple Waterproof Mattress Protector'],
+['MAT5PURKI','Purple King','King',169.00,'499212820','Purple Waterproof Mattress Protector'],
+['MAT5PURCA','Purple Cal King','Cal King',169.00,'499212830','Purple Waterproof Mattress Protector']
+  ];
+  var PROTECTORS = {};
+  PROTECTOR_ROWS.forEach(function(r){
+    PROTECTORS[r[0]] = {code:r[0], listName:r[1], size:r[2], price:r[3], websiteSku:r[4], websiteName:r[5]};
+  });
+  function protectorByCode(raw){
+    var code = String(raw == null ? '' : raw).trim().toUpperCase();
+    if(!/^MAT5[A-Z0-9]{2,12}$/.test(code)) return null;
+    var row = PROTECTORS[code];
+    if(!row) return {code:code, known:false, listName:'', size:'', price:null, priceText:'', websiteSku:'', websiteName:'', description:''};
+    var description = row.websiteName ? (row.websiteName + ', ' + row.size) : (row.listName + ' Mattress Protector');
+    return {code:code, known:true, listName:row.listName, size:row.size, price:row.price, priceText:Number(row.price).toFixed(2), websiteSku:row.websiteSku, websiteName:row.websiteName, description:description};
+  }
+
   function round2(n){return Math.round((+n) * 100) / 100}
 
   function skuOf(data){
@@ -219,7 +293,10 @@
 
   function websiteStale(w, sku, zip){
     if(!w || !w.ok) return false;
-    if(String(w.sku || '') !== sku9(sku)) return true;
+    var want = sku9(sku);
+    var prot = protectorByCode(sku);
+    if(prot && prot.known && prot.websiteSku) want = prot.websiteSku;
+    if(String(w.sku || '') !== want) return true;
     if(String(w.zip == null ? '' : w.zip) !== String(zip == null ? '' : zip)) return true;
     return false;
   }
@@ -413,6 +490,7 @@
     totalLines:totalLines,
     moneyFromCents:moneyFromCents,
     sku9:sku9,
+    protectorByCode:protectorByCode,
     matchResults:matchResults,
     deliveryAssessment:deliveryAssessment,
     colorFromFacets:colorFromFacets,
