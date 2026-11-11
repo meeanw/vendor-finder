@@ -306,6 +306,55 @@ test('every customer message states the pet exclusion and a retired preview cann
   assert.equal(VFQ.canCompose(preview.state, 'mail', quote), true);
 });
 
+test('amount saved is was-price minus sale price times quantity, and a simple message omits protection', function(){
+  assert.equal(VFQ.amountSavedCents([
+    {qty:2, quotedCents:40000, wasCents:50000},
+    {qty:1, quotedCents:10000, wasCents:25000},
+    {qty:1, quotedCents:4000, wasCents:null},
+    {qty:1, quotedCents:8000, wasCents:8000}
+  ]), 35000);
+  assert.equal(VFQ.amountSavedCents([{qty:1, quotedCents:70000, wasCents:70000}]), 0);
+  var quote = {
+    extended: false,
+    simple: true,
+    name: 'Jamie Cole',
+    zip: '08002',
+    items: [
+      {name: 'Example Chair', qty: 2, price: 400, regular: 500, discounted: true, label: 'Sale'},
+      {name: 'Example Sofa', qty: 1, price: 100, regular: 250, discounted: true, label: 'Floor sample'},
+      {name: 'Example Ottoman', qty: 1, price: 80, regular: null, discounted: false, label: 'Outlet'},
+      {name: 'Example Lamp', qty: 1, price: 40, regular: null, discounted: false, label: 'Accessory'}
+    ],
+    delivery: '50'
+  };
+  var out = VFQ.customerMessages(quote);
+  [out.text, out.email].forEach(function(msg){
+    assert.match(msg, /Example Chair/);
+    assert.match(msg, /\$400\.00/);
+    assert.match(msg, /Floor sample/);
+    assert.match(msg, /Outlet/);
+    assert.match(msg, /Accessory/);
+    assert.match(msg, /NJ sales tax \(6\.625%\)/);
+    assert.match(msg, /Delivery to 08002: \$50\.00/);
+    assert.match(msg, /Amount saved: \$350\.00/);
+    assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+    assert.equal(msg.indexOf('Platinum'), -1);
+    assert.equal(msg.indexOf('platinum-protection'), -1);
+    assert.equal(msg.indexOf('financing-options'), -1);
+    assert.equal(msg.indexOf('Damage caused by pets'), -1);
+    assert.equal(msg.indexOf('Spills and pets'), -1);
+    assert.equal(VFQ.coverageProblem(msg), '');
+  });
+  assert.match(out.text, /Estimated total:/);
+  assert.match(out.email, /ESTIMATED TOTAL:/);
+  var plain = VFQ.customerMessages({
+    extended: false, simple: true, name: 'Jamie', zip: '08002', delivery: '0',
+    items: [{name: 'Example Server', qty: 1, price: 700, regular: null, discounted: false}]
+  });
+  assert.equal(plain.text.indexOf('Amount saved'), -1);
+  assert.equal(VFQ.coverageProblem('Hi Jamie\nItems: $700.00\nEstimated total: $700.00'), '');
+});
+
 test('cart importer preview stays hidden until pieces are added', function(){
   assert.equal(VFQ.cartPreviewVisible({rows: [], added: false}), false);
   assert.equal(VFQ.cartPreviewVisible({rows: [{on: true}], added: false}), false);

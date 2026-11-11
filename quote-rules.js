@@ -187,8 +187,21 @@
   function coverageProblem(body){
     var text = String(body || '');
     if(/Spills and pets|pets happen|has you covered/i.test(text)) return 'retired-pet-coverage';
-    if(text.indexOf(PET_EXCLUSION) === -1) return 'missing-pet-exclusion';
+    var mentionsProtection = /platinum|protection plan|protection:/i.test(text);
+    if(mentionsProtection && text.indexOf(PET_EXCLUSION) === -1) return 'missing-pet-exclusion';
     return '';
+  }
+
+  function amountSavedCents(rows){
+    var saved = 0;
+    (rows || []).forEach(function(row){
+      var qty = row && row.qty > 0 ? Math.round(row.qty) : 1;
+      var quoted = row ? row.quotedCents : null;
+      var was = row ? row.wasCents : null;
+      if(quoted == null || was == null || !(was > quoted)) return;
+      saved += (was - quoted) * qty;
+    });
+    return saved;
   }
 
   function composeGate(quote){
@@ -202,7 +215,37 @@
     return {ok:true, months:months};
   }
 
+  function simpleCustomerMessages(quote){
+    var months = financeMonths(quote && quote.extended);
+    var cents = 0;
+    var blocks = [];
+    var rows = [];
+    ((quote && quote.items) || []).forEach(function(item, i){
+      var q = quotedUnit(months, item);
+      var amount = q.ok ? q.amount : 0;
+      var qty = item.qty > 0 ? item.qty : 1;
+      var quotedCents = Math.round(amount * 100);
+      cents += quotedCents * qty;
+      var wasCents = item.regular > 0 ? Math.round(item.regular * 100) : null;
+      rows.push({qty:qty, quotedCents:quotedCents, wasCents:wasCents});
+      var title = (item.name || 'Item') + (item.label ? ', ' + item.label : '');
+      var price = moneyFromCents(quotedCents);
+      blocks.push((i + 1) + '. ' + title + ' — ' + (qty > 1 ? price + ' each, Qty ' + qty + ' = ' + moneyFromCents(quotedCents * qty) : price));
+    });
+    var totals = quoteTotals(cents, deliveryCents(quote.delivery));
+    var saved = amountSavedCents(rows);
+    function finish(full){
+      var lines = ['Hi ' + (quote.name || 'there') + ',', ''].concat(blocks).concat(['']).concat(totalLines(totals, quote.zip, full));
+      if(saved > 0) lines.push('Amount saved: ' + moneyFromCents(saved));
+      lines.push('');
+      customerFinanceLines(!!quote.extended).forEach(function(l){ lines.push(l); });
+      return lines.join('\n');
+    }
+    return {text:finish(false), email:finish(true)};
+  }
+
   function customerMessages(quote){
+    if(quote && quote.simple) return simpleCustomerMessages(quote);
     var gate = composeGate(quote);
     var months = gate.months || financeMonths(quote && quote.extended);
     var items = (quote && quote.items) || [];
@@ -335,6 +378,7 @@
     customerFinanceLines:customerFinanceLines,
     PET_EXCLUSION:PET_EXCLUSION,
     coverageProblem:coverageProblem,
+    amountSavedCents:amountSavedCents,
     customerMessages:customerMessages,
     composeGate:composeGate,
     preview:preview,
