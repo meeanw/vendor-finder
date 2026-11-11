@@ -315,6 +315,124 @@ test('SKU lookup starts for an unreadable name and does not replace a typed name
   assert.match(doc.getElementById('rcartpanel').textContent, /Magdalena 7-pc\. Dining Set/);
 });
 
+test('Platinum Protection adds the tier for eligible furniture and each option has its own tier', function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'199.99', plat:true,
+    items:[{v:'Raymour & Flanigan', d:'Sofa', sku:'218092233', q:'1', p:'1849.95', rg:'1999.95'}]
+  });
+  assert.equal(doc.getElementById('rplat').checked, true);
+  assert.equal(doc.getElementById('rplat').disabled, false);
+  assert.equal(doc.getElementById('rplatprice').textContent, '$219.95 for $1,849.95 of furniture');
+  var email = api.email();
+  var text = api.text();
+  [email, text].forEach(function(msg){
+    assert.match(msg, /Items: \$1,849\.95/);
+    assert.match(msg, /Delivery to 08807: \$199\.99/);
+    assert.match(msg, /5-Year Platinum Protection: \$219\.95/);
+    assert.match(msg, /Sales tax \(NJ 6\.625%\): \$150\.38/);
+    assert.match(msg, /5-Year Platinum Protection is included in this quote\./);
+    assert.match(msg, /https:\/\/www\.raymourflanigan\.com\/raymour-services\/platinum-protection/);
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.equal(msg.indexOf('P1751200P'), -1);
+    assert.equal(msg.indexOf('within three days'), -1);
+    assert.equal(msg.indexOf('pet damage is covered'), -1);
+  });
+  assert.match(email, /ESTIMATED TOTAL: \$2,420\.27/);
+  assert.match(text, /Estimated total: \$2,420\.27/);
+  assert.match(email, /Amount saved: \$150\.00/);
+  var invest = email.slice(email.indexOf('YOUR INVESTMENT'), email.indexOf('This price is held'));
+  assert.ok(invest.indexOf('Delivery to 08807: $199.99') < invest.indexOf('5-Year Platinum Protection: $219.95'));
+  assert.ok(invest.indexOf('5-Year Platinum Protection: $219.95') < invest.indexOf('Sales tax (NJ 6.625%): $150.38'));
+  assert.ok(invest.indexOf('Sales tax (NJ 6.625%): $150.38') < invest.indexOf('ESTIMATED TOTAL: $2,420.27'));
+  var logged = api.logFields();
+  assert.equal(logged.estTotal, 2420.27);
+  assert.equal(logged.tax, 150.38);
+  assert.equal(logged.platinum, 'Yes $219.95');
+  assert.ok(logged.keys.indexOf('token') < logged.keys.indexOf('platinum'));
+  assert.equal(logged.keys.indexOf('estTotal'), logged.keys.indexOf('subtotal') - 1);
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'199.99', plat:false,
+    items:[{v:'Raymour & Flanigan', d:'Sofa', sku:'218092233', q:'1', p:'1849.95', rg:'1999.95'}]
+  });
+  assert.equal(doc.getElementById('rplat').checked, false);
+  assert.match(api.email(), /Platinum Protection can be added within three days of delivery\./);
+  assert.equal(api.email().indexOf('5-Year Platinum Protection: $'), -1);
+  assert.equal(api.email().indexOf('is included in this quote'), -1);
+  assert.match(api.email(), /5-year Platinum Protection:/);
+  assert.equal(api.logFields().platinum, 'No');
+  assert.equal(api.logFields().estTotal, 2185.75);
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'199.99', plat:true,
+    items:[
+      {v:'Raymour & Flanigan', d:'Sofa', q:'1', p:'1849.95', rg:'1999.95'},
+      {v:'Raymour & Flanigan', d:'Floor sample chair', q:'1', p:'400.00', tg:{t:'floor', w:'800'}},
+      {v:'Raymour & Flanigan', d:'Mattress protector', sku:'MAT5VERQU', q:'1', p:'279.99'}
+    ]
+  });
+  assert.equal(doc.getElementById('rplatprice').textContent, '$219.95 for $1,849.95 of furniture');
+  assert.match(api.email(), /5-Year Platinum Protection: \$219\.95/);
+  assert.match(api.email(), /not available on floor sample items/);
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'199.99', plat:true, ext:false,
+    items:[
+      {v:'Raymour & Flanigan', d:'Sofa', q:'1', p:'1849.95'},
+      {v:'Raymour & Flanigan', d:'Chair option', q:'1', p:'600.00', opt:2}
+    ]
+  });
+  var optBox = doc.querySelector('[data-platopt="2"]');
+  assert.equal(optBox.checked, true);
+  assert.match(optBox.parentNode.textContent, /\$69\.95 for \$600\.00 of furniture/);
+  var both = api.email();
+  assert.match(both, /5-Year Platinum Protection: \$219\.95/);
+  assert.match(both, /5-Year Platinum Protection: \$69\.95/);
+  optBox.checked = false;
+  optBox.dispatchEvent(new page.dom.window.Event('change', {bubbles:true}));
+  var mainOnly = api.email();
+  assert.match(mainOnly, /5-Year Platinum Protection: \$219\.95/);
+  assert.equal(mainOnly.indexOf('$69.95'), -1);
+  assert.match(api.logFields().optionsSummary, /Option 2:/);
+  assert.equal(api.logFields().optionsSummary.indexOf('Platinum $69.95'), -1);
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', plat:true, ext:true,
+    items:[{v:'Raymour & Flanigan', d:'Sale chair', q:'2', p:'400.00', rg:'500.00'}]
+  });
+  assert.equal(doc.getElementById('rplatprice').textContent, '$99.95 for $1,000.00 of furniture');
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', plat:true, ext:false,
+    items:[{v:'Raymour & Flanigan', d:'Sale chair', q:'2', p:'400.00', rg:'500.00'}]
+  });
+  assert.equal(doc.getElementById('rplatprice').textContent, '$99.95 for $800.00 of furniture');
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', plat:true, ext:true,
+    items:[{v:'Raymour & Flanigan', d:'Sale chair', q:'1', p:'700.00', rg:'800.00', tg:{t:'sale', w:'800'}}]
+  });
+  assert.equal(doc.getElementById('rplatprice').textContent, '$99.95 for $800.00 of furniture');
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', plat:true,
+    items:[{v:'Raymour & Flanigan', d:'Floor only', q:'1', p:'400.00', tg:{t:'floor'}}]
+  });
+  assert.equal(doc.getElementById('rplat').disabled, true);
+  assert.match(doc.getElementById('rplatnote').textContent, /No eligible furniture/);
+  assert.equal(api.email().indexOf('5-Year Platinum Protection:'), -1);
+
+  api.load({
+    name:'Barbara Cole', phone:'9085550100', email:'barbara@example.com', zip:'08807', dl:'0', plat:true,
+    items:[{v:'Raymour & Flanigan', d:'Whole showroom', q:'1', p:'100000.00'}]
+  });
+  assert.equal(doc.getElementById('rplat').disabled, true);
+  assert.match(doc.getElementById('rplatnote').textContent, /Confirm the Platinum price in store/);
+  assert.equal(api.email().indexOf('is included in this quote'), -1);
+  assert.equal(api.logFields().platinum, 'No');
+});
+
 test('main quote stays full and alternatives are separate options', function(){
   var page = loadPage();
   var api = page.api;
