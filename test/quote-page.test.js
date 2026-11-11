@@ -58,7 +58,7 @@ test('both real text and email include the disclosure, and longer than 18 months
   assert.equal(text.indexOf('Displayed prices are regular prices.'), -1);
   assert.match(text, /\$100\.00/);
   assert.match(text, /Delivery to 08807: \$0\.00/);
-  assert.match(text, /NJ sales tax \(6\.625%\)/);
+  assert.match(text, /Sales tax \(NJ 6\.625%\)/);
   assert.match(text, /Estimated total:/);
   assert.match(email, /ESTIMATED TOTAL:/);
   assert.match(text, /72 hours/);
@@ -263,6 +263,84 @@ test('SKU lookup starts for an unreadable name and does not replace a typed name
   await new Promise(function(r){setTimeout(r, 30)});
   assert.equal(doc.querySelector('[data-cartfield=name]').value, 'My edited name');
   assert.match(doc.getElementById('rcartpanel').textContent, /Magdalena 7-pc\. Dining Set/);
+});
+
+test('main quote stays full and alternatives are separate options', function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  assert.equal(doc.getElementById('rsimple'), null);
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'199', ext:false, notes:'', pn:'The gray one is the one we sat on',
+    items:[
+      {v:'Raymour & Flanigan', d:'Example Sofa A', sku:'200000001', vn:'SECRET-VENDOR', q:'1', p:'1099.00', rg:'1499.00', tg:{t:'sale'}},
+      {v:'Raymour & Flanigan', d:'Example Sofa B', sku:'200000002', q:'1', p:'899.00', rg:'1199.00', tg:{t:'sale'}, opt:2, adl:'149'},
+      {v:'Raymour & Flanigan', d:'Example Sofa C', sku:'200000003', q:'1', p:'100.00', tg:{t:'floor', w:'250'}, opt:3},
+      {v:'Raymour & Flanigan', d:'Example Sofa D', sku:'200000004', q:'1', p:'80.00', tg:{t:'outlet'}, opt:4}
+    ]
+  });
+  var text = api.text();
+  var email = api.email();
+  [text, email].forEach(function(msg){
+    assert.match(msg, /Example Sofa A/);
+    assert.match(msg, /Damage caused by pets is not covered\./);
+    assert.match(msg, /platinum-protection/);
+    assert.match(msg, /financing-options/);
+    assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+    assert.match(msg, /This applies to the main quote and every option below\./);
+    assert.match(msg, /72 hours/);
+    assert.match(msg, /Quote #/);
+    assert.match(msg, /Amount saved: \$400\.00/);
+    assert.match(msg, /Sales tax \(NJ 6\.625%\)/);
+    assert.match(msg, /Delivery to 08002: \$199\.00/);
+    assert.match(msg, /Option 2/);
+    assert.match(msg, /Example Sofa B, Sale/);
+    assert.match(msg, /\$899\.00/);
+    assert.match(msg, /Delivery to 08002: \$149\.00/);
+    assert.match(msg, /Option 3/);
+    assert.match(msg, /Floor sample/);
+    assert.match(msg, /Option 4/);
+    assert.match(msg, /Outlet/);
+    assert.equal(msg.indexOf('SECRET-VENDOR'), -1);
+    var opt = msg.slice(msg.indexOf('OTHER OPTIONS'));
+    assert.equal(opt.indexOf('platinum-protection'), -1);
+    assert.equal(opt.indexOf('financing-options'), -1);
+    assert.equal(opt.indexOf('Damage caused by pets'), -1);
+  });
+  assert.match(text, /Reply YES \(Quote #/);
+  assert.match(email, /reply YES to this email \(Quote #/i);
+  assert.match(text, /Cell /);
+  assert.equal(email.indexOf('Cell '), -1);
+  assert.match(email, /The gray one is the one we sat on/);
+  var preview = api.preview('mail');
+  assert.match(preview.body || preview.mail, /Option 2/);
+  assert.equal(doc.getElementById('rplace1').value, '2');
+});
+
+test('quote tax label follows a known ZIP and an unknown ZIP must be confirmed', function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  function loadZip(zip){
+    api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:zip, dl:'0', ext:false, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'Example Sofa', q:'1', p:'100.00'}]});
+  }
+  loadZip('19103');
+  assert.match(api.text(), /Sales tax \(PA, Philadelphia 8%\)/);
+  loadZip('15213');
+  assert.match(api.email(), /Sales tax \(PA, Allegheny County 7%\)/);
+  loadZip('10001');
+  var blocked = api.preview('sms');
+  assert.equal(blocked.sms, '');
+  assert.match(doc.getElementById('rerr').textContent, /not applied yet|Confirm the sales tax/);
+  assert.equal(doc.getElementById('rtaxbox').hidden, false);
+  doc.getElementById('rtax').value = '8.875';
+  doc.getElementById('rtax').dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  doc.getElementById('rtaxok').checked = true;
+  doc.getElementById('rtaxok').dispatchEvent(new page.dom.window.Event('change', {bubbles:true}));
+  assert.match(api.text(), /Sales tax \(NY, New York City 8\.875%\)/);
+  loadZip('90210');
+  assert.equal(api.preview('mail').mail, '');
+  assert.match(doc.getElementById('rerr').textContent, /not used|Confirm the sales tax/);
 });
 
 test('a saved quote regenerates the pet exclusion and a retired preview cannot be sent', function(){

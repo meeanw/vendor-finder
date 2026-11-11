@@ -40,7 +40,7 @@ test('customer lines itemize delivery, NJ tax, and the grand total', function(){
   assert.deepEqual(lines, [
     'Items: $200.00',
     'Delivery to 08002: $100.00',
-    'NJ sales tax (6.625%): $19.88',
+    'Sales tax (NJ 6.625%): $19.88',
     'Estimated total: $319.88'
   ]);
   var free = VFQ.totalLines({itemsCents: 20000, deliveryCents: 0, taxCents: 1325, totalCents: 21325}, '');
@@ -180,8 +180,8 @@ test('both customer text and email include the financing disclosure, including w
     assert.ok(emailAt > out.email.toLowerCase().indexOf('financing options'));
     assert.match(out.text, /Delivery to 08807: \$0\.00/);
     assert.match(out.email, /Delivery to 08807: \$0\.00/);
-    assert.match(out.text, /NJ sales tax \(6\.625%\)/);
-    assert.match(out.email, /NJ sales tax \(6\.625%\)/);
+    assert.match(out.text, /Sales tax \(NJ 6\.625%\)/);
+    assert.match(out.email, /Sales tax \(NJ 6\.625%\)/);
     assert.match(out.text, /Estimated total:/);
     assert.match(out.email, /ESTIMATED TOTAL:/);
     if(extended){
@@ -304,6 +304,50 @@ test('every customer message states the pet exclusion and a retired preview cann
   var preview = VFQ.preview(quote, 'mail');
   assert.equal(VFQ.canCompose({mail:retired}, 'mail', quote), false);
   assert.equal(VFQ.canCompose(preview.state, 'mail', quote), true);
+});
+
+test('sales tax follows the delivery ZIP and does not invent a rate', function(){
+  assert.equal(VFQ.amountSavedCents([
+    {qty:2, quotedCents:40000, wasCents:50000},
+    {qty:1, quotedCents:10000, wasCents:25000}
+  ]), 35000);
+  var nj = VFQ.salesTaxForZip('08807');
+  assert.equal(nj.confident, true);
+  assert.equal(nj.needsConfirm, false);
+  assert.equal(nj.rateBp, 6625);
+  assert.equal(nj.deliveryTaxed, true);
+  assert.match(nj.label, /NJ 6\.625%/);
+  assert.equal(VFQ.salesTaxForZip('').rateBp, 6625);
+  var allegheny = VFQ.salesTaxForZip('15213');
+  assert.equal(allegheny.confident, true);
+  assert.equal(allegheny.rateBp, 7000);
+  assert.match(allegheny.label, /Allegheny County 7%/);
+  var philly = VFQ.salesTaxForZip('19103');
+  assert.equal(philly.confident, true);
+  assert.equal(philly.rateBp, 8000);
+  assert.equal(philly.deliveryTaxed, true);
+  assert.match(philly.label, /Philadelphia 8%/);
+  var phillyTax = VFQ.quoteTotals(100000, 19900, philly);
+  assert.equal(phillyTax.taxCents, Math.floor(((100000 + 19900) * 8000 + 50000) / 100000));
+  var ny = VFQ.salesTaxForZip('10001');
+  assert.equal(ny.needsConfirm, true);
+  assert.equal(ny.rateBp, null);
+  assert.equal(ny.guessBp, 8875);
+  assert.match(ny.note, /not applied yet/);
+  assert.equal(ny.rateBp === 6625, false);
+  var confirmed = VFQ.appliedSalesTax('10001', {ok:true, zip:'10001', rateBp:8875});
+  assert.equal(confirmed.needsConfirm, false);
+  assert.equal(confirmed.rateBp, 8875);
+  assert.match(confirmed.label, /New York City 8\.875%/);
+  var unknown = VFQ.salesTaxForZip('90210');
+  assert.equal(unknown.needsConfirm, true);
+  assert.equal(unknown.rateBp, null);
+  assert.equal(unknown.guessBp, null);
+  assert.match(unknown.note, /not used/);
+  var pa = VFQ.salesTaxForZip('17101');
+  assert.equal(pa.needsConfirm, true);
+  assert.equal(pa.guessBp, 6000);
+  assert.equal(pa.rateBp, null);
 });
 
 test('cart importer preview stays hidden until pieces are added', function(){
