@@ -287,7 +287,13 @@ test('main quote stays full and alternatives are separate options', function(){
     assert.match(msg, /platinum-protection/);
     assert.match(msg, /financing-options/);
     assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
-    assert.match(msg, /This applies to the main quote and every option below\./);
+    assert.match(msg, /I also included 3 other options below so you can compare\./);
+    assert.match(msg, /This applies to the main quote and every option above\./);
+    assert.equal(msg.indexOf('every option below'), -1);
+    assert.equal(msg.indexOf('disclosure above'), -1);
+    assert.ok(msg.indexOf('72 hours') < msg.indexOf('OTHER OPTIONS'));
+    assert.ok(msg.indexOf('OTHER OPTIONS') < msg.indexOf('platinum-protection'));
+    assert.ok(msg.indexOf('OTHER OPTIONS') < msg.indexOf('Financing terms longer than 18 months'));
     assert.match(msg, /72 hours/);
     assert.match(msg, /Quote #/);
     assert.match(msg, /Amount saved: \$400\.00/);
@@ -302,11 +308,16 @@ test('main quote stays full and alternatives are separate options', function(){
     assert.match(msg, /Option 4/);
     assert.match(msg, /Outlet/);
     assert.equal(msg.indexOf('SECRET-VENDOR'), -1);
-    var opt = msg.slice(msg.indexOf('OTHER OPTIONS'));
-    assert.equal(opt.indexOf('platinum-protection'), -1);
-    assert.equal(opt.indexOf('financing-options'), -1);
-    assert.equal(opt.indexOf('Damage caused by pets'), -1);
   });
+  assert.ok(text.indexOf('I also included') < text.indexOf('\nItems:'));
+  assert.ok(email.indexOf('I also included') < email.indexOf('WHAT YOU PICKED'));
+  assert.ok(email.indexOf('Quote #') < email.indexOf('OTHER OPTIONS'));
+  assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('MAKE IT LAST'));
+  assert.ok(email.indexOf('OTHER OPTIONS') < email.indexOf('READY WHEN YOU ARE'));
+  assert.ok(text.indexOf('\n1. Example Sofa A\n') < text.indexOf('OTHER OPTIONS'));
+  assert.ok(text.indexOf('You’re saving') < text.indexOf('OTHER OPTIONS'));
+  assert.ok(text.indexOf('OTHER OPTIONS') < text.indexOf('5-year Platinum'));
+  assert.ok(text.indexOf('OTHER OPTIONS') < text.indexOf('Cell '));
   assert.match(text, /Reply YES \(Quote #/);
   assert.match(email, /reply YES to this email \(Quote #/i);
   assert.match(text, /Cell /);
@@ -326,6 +337,8 @@ test('quote tax label follows a known ZIP and an unknown ZIP must be confirmed',
   }
   loadZip('19103');
   assert.match(api.text(), /Sales tax \(PA, Philadelphia 8%\)/);
+  assert.equal(api.text().indexOf('other option'), -1);
+  assert.equal(api.email().indexOf('OTHER OPTIONS'), -1);
   loadZip('15213');
   assert.match(api.email(), /Sales tax \(PA, Allegheny County 7%\)/);
   loadZip('10001');
