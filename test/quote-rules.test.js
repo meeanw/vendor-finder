@@ -350,6 +350,24 @@ test('sales tax follows the delivery ZIP and does not invent a rate', function()
   assert.equal(pa.rateBp, null);
 });
 
+test('protector codes map to a list price and a website SKU when one was verified', function(){
+  var queen = VFQ.protectorByCode(' mat5verqu ');
+  assert.equal(queen.known, true);
+  assert.equal(queen.code, 'MAT5VERQU');
+  assert.equal(queen.listName, 'Ver-Tex Queen');
+  assert.equal(queen.priceText, '279.99');
+  assert.equal(queen.websiteSku, '498141440');
+  assert.equal(queen.description, 'BEDGEAR Ver-Tex Performance® Mattress Protector, Queen');
+  var missing = VFQ.protectorByCode('MAT5ACTQU');
+  assert.equal(missing.known, true);
+  assert.equal(missing.websiteSku, '');
+  assert.equal(missing.description, 'Tempur Queen Mattress Protector');
+  assert.equal(VFQ.protectorByCode('MAT5NOPE').known, false);
+  assert.equal(VFQ.protectorByCode('218092233'), null);
+  assert.equal(VFQ.websiteStale({ok:1, sku:'498141440', zip:'08002'}, 'MAT5VERQU', '08002'), false);
+  assert.equal(VFQ.websiteStale({ok:1, sku:'111111111', zip:'08002'}, 'MAT5VERQU', '08002'), true);
+});
+
 test('cart importer preview stays hidden until pieces are added', function(){
   assert.equal(VFQ.cartPreviewVisible({rows: [], added: false}), false);
   assert.equal(VFQ.cartPreviewVisible({rows: [{on: true}], added: false}), false);
