@@ -1745,8 +1745,9 @@ els.qlist.addEventListener('click',itemRowClick);rEl.ritems.addEventListener('cl
 /* ---------- v1.8: read a price tag from a photo (on-device OCR) ----------
    The photo is read on this phone with Tesseract.js (pinned on-site assets, saved in the installed PWA cache). Nothing is uploaded, the photo is not saved or attached,
    and the tag's internal vendor code and vendor stock # are dropped here and never shown, quoted or logged. */
-var TG_VER='5.1.1',TG_CDN=new URL('ocr/tesseract-5.1.1/',document.baseURI).href,TG_SRI='sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F',
- TG_CORE=new URL('ocr/core-5.1.1/',document.baseURI).href,TG_LANG=new URL('ocr/lang/',document.baseURI).href;
+function tgAsset(path){try{return new URL(path,document.baseURI).href}catch(e){return new URL(path,'https://meeanw.github.io/vendor-finder/').href}}
+var TG_VER='5.1.1',TG_CDN=tgAsset('ocr/tesseract-5.1.1/'),TG_SRI='sha384-GJqSu7vueQ9qN0E9yLPb3Wtpd7OrgK8KmYzC8T1IysG1bcvxvIO4qtYR/D3A991F',
+ TG_CORE=tgAsset('ocr/core-5.1.1/'),TG_LANG=tgAsset('ocr/lang/');
 var TG_HDR=/\b(qty|sku|description|cover|retail|finish|vendor|stock|package|carton|dimensions|feet|info|consists|following)\b/i;
 var TG_MARK=/comfort|of home|starts here|raymour|flanigan|furniture|mattress|\bthe\b.*\bhere\b/i;
 function tgClean(t){return String(t||'').replace(/[\u201C\u201D\u2033\u02BA\u201E]/g,'"').replace(/[\u2018\u2019\u2032\u02B9]/g,"'").replace(/[\u2010-\u2015\u2212]/g,'-').replace(/\r/g,'')}

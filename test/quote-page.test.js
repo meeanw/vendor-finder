@@ -52,6 +52,29 @@ test('every updated label uses one date and the footer version matches the servi
   assert.equal(doc.querySelector('meta[name="vf-version"]').content, (sw.match(/var VERSION='([^']+)'/) || [])[1]);
 });
 
+test('an about:blank base does not throw the OCR path into Simple mode', function(){
+  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
+  html = html.replace('<script src="quote-rules.js"></script>', '');
+  var errors = [];
+  var dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    url: 'about:blank',
+    pretendToBeVisual: true,
+    beforeParse: function(window){
+      window.eval(rules);
+      window.addEventListener('error', function(ev){ errors.push(String(ev.message || ev.error || ev)); });
+    }
+  });
+  var doc = dom.window.document;
+  assert.equal(dom.window.document.baseURI, 'about:blank');
+  assert.ok(dom.window.vfQuoteApi, 'quote API did not load' + ((doc.getElementById('nj-err') || {}).textContent || ''));
+  assert.equal(doc.documentElement.classList.contains('nojs'), false);
+  assert.equal(doc.documentElement.classList.contains('js'), true);
+  assert.equal((doc.getElementById('nj-err').textContent || '').indexOf('URL'), -1);
+  assert.deepEqual(errors, []);
+});
+
 test('the page source keeps cart preview hidden until pieces are added and does not ship new secrets', function(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
