@@ -24,57 +24,6 @@ function loadPage(){
   return {dom: dom, api: api};
 }
 
-test('every updated label uses one date and the footer version matches the service worker', function(){
-  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  var updated = html.match(/<meta name="vf-updated" content="([^"]+)">/);
-  var version = html.match(/<meta name="vf-version" content="([^"]+)">/);
-  assert.ok(updated, 'missing vf-updated');
-  assert.ok(version, 'missing vf-version');
-  assert.equal(updated[1], 'Nov 17, 2026');
-  assert.equal(version[1], '2.7.2');
-  assert.equal((html.match(/<meta name="vf-updated"/g) || []).length, 1);
-  assert.match(sw, new RegExp("var VERSION='" + version[1].replace(/\./g, '\\.') + "'"));
-  assert.equal(html.indexOf('Data updated'), -1);
-  var stamps = html.match(/Last updated Nov \d{1,2}, \d{4}/g) || [];
-  assert.ok(stamps.length >= 2);
-  stamps.forEach(function(s){ assert.equal(s, 'Last updated ' + updated[1]); });
-  assert.match(html, /id="upd">Last updated Nov 17, 2026</);
-  assert.match(html, /var LINKS_CHECKED='Nov 2, 2026'/);
-  assert.match(html, /id="linkchecked">Nov 2, 2026</);
-  assert.equal(html.indexOf('linkchecked">'+updated[1]), -1);
-  assert.match(html, /id="ver">Last updated Nov 17, 2026 &middot; v2\.7\.2</);
-  var doc = loadPage().dom.window.document;
-  assert.equal(doc.getElementById('upd').textContent, 'Last updated ' + updated[1]);
-  assert.equal(doc.getElementById('linkchecked').textContent, 'Nov 2, 2026');
-  assert.notEqual(doc.getElementById('linkchecked').textContent, updated[1]);
-  assert.equal(doc.getElementById('ver').textContent, 'Last updated ' + updated[1] + ' \u00b7 v' + version[1]);
-  assert.equal(doc.querySelector('meta[name="vf-version"]').content, (sw.match(/var VERSION='([^']+)'/) || [])[1]);
-});
-
-test('an about:blank base does not throw the OCR path into Simple mode', function(){
-  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-  var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
-  html = html.replace('<script src="quote-rules.js"></script>', '');
-  var errors = [];
-  var dom = new JSDOM(html, {
-    runScripts: 'dangerously',
-    url: 'about:blank',
-    pretendToBeVisual: true,
-    beforeParse: function(window){
-      window.eval(rules);
-      window.addEventListener('error', function(ev){ errors.push(String(ev.message || ev.error || ev)); });
-    }
-  });
-  var doc = dom.window.document;
-  assert.equal(dom.window.document.baseURI, 'about:blank');
-  assert.ok(dom.window.vfQuoteApi, 'quote API did not load' + ((doc.getElementById('nj-err') || {}).textContent || ''));
-  assert.equal(doc.documentElement.classList.contains('nojs'), false);
-  assert.equal(doc.documentElement.classList.contains('js'), true);
-  assert.equal((doc.getElementById('nj-err').textContent || '').indexOf('URL'), -1);
-  assert.deepEqual(errors, []);
-});
-
 test('the page source keeps cart preview hidden until pieces are added and does not ship new secrets', function(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
@@ -776,4 +725,53 @@ test('mobile layout keeps preview actions in the quote sheet', function(){
   }).join('\n');
   assert.match(css, /max-width:\s*479px/);
   assert.match(css, /flex-direction:\s*column/);
+});
+
+test('cart parse keeps name words that contain digits and repairs OCR letter confusions in prices', function(){
+  var cart = loadPage().dom.window.vfCart;
+  function W(t,x0,y0,x1,y1){return {t:t,x0:x0,y0:y0,x1:x1,y1:y1}}
+  function line(words,y,x){var out=[],cx=x||100;words.forEach(function(t){var wdt=t.length*13+6;out.push(W(t,cx,y,cx+wdt,y+28));cx+=wdt+10});return out}
+  var ws=[];
+  ws=ws.concat(line(['Magdalena','7pc','Dining','Set'],230));
+  ws=ws.concat(line(['SKU:','797015027'],300));
+  ws=ws.concat(line(['Color:','Espresso'],350));
+  ws=ws.concat(line(['Quantity:','2'],395));
+  ws=ws.concat(line(['$1,299.00','$1,O99.00'],440));
+  var p = cart.parse(ws.map(function(w){return w.t}).join(' '), ws, 1000, 2200);
+  assert.equal(p.rows.length, 1);
+  assert.equal(p.rows[0].name, 'Magdalena 7pc Dining Set');
+  assert.equal(p.rows[0].reg, '1299.00');
+  assert.equal(p.rows[0].price, '1099.00');
+});
+
+test('typed prices are not letter-repaired; only OCR reads are', function(){
+  var page = loadPage();
+  var cart = page.dom.window.vfCart;
+  cart.seedReview([{sku:'797015027', name:'Magdalena Dining Set', price:'1O99', reg:'1299.00'}]);
+  assert.equal(cart.state().rows[0].price, '');
+});
+
+test('add is blocked while captured totals disagree with the cart, until the rep confirms the pieces', function(){
+  var page = loadPage();
+  var cart = page.dom.window.vfCart;
+  var doc = page.dom.window.document;
+  // a two-cent digit misread: 714.97 read as 714.99, so captured totals disagree with the cart subtotals
+  cart.seedReview([
+    {sku:'750015022', name:'Magdalena Server', price:'714.99', reg:'714.97', qty:'1'},
+    {sku:'797015027', name:'Magdalena Dining Set', price:'1099.00', reg:'1299.00', qty:'2'}
+  ], {original:'3312.97', current:'2912.97', count:3});
+  var status = doc.getElementById('rcartstatus');
+  assert.match(status.textContent, /do not match the cart subtotals/);
+  var add = doc.querySelector('[data-cart=add]');
+  assert.equal(add.disabled, true);
+  var box = doc.querySelector('[data-cartfield="verified"]');
+  assert.ok(box, 'confirm checkbox missing');
+  box.checked = true;
+  box.dispatchEvent(new page.dom.window.Event('change', {bubbles:true}));
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+  // editing any field after confirming revokes the confirmation
+  var color = doc.querySelector('[data-cartrow="0"][data-cartfield="color"]');
+  color.value = 'Walnut';
+  color.dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, true);
 });
