@@ -24,6 +24,57 @@ function loadPage(){
   return {dom: dom, api: api};
 }
 
+test('every updated label uses one date and the footer version matches the service worker', function(){
+  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  var updated = html.match(/<meta name="vf-updated" content="([^"]+)">/);
+  var version = html.match(/<meta name="vf-version" content="([^"]+)">/);
+  assert.ok(updated, 'missing vf-updated');
+  assert.ok(version, 'missing vf-version');
+  assert.equal(updated[1], 'Nov 17, 2026');
+  assert.equal(version[1], '2.7.2');
+  assert.equal((html.match(/<meta name="vf-updated"/g) || []).length, 1);
+  assert.match(sw, new RegExp("var VERSION='" + version[1].replace(/\./g, '\\.') + "'"));
+  assert.equal(html.indexOf('Data updated'), -1);
+  var stamps = html.match(/Last updated Nov \d{1,2}, \d{4}/g) || [];
+  assert.ok(stamps.length >= 2);
+  stamps.forEach(function(s){ assert.equal(s, 'Last updated ' + updated[1]); });
+  assert.match(html, /id="upd">Last updated Nov 17, 2026</);
+  assert.match(html, /var LINKS_CHECKED='Nov 2, 2026'/);
+  assert.match(html, /id="linkchecked">Nov 2, 2026</);
+  assert.equal(html.indexOf('linkchecked">'+updated[1]), -1);
+  assert.match(html, /id="ver">Last updated Nov 17, 2026 &middot; v2\.7\.2</);
+  var doc = loadPage().dom.window.document;
+  assert.equal(doc.getElementById('upd').textContent, 'Last updated ' + updated[1]);
+  assert.equal(doc.getElementById('linkchecked').textContent, 'Nov 2, 2026');
+  assert.notEqual(doc.getElementById('linkchecked').textContent, updated[1]);
+  assert.equal(doc.getElementById('ver').textContent, 'Last updated ' + updated[1] + ' \u00b7 v' + version[1]);
+  assert.equal(doc.querySelector('meta[name="vf-version"]').content, (sw.match(/var VERSION='([^']+)'/) || [])[1]);
+});
+
+test('an about:blank base does not throw the OCR path into Simple mode', function(){
+  var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+  var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
+  html = html.replace('<script src="quote-rules.js"></script>', '');
+  var errors = [];
+  var dom = new JSDOM(html, {
+    runScripts: 'dangerously',
+    url: 'about:blank',
+    pretendToBeVisual: true,
+    beforeParse: function(window){
+      window.eval(rules);
+      window.addEventListener('error', function(ev){ errors.push(String(ev.message || ev.error || ev)); });
+    }
+  });
+  var doc = dom.window.document;
+  assert.equal(dom.window.document.baseURI, 'about:blank');
+  assert.ok(dom.window.vfQuoteApi, 'quote API did not load' + ((doc.getElementById('nj-err') || {}).textContent || ''));
+  assert.equal(doc.documentElement.classList.contains('nojs'), false);
+  assert.equal(doc.documentElement.classList.contains('js'), true);
+  assert.equal((doc.getElementById('nj-err').textContent || '').indexOf('URL'), -1);
+  assert.deepEqual(errors, []);
+});
+
 test('the page source keeps cart preview hidden until pieces are added and does not ship new secrets', function(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
