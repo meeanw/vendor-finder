@@ -585,7 +585,7 @@ body.scan-open{overflow:hidden}
 <div id="panel" role="tabpanel" aria-labelledby="tab-picks" tabindex="-1"><h2 class="vh">Results</h2><div id="results" class="grid"></div></div>
 <button type="button" class="more" id="more">Show more</button>
 </div>
-<footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked <span id="linkchecked">Nov 17, 2026</span>; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
+<footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked <span id="linkchecked">Nov 2, 2026</span>; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
 <p class="ver" id="ver">Last updated Nov 17, 2026 &middot; v2.7.2</p>
 </main>
@@ -720,13 +720,14 @@ var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
 var PINCFG={"it":150000,"naeem":{"s":"f75b4c28cf6bfb8e6b4d0bbe31645300","h":"454d1479650342a2710d88a69102c37e2179ab52fc8d078d0fcab5d789462a07"},"hans":{"s":"094eb5680b3af3352a25186c1f71c842","h":"019494205677711642ed2e90c465d6b0a50456bb32df386931433f2e17cb6bc8"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
-// One date for every "updated" label. Change LAST_UPDATED here and in the matching HTML text.
+// One date for every "Last updated" label. LINKS_CHECKED is the last link audit, not the site update.
 var LAST_UPDATED=(document.querySelector('meta[name="vf-updated"]')||{}).content||'Nov 17, 2026';
 var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.2';
+var LINKS_CHECKED='Nov 2, 2026';
 function stampFreshness(){
  var upd=document.getElementById('upd');if(upd)upd.textContent='Last updated '+LAST_UPDATED;
  var ver=document.getElementById('ver');if(ver)ver.textContent='Last updated '+LAST_UPDATED+' \u00b7 v'+APP_VERSION;
- var checked=document.getElementById('linkchecked');if(checked)checked.textContent=LAST_UPDATED;
+ var checked=document.getElementById('linkchecked');if(checked)checked.textContent=LINKS_CHECKED;
 }
 function boot(){stampFreshness();
 var D=JSON.parse(document.getElementById('data').textContent);

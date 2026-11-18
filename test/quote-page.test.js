@@ -40,11 +40,14 @@ test('every updated label uses one date and the footer version matches the servi
   assert.ok(stamps.length >= 2);
   stamps.forEach(function(s){ assert.equal(s, 'Last updated ' + updated[1]); });
   assert.match(html, /id="upd">Last updated Nov 17, 2026</);
-  assert.match(html, /id="linkchecked">Nov 17, 2026</);
+  assert.match(html, /var LINKS_CHECKED='Nov 2, 2026'/);
+  assert.match(html, /id="linkchecked">Nov 2, 2026</);
+  assert.equal(html.indexOf('linkchecked">'+updated[1]), -1);
   assert.match(html, /id="ver">Last updated Nov 17, 2026 &middot; v2\.7\.2</);
   var doc = loadPage().dom.window.document;
   assert.equal(doc.getElementById('upd').textContent, 'Last updated ' + updated[1]);
-  assert.equal(doc.getElementById('linkchecked').textContent, updated[1]);
+  assert.equal(doc.getElementById('linkchecked').textContent, 'Nov 2, 2026');
+  assert.notEqual(doc.getElementById('linkchecked').textContent, updated[1]);
   assert.equal(doc.getElementById('ver').textContent, 'Last updated ' + updated[1] + ' \u00b7 v' + version[1]);
   assert.equal(doc.querySelector('meta[name="vf-version"]').content, (sw.match(/var VERSION='([^']+)'/) || [])[1]);
 });
