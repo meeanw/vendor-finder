@@ -149,6 +149,57 @@
     return /^\d{9}$/.test(d) ? d : '';
   }
 
+  // A name is garbled when it is not two or more plain words. OCR junk like
+  // "BR ~ Hie AR RE" must not be sent to website search.
+  function looksGarbled(name){
+    var s = String(name == null ? '' : name).replace(/\s+/g, ' ').trim();
+    if(!s) return false;
+    var tokens = s.split(' ');
+    var dict = 0, bad = 0;
+    tokens.forEach(function(t){
+      if(/^[A-Za-z][A-Za-z'-]{2,}$/.test(t)) dict++;
+      if(t.length <= 3 || /[^A-Za-z0-9'&-]/.test(t)) bad++;
+    });
+    if(dict < 2) return true;
+    return bad * 2 > tokens.length;
+  }
+
+  // First two digits of a Raymour website SKU, from a Nov 20, 2026 sample of
+  // public Constructor search (page 1, variation_id). 28 is power recliners
+  // (280019716 Adrienne Power Recliner). 29 is sectionals and living-room sets.
+  // 20 sofas, 21 chairs and ottomans, 17 rugs, 11 lamps, 46-48 mattresses,
+  // 50 and 59 beds, 51 nightstands, 54 dressers, 70 and 79 dining.
+  var SKU_PREFIX_TERMS = {
+    '11': ['lamp'],
+    '17': ['rug'],
+    '20': ['sofa', 'sectional'],
+    '21': ['chair', 'ottoman', 'recliner'],
+    '28': ['recliner', 'chair', 'power recliner'],
+    '29': ['living room set', 'sofa', 'sectional'],
+    '46': ['mattress'],
+    '47': ['mattress'],
+    '48': ['mattress'],
+    '50': ['bed', 'headboard'],
+    '51': ['nightstand', 'dresser'],
+    '54': ['dresser'],
+    '59': ['bed', 'headboard'],
+    '70': ['dining', 'table'],
+    '79': ['dining', 'table']
+  };
+  var SKU_FALLBACK_GENERIC = ['sofa', 'sectional', 'recliner', 'chair', 'bed', 'dresser', 'nightstand', 'mattress', 'dining', 'table', 'rug', 'lamp', 'outlet'];
+  function skuFallbackTerms(raw){
+    var nine = sku9(raw);
+    var pref = nine && SKU_PREFIX_TERMS[nine.slice(0, 2)] || [];
+    var out = [], seen = {};
+    pref.concat(SKU_FALLBACK_GENERIC).forEach(function(t){
+      var k = String(t).toLowerCase();
+      if(!k || seen[k]) return;
+      seen[k] = 1;
+      out.push(t);
+    });
+    return out;
+  }
+
 
   // Raymour 5-Year Platinum Mattress Plan item codes. Store codes, not vendor stock numbers.
   // 46 rows include a website SKU matched on product, size, and exact list price. 10 have no website listing.
@@ -523,6 +574,8 @@
     totalLines:totalLines,
     moneyFromCents:moneyFromCents,
     sku9:sku9,
+    looksGarbled:looksGarbled,
+    skuFallbackTerms:skuFallbackTerms,
     protectorByCode:protectorByCode,
     matchResults:matchResults,
     deliveryAssessment:deliveryAssessment,

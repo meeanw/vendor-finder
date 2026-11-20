@@ -303,6 +303,52 @@ test('a protector code fills list details without erasing a typed name and keeps
   assert.equal(doc.getElementById('rprot0').textContent, '');
 });
 
+test('a garbled name does not block SKU 280019716, and one tap fills the website fields', async function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  var win = page.dom.window;
+  var fixture = {response:{total_num_results:1, results:[{value:'Adrienne Power Recliner', variations:[{value:'Adrienne Power Recliner', data:{
+    variation_id:'280019716',
+    url:'/outlet/chairs-recliners-clearance/adrienne-power-recliner-280019716',
+    Pricing:'{"price":499.99,"originalPrice":899.99,"priceStyle":"Outlet"}',
+    facets:[{name:'Color', values:['Gray']}],
+    zipDeliveryEstimate:'Get it in 2-4 weeks',
+    zipDeliveryZip:'08002'
+  }}]}]}};
+  var terms = [];
+  win.fetch = function(url){
+    var term = decodeURIComponent(String(url).split('/search/')[1].split('?')[0]);
+    terms.push(term);
+    var body = term.toLowerCase() === 'recliner' ? fixture : {response:{total_num_results:0, results:[]}};
+    return Promise.resolve({ok:true, json:function(){return Promise.resolve(body)}});
+  };
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'280019716', q:'1', p:'10.00', fin:'', e:''}]});
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 50)});
+  assert.equal(terms[0], 'recliner');
+  assert.equal(terms.indexOf('BR ~ Hie AR RE'), -1);
+  assert.equal(doc.getElementById('rd0').value, 'BR ~ Hie AR RE');
+  assert.match(doc.getElementById('rw0').textContent, /Adrienne Power Recliner/);
+  assert.match(doc.getElementById('rw0').textContent, /Replace the unreadable name with the website name/);
+  doc.querySelector('[data-wpall="0"]').click();
+  assert.equal(doc.getElementById('rd0').value, 'Adrienne Power Recliner');
+  assert.equal(doc.getElementById('rfn0').value, 'Gray');
+  assert.equal(doc.getElementById('rp0').value, '499.99');
+  assert.equal(doc.getElementById('rg0').value, '899.99');
+  assert.equal(doc.getElementById('re0').value, 'Get it in 2-4 weeks');
+
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:true, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'280019716', q:'1', p:'10.00', fin:'', e:'Ask the warehouse'}]});
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 50)});
+  doc.querySelector('[data-wpall="0"]').click();
+  assert.equal(doc.getElementById('rp0').value, '899.99');
+  assert.equal(doc.getElementById('rg0').value, '899.99');
+  assert.notEqual(doc.getElementById('rp0').value, '499.99');
+  assert.equal(doc.getElementById('rd0').value, 'Adrienne Power Recliner');
+  assert.equal(doc.getElementById('re0').value, 'Get it in 2-4 weeks');
+});
+
 test('SKU lookup starts for an unreadable name and does not replace a typed name', async function(){
   var page = loadPage();
   var doc = page.dom.window.document;
