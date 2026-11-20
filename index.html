@@ -5,7 +5,7 @@
 <meta name="description" content="Vendor reference by room, furniture type and style.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="vf-updated" content="Nov 20, 2026">
-<meta name="vf-version" content="2.7.4">
+<meta name="vf-version" content="2.7.5">
 <link rel="canonical" href="https://meeanw.github.io/vendor-finder/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Furniture Vendor Finder">
 <meta property="og:title" content="Furniture Vendor Finder"><meta property="og:description" content="Find vendors by room, furniture type and style.">
@@ -587,7 +587,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 20, 2026 &middot; v2.7.4</p>
+<p class="ver" id="ver">Data updated Nov 20, 2026 &middot; v2.7.5</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>Updated protection wording is ready. Your saved quote stays on this phone.</span><button type="button" id="updbtn">Update</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -721,7 +721,7 @@ var PINCFG={"it":150000,"naeem":{"s":"f75b4c28cf6bfb8e6b4d0bbe31645300","h":"454
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 var LAST_UPDATED=(document.querySelector('meta[name="vf-updated"]')||{}).content||'Nov 20, 2026';
-var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.4';
+var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.5';
 var LINKS_CHECKED='Nov 2, 2026';
 function stampFreshness(){
  var upd=document.getElementById('upd');if(upd)upd.textContent='Last updated '+LAST_UPDATED;
@@ -1160,12 +1160,17 @@ function rltxt(i){var el=document.getElementById('rl'+i),x=RD.items[i];if(el&&x)
    Nothing is written over the rep's fields until they tap a button. No vendor stock numbers are kept. ---- */
 var WP_KEY='key_1tigFZoUEs7Ygkww',WP_SITE='https://www.raymourflanigan.com';
 function wpClean(w){if(!w||typeof w!=='object')return undefined;var o={t:+w.t||0};
- if(w.ok){var p=pnum(w.p),g=pnum(w.o);if(p===null||p<=0||p>1e6)return undefined;o.ok=1;o.p=p;if(g!==null&&g>0&&g<1e6)o.o=g;o.st=/^(Sale|Outlet|Retail|Clearance)$/.test(w.st)?w.st:'';o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.nm=clip(w.nm,120);o.color=clip(w.color,80);o.colorState=w.colorState==='website'&&o.color?'website':'unconfirmed';o.delState=w.delState==='website'&&String(w.delText||'').trim()?'website':'unconfirmed';o.delText=o.delState==='website'?clip(w.delText,100):'';o.delReason=clip(w.delReason,240);o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip=clip(w.zip,60);o.discounted=w.discounted?1:0}
+ if(w.indexOnly){o.ok=1;o.indexOnly=1;o.nm=clip(w.nm,120);o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip=clip(w.zip,60);o.color='';o.colorState='unconfirmed';o.delState='unconfirmed';o.delText='';o.discounted=0;if(!o.nm)return undefined}
+ else if(w.ok){var p=pnum(w.p),g=pnum(w.o);if(p===null||p<=0||p>1e6)return undefined;o.ok=1;o.p=p;if(g!==null&&g>0&&g<1e6)o.o=g;o.st=/^(Sale|Outlet|Retail|Clearance)$/.test(w.st)?w.st:'';o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.nm=clip(w.nm,120);o.color=clip(w.color,80);o.colorState=w.colorState==='website'&&o.color?'website':'unconfirmed';o.delState=w.delState==='website'&&String(w.delText||'').trim()?'website':'unconfirmed';o.delText=o.delState==='website'?clip(w.delText,100):'';o.delReason=clip(w.delReason,240);o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip=clip(w.zip,60);o.discounted=w.discounted?1:0}
  else o.m=/^(nomatch|offline|nosku|noname|protnone|protunknown)$/.test(w.m)?w.m:'nomatch';return o}
 function wpView(x){var w=x&&x.w;if(!w)return null;if(w.ok&&VFQ.websiteStale(w,x.sku,RD.zip)){var o={},k;for(k in w)if(Object.prototype.hasOwnProperty.call(w,k))o[k]=w[k];o.stale=1;return o}return w}
 function wpSearchUrl(x){var q=(x.d||x.c||x.v||'').trim().replace(/\s+/g,' ').slice(0,80);return q?WP_SITE+'/search?page=1&redirectQuery='+encodeURIComponent(q):WP_SITE+'/'}
 function wpTime(t){if(!t)return '';var d=new Date(t),h=d.getHours(),m=d.getMinutes();return (h%12||12)+':'+(m<10?'0':'')+m+(h>=12?' PM':' AM')}
 function wpHtml(x,i){var w=wpView(x);if(!w)return '';
+ if(w.indexOnly){var idxName=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':'Use website name';
+  var ih='<p class="rwp"><b>Website name:</b> '+esc(w.nm)+'</p><p class="qfine">This name is from the site index. The live search did not return a price, color, or delivery time, so confirm those before using them.</p><div class="rrow"><button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+idxName+'</button>';
+  if(w.u)ih+='<a class="rwlink" href="'+esc(WP_SITE+w.u)+'" target="_blank" rel="noopener noreferrer">Open on raymourflanigan.com \u2197</a>';
+  return ih+'</div>'}
  if(!w.ok){var digits=String(x.sku||'').replace(/\D/g,''),msg=w.m==='offline'?'Could not reach the Raymour website. Check your connection and try again.':w.m==='noname'?'Enter the item name or collection, then check again. Searching the SKU digits alone does not return a Raymour product.':w.m==='protnone'?'This protector isn\u2019t listed on the website, so confirm delivery in store.':w.m==='protunknown'?'This code isn\u2019t in the protector list. Enter the 9-digit website SKU to check the website.':w.m==='nosku'?(digits?'Enter the 9-digit website SKU, then check again.':'Enter the SKU first, then check the website.'):'Could not match SKU '+esc(x.sku.trim())+' in the website\u2019s search by name, so nothing was filled in. ';
   return '<p class="tgwarn">'+msg+(w.m==='nomatch'?'<a href="'+esc(wpSearchUrl(x))+'" target="_blank" rel="noopener noreferrer">Search the website for this item \u2197</a>':'')+'</p>'}
  if(w.stale)return '<p class="tgwarn">This website check is out of date because the SKU or delivery ZIP changed. It is not verified. Check again before using it.</p>';
@@ -1197,29 +1202,39 @@ function wpSearchPages(term,sku,zip,signal,maxPages){var page=1,netOk=false;maxP
    var total=(j&&j.response&&+j.response.total_num_results)||0;if(page*100>=total||page>=maxPages)return {hit:null,ok:true};page++;return one()})}
  return one().then(function(r){r.ok=true;return r},function(err){var aborted=!!(err&&(err.name==='AbortError'||/abort/i.test(String(err&&err.message||err))));if(aborted)return {hit:null,ok:true,aborted:true};return {hit:null,ok:netOk}})}
 function wpLookupSku(x){var nine=VFQ.sku9(x&&x.sku);if(nine)return {sku:nine,kind:'sku'};var p=VFQ.protectorByCode(x&&x.sku);if(!p)return {sku:'',kind:'nosku'};if(!p.known)return {sku:'',kind:'protunknown'};if(!p.websiteSku)return {sku:'',kind:'protnone'};return {sku:p.websiteSku,kind:'protector',name:p.websiteName||p.listName}}
-function wpCheck(i){var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;var look=wpLookupSku(x),sku=look.sku,finished=false;
- var done=function(w){if(finished)return;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
+var SKU_INDEX=null,SKU_INDEX_P=null;
+function wpSkuIndex(){if(SKU_INDEX)return Promise.resolve(SKU_INDEX);if(SKU_INDEX_P)return SKU_INDEX_P;
+ SKU_INDEX_P=fetch('sku-index.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){SKU_INDEX=(j&&typeof j==='object')?j:{};return SKU_INDEX},function(){SKU_INDEX_P=null;return {}});
+ return SKU_INDEX_P}
+function wpIndexEntry(sku){return wpSkuIndex().then(function(idx){var row=idx&&idx[sku];if(!row||!row.length)return null;var name=String(row[0]||'').replace(/\s+/g,' ').trim();var urlPath=String(row[1]||'').split('?')[0];if(!name)return null;return {name:name.slice(0,120),url:/^\/[A-Za-z0-9\/_.-]{3,200}$/.test(urlPath)?urlPath:''}})}
+function wpCheck(i){var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;var look=wpLookupSku(x),sku=look.sku,finished=false,to=0,ctl=null;
+ var done=function(w){if(finished)return;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);if(ctl)try{ctl.abort()}catch(e){}x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
  if(look.kind==='protnone'||look.kind==='protunknown'){done({t:Date.now(),m:look.kind});return}
  if(!sku){done({t:Date.now(),m:'nosku'});return}
  if(navigator.onLine===false||typeof fetch!=='function'){done({t:Date.now(),m:'offline'});return}
- var terms=wpTerms(x);if(!terms.length&&look.name&&!VFQ.looksGarbled(look.name))terms=[look.name];
- var fallback=look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
- var fallbackAt=terms.length;terms=terms.concat(fallback);
- if(!terms.length){done({t:Date.now(),m:'noname'});return}
- box.innerHTML='<p class="qfine">'+(fallbackAt?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
- var ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort();done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000),sawOk=false,sawFail=false,step=function(n){
-  if(finished)return;
-  if(n>=terms.length){done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
-  if(n===fallbackAt&&fallback.length)box.innerHTML='<p class="qfine">Searching the Raymour site by SKU\u2026</p>';
-  wpSearchPages(terms[n],sku,RD.zip,ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip=RD.zip;done(r.hit);return}step(n+1)})};
- step(0)}
+ function begin(indexEntry){
+  var terms=wpTerms(x);if(!terms.length&&look.name&&!VFQ.looksGarbled(look.name))terms=[look.name];
+  if(indexEntry&&indexEntry.name){var nm=indexEntry.name;terms=[nm].concat(terms.filter(function(t){return t.toLowerCase()!==nm.toLowerCase()}))}
+  var fallback=look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
+  var fallbackAt=terms.length;terms=terms.concat(fallback);
+  if(!terms.length){if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done({t:Date.now(),m:'noname'});return}
+  box.innerHTML='<p class="qfine">'+(fallbackAt?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
+  ctl=typeof AbortController==='function'?new AbortController():null;var sawOk=false,sawFail=false,step=function(n){
+   if(finished)return;
+   if(n>=terms.length){if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
+   if(n===fallbackAt&&fallback.length)box.innerHTML='<p class="qfine">Searching the Raymour site by SKU\u2026</p>';
+   wpSearchPages(terms[n],sku,RD.zip,ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip=RD.zip;done(r.hit);return}step(n+1)})};
+  to=setTimeout(function(){if(ctl)try{ctl.abort()}catch(e){}if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000);
+  step(0)}
+ if(look.kind==='sku'){box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';wpIndexEntry(sku).then(function(entry){if(!finished)begin(entry)})}
+ else begin(null)}
 function wpUse(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale)return;var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));if(!plan.ok)return;
  x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u);rrenderItems(false);rhref()}
 function wpUseAll(i){var x=RD.items[i],w=wpView(x);if(!x||!w||!w.ok||w.stale)return;
  if(w.nm)x.d=w.nm;
  if(w.colorState==='website'&&w.color)x.fin=w.color;
- var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));
- if(plan.ok){x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u)}
+ if(w.p>0){var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));
+  if(plan.ok&&plan.price>0){x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u)}}
  if(w.delState==='website'&&w.delText)x.e=w.delText;
  rrenderItems(false);rhref()}
 function wpUseName(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||!w.nm)return;x.d=w.nm;rrenderItems(false);rhref()}

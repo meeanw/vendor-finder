@@ -318,15 +318,18 @@ test('a garbled name does not block SKU 280019716, and one tap fills the website
   }}]}]}};
   var terms = [];
   win.fetch = function(url){
-    var term = decodeURIComponent(String(url).split('/search/')[1].split('?')[0]);
+    var s = String(url);
+    if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
+    var term = decodeURIComponent(s.split('/search/')[1].split('?')[0]);
     terms.push(term);
     var body = term.toLowerCase() === 'recliner' ? fixture : {response:{total_num_results:0, results:[]}};
     return Promise.resolve({ok:true, json:function(){return Promise.resolve(body)}});
   };
   api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:false, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'280019716', q:'1', p:'10.00', fin:'', e:''}]});
   doc.querySelector('[data-wp="0"]').click();
-  await new Promise(function(r){setTimeout(r, 50)});
-  assert.equal(terms[0], 'recliner');
+  await new Promise(function(r){setTimeout(r, 80)});
+  assert.equal(terms[0], 'sofa');
+  assert.ok(terms.indexOf('recliner') >= 0);
   assert.equal(terms.indexOf('BR ~ Hie AR RE'), -1);
   assert.equal(doc.getElementById('rd0').value, 'BR ~ Hie AR RE');
   assert.match(doc.getElementById('rw0').textContent, /Adrienne Power Recliner/);
@@ -340,13 +343,75 @@ test('a garbled name does not block SKU 280019716, and one tap fills the website
 
   api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', ext:true, notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'280019716', q:'1', p:'10.00', fin:'', e:'Ask the warehouse'}]});
   doc.querySelector('[data-wp="0"]').click();
-  await new Promise(function(r){setTimeout(r, 50)});
+  await new Promise(function(r){setTimeout(r, 80)});
   doc.querySelector('[data-wpall="0"]').click();
   assert.equal(doc.getElementById('rp0').value, '899.99');
   assert.equal(doc.getElementById('rg0').value, '899.99');
   assert.notEqual(doc.getElementById('rp0').value, '499.99');
   assert.equal(doc.getElementById('rd0').value, 'Adrienne Power Recliner');
   assert.equal(doc.getElementById('re0').value, 'Get it in 2-4 weeks');
+});
+
+test('the SKU index names Ella Marie and Adrienne before any category search', async function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.dom.window.document;
+  var win = page.dom.window;
+  var index = {
+    '545060179': ['Ella Marie Triple Power Swivel Glider Recliner', '/nursery/rocking-chairs/ella-marie-triple-power-swivel-glider-recliner-545060179'],
+    '280019716': ['Adrienne Power Recliner', '/outlet/chairs-recliners-clearance/adrienne-power-recliner-280019716']
+  };
+  function hit(name, sku, url, price){
+    return {response:{total_num_results:1, results:[{value:name, variations:[{value:name, data:{
+      variation_id:sku, url:url,
+      Pricing:JSON.stringify({price:price, originalPrice:price + 100, priceStyle:'Outlet'}),
+      facets:[{name:'Color', values:['Gray']}],
+      zipDeliveryEstimate:'Get it by Thu',
+      zipDeliveryZip:'08002'
+    }}]}]}};
+  }
+  var searched = [];
+  win.fetch = function(url){
+    var s = String(url);
+    if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){return Promise.resolve(index)}});
+    var term = decodeURIComponent(s.split('/search/')[1].split('?')[0]);
+    searched.push(term);
+    if(term === 'Ella Marie Triple Power Swivel Glider Recliner') return Promise.resolve({ok:true, json:function(){return Promise.resolve(hit(term, '545060179', index['545060179'][1], 799))}});
+    if(term === 'Adrienne Power Recliner') return Promise.resolve({ok:true, json:function(){return Promise.resolve(hit(term, '280019716', index['280019716'][1], 499))}});
+    return Promise.resolve({ok:true, json:function(){return Promise.resolve({response:{total_num_results:0, results:[]}})}});
+  };
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'545060179', q:'1', p:''}]});
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 40)});
+  assert.equal(searched[0], 'Ella Marie Triple Power Swivel Glider Recliner');
+  assert.equal(doc.getElementById('rd0').value, 'BR ~ Hie AR RE');
+  assert.match(doc.getElementById('rw0').textContent, /Ella Marie Triple Power Swivel Glider Recliner/);
+  assert.match(doc.getElementById('rw0').textContent, /Get it by Thu/);
+  doc.querySelector('[data-wpname="0"]').click();
+  assert.equal(doc.getElementById('rd0').value, 'Ella Marie Triple Power Swivel Glider Recliner');
+
+  searched = [];
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'', sku:'280019716', q:'1', p:''}]});
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 40)});
+  assert.equal(searched[0], 'Adrienne Power Recliner');
+  assert.match(doc.getElementById('rw0').textContent, /Use website name/);
+
+  searched = [];
+  win.fetch = function(url){
+    var s = String(url);
+    if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){return Promise.resolve(index)}});
+    searched.push(decodeURIComponent(s.split('/search/')[1].split('?')[0]));
+    return Promise.resolve({ok:true, json:function(){return Promise.resolve({response:{total_num_results:0, results:[]}})}});
+  };
+  api.load({name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08002', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'545060179', q:'1', p:''}]});
+  doc.querySelector('[data-wp="0"]').click();
+  await new Promise(function(r){setTimeout(r, 30)});
+  assert.equal(doc.getElementById('rd0').value, 'BR ~ Hie AR RE');
+  assert.match(doc.getElementById('rw0').textContent, /Ella Marie Triple Power Swivel Glider Recliner/);
+  assert.match(doc.getElementById('rw0').textContent, /Use website name|Replace the unreadable name/);
+  assert.match(doc.getElementById('rw0').innerHTML, /ella-marie-triple-power-swivel-glider-recliner-545060179/);
+  assert.equal(doc.getElementById('rw0').textContent.indexOf('$'), -1);
 });
 
 test('SKU lookup starts for an unreadable name and does not replace a typed name', async function(){

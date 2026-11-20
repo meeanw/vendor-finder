@@ -80,8 +80,10 @@ test('garbled names are recognized and recliner SKUs search recliner first', fun
   assert.equal(VFQ.looksGarbled('BR ~ Hie AR RE'), true);
   assert.equal(VFQ.looksGarbled('Adrienne Power Recliner'), false);
   assert.equal(VFQ.looksGarbled(''), false);
-  assert.deepEqual(VFQ.skuFallbackTerms('280019716').slice(0, 3), ['recliner', 'chair', 'power recliner']);
-  assert.deepEqual(VFQ.skuFallbackTerms('299087859').slice(0, 3), ['living room set', 'sofa', 'sectional']);
+  assert.deepEqual(VFQ.skuFallbackTerms('280019716').slice(0, 3), ['sofa', 'sectional', 'recliner']);
+  assert.ok(VFQ.skuFallbackTerms('545060179').indexOf('glider') >= 0);
+  assert.ok(VFQ.skuFallbackTerms('545060179').indexOf('nursery') >= 0);
+  assert.deepEqual(VFQ.skuFallbackTerms('MAT5VERQU'), []);
   var adrienne = {response:{results:[{value:'Adrienne Power Recliner', variations:[{value:'Adrienne Power Recliner', data:{
     variation_id:'280019716',
     url:'/outlet/chairs-recliners-clearance/adrienne-power-recliner-280019716',

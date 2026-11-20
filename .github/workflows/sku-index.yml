@@ -1,0 +1,25 @@
+name: Refresh SKU index
+on:
+  schedule:
+    # 09:00 UTC is 4:00am EST and 5:00am EDT.
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/build-sku-index.js
+      - name: Commit the index when it changed
+        run: |
+          git diff --quiet -- sku-index.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sku-index.json
+          git commit -m "Refresh the public website SKU index"
+          git push
