@@ -161,7 +161,9 @@ test('moving an item onto an option takes that option fee, and short texts inclu
     {v:'Raymour & Flanigan', d:'Four', p:'100.00', q:'1'}
   ]}));
   assert.equal(api.text().indexOf('details in the email'), -1);
-  assert.doesNotMatch(api.text(), /^1\. /m);
+  assert.match(api.text(), /1\. One — \$100\.00/);
+  assert.match(api.text(), /4\. Four — \$100\.00/);
+  assert.equal(api.text().indexOf('and 3 more'), -1);
 });
 
 test('option items show their size in the email and in a short text of three or fewer items', function(){
@@ -180,7 +182,7 @@ test('option items show their size in the email and in a short text of three or 
   assert.equal(opt.split('Size:').length, 2);
   var text = api.text();
   assert.match(text, /Size: 32" W x 35" D x 41" H/);
-  assert.match(text, new RegExp('Size: ' + leaf.replace(/[()]/g, '\\$&')));
+  assert.match(text, /Option 2, Fowler Dining Table size: 60" W x 42" D x 30" H \(78" W with leaf\)/);
 
   api.load(base({items:[
     {v:'Raymour & Flanigan', d:'Main chair', p:'100.00', q:'1', sz:'32" W x 35" D x 41" H'},
@@ -309,6 +311,67 @@ test('logging reads a text response and a rep with no log URL is told so', async
   assert.equal(api.logText(), 'Not logged, will retry');
   var queued = JSON.parse(page.win.localStorage.getItem('vf-logq-v1-naeem') || '[]');
   assert.ok(queued.length >= 1);
+});
+
+test('quote wording fixes from the v2.7.7 sample review', function(){
+  var api = loadPage().api;
+  var long = '162" W x 93" D x 29" H; Artemis I Right Arm Facing Chaise: 38" L x 66" W x 29" H; Artemis I Armless Loveseat: 64" L x 38" W x 29" H; Artemis I Armless Chair: 29" L x 38" W x 29" H';
+  assert.ok(long.length > 140 && long.length < 500);
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Artemis sectional', p:'1000.00', q:'1', sz:long}]}));
+  assert.equal(api.items()[0].sz, long);
+  var email = api.email();
+  assert.match(email, /   Size: 162" W x 93" D x 29" H\n      Artemis I Right Arm Facing Chaise: 38" L x 66" W x 29" H\n      Artemis I Armless Loveseat/);
+  assert.doesNotMatch(email, /Size: 162".*Armless Chair: 29/);
+  assert.match(api.text(), /Size: 162" W x 93" D x 29" H/);
+  assert.equal(api.text().indexOf('Armless Chair'), -1);
+
+  api.load(base({items:[
+    {v:'Raymour & Flanigan', d:'Adrienne Power Recliner', p:'499.99', q:'1', sz:'36" W x 39.5" D x 41" H', fin:'Linen'},
+    {v:'Raymour & Flanigan', d:'Ella Marie chair', p:'799.00', q:'1', sz:'32" W x 35" D x 41" H', fin:'Fog'}
+  ]}));
+  assert.match(api.text(), /Adrienne Power Recliner size: 36" W x 39\.5" D x 41" H/);
+  assert.match(api.text(), /Ella Marie chair size: 32" W x 35" D x 41" H/);
+
+  api.load(base({ext:true, items:[{v:'Raymour & Flanigan', d:'Adrienne Power Recliner', p:'499.99', rg:'899.99', q:'1', fin:'Linen', tg:{t:'outlet'}}]}));
+  email = api.email();
+  var block = email.slice(email.indexOf('1. Adrienne'), email.indexOf('Your Investment'));
+  assert.match(block, /Adrienne Power Recliner, Linen, Outlet/);
+  assert.equal(block.split('Regular price:').length, 2);
+  assert.match(block, /Outlet pricing does not apply with extended financing\./);
+  assert.equal(block.indexOf('sale prices do not apply'), -1);
+  api.load(base({ext:true, items:[{v:'Raymour & Flanigan', d:'Main sofa', p:'100.00', q:'1'}, {v:'Raymour & Flanigan', d:'Adrienne Power Recliner', p:'499.99', rg:'899.99', q:'1', fin:'Linen', opt:2, tg:{t:'outlet'}}]}));
+  var opt = api.email().slice(api.email().indexOf('Option 2'), api.email().indexOf('Make It Last'));
+  assert.match(opt, /Adrienne Power Recliner, Linen, Outlet/);
+  assert.match(opt, /Outlet pricing does not apply with extended financing\./);
+
+  api.load(base({ext:false, items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale', se:'2026-11-21'}}]}));
+  assert.match(api.email(), /Sale price good through Nov 21, 2026 only\./);
+
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
+  email = api.email();
+  assert.match(email, /This price is good for 72 hours, until .+\. Floor samples are one of a kind and can’t be reserved, so the piece may sell before then\./);
+  assert.equal(email.indexOf("can't be held"), -1);
+  assert.equal(email.indexOf('can’t be held'), -1);
+  assert.match(email, /Floor sample, sold as is\. No layaways, no warranties\./);
+
+  api.load(base({email:'jamie@example.com', items:[
+    {v:'Raymour & Flanigan', d:'One', p:'10.00', q:'1'},
+    {v:'Raymour & Flanigan', d:'Two', p:'20.00', q:'1'},
+    {v:'Raymour & Flanigan', d:'Three', p:'30.00', q:'1'},
+    {v:'Raymour & Flanigan', d:'Four', p:'40.00', q:'1'}
+  ]}));
+  assert.match(api.text(), /and 3 more/);
+  assert.doesNotMatch(api.text(), /^1\. One/m);
+
+  api.load(base({email:'', items:[{v:'Raymour & Flanigan', d:'BEDGEAR Ver-Tex Performance Mattress Protector', sku:'MAT5VERQU', p:'279.99', q:'1'}]}));
+  assert.match(api.text(), /Here’s your quote for BEDGEAR Ver-Tex Performance Protector\./);
+  assert.match(api.email(), /This protector includes the 5-Year Platinum Mattress Plan\./);
+  assert.equal(api.email().indexOf('5-year Platinum Protection:'), -1);
+
+  api.load(base({zip:'088071', dl:'199.99', items:[{v:'Raymour & Flanigan', d:'Chair', p:'100.00', q:'1'}]}));
+  assert.match(api.text(), /Delivery: ZIP needed/);
+  assert.equal(api.text().indexOf('Delivery to 088071'), -1);
+  assert.equal(api.email().indexOf('Delivery to 088071'), -1);
 });
 
 test('the service worker can install when the SKU files are missing', function(){
