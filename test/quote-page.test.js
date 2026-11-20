@@ -7,7 +7,16 @@ var {JSDOM} = require('jsdom');
 
 var root = path.join(__dirname, '..');
 var DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+var openPages = [];
 
+function trackTimers(window){
+  var ids = [];
+  var st = window.setTimeout.bind(window);
+  var si = window.setInterval.bind(window);
+  window.setTimeout = function(){ var id = st.apply(window, arguments); ids.push(id); return id; };
+  window.setInterval = function(){ var id = si.apply(window, arguments); ids.push(id); return id; };
+  window.__vfStop = function(){ ids.splice(0).forEach(function(id){ window.clearTimeout(id); window.clearInterval(id); }); };
+}
 function loadPage(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
@@ -16,13 +25,21 @@ function loadPage(){
     runScripts: 'dangerously',
     url: 'https://meeanw.github.io/vendor-finder/',
     pretendToBeVisual: true,
-    beforeParse: function(window){ window.eval(rules); }
+    beforeParse: function(window){ trackTimers(window); window.eval(rules); }
   });
+  openPages.push(dom);
   var api = dom.window.vfQuoteApi;
   var err = dom.window.document.getElementById('nj-err');
   assert.ok(api, 'quote API did not load' + (err && err.textContent ? ': ' + err.textContent.slice(0, 300) : ''));
   return {dom: dom, api: api};
 }
+test.afterEach(function(){
+  while(openPages.length){
+    var dom = openPages.pop();
+    try{ dom.window.__vfStop(); }catch(e){}
+    try{ dom.window.close(); }catch(e){}
+  }
+});
 
 test('the page source keeps cart preview hidden until pieces are added and does not ship new secrets', function(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');

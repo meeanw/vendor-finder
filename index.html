@@ -1169,18 +1169,21 @@ var WP_KEY='key_1tigFZoUEs7Ygkww',WP_SITE='https://www.raymourflanigan.com';
 function wpPublic(s){s=String(s==null?'':s).replace(/\s+/g,' ').trim();if(!s||/WSTW-|\b[A-Z]{2,6}-\d{2,}\b/.test(s))return '';return s}
 function wpExtras(o,w){var color=wpPublic(w.color);o.color=color&&w.colorState==='website'?clip(color,80):'';o.colorState=o.color?'website':'unconfirmed';var del=wpPublic(w.delText);o.delText=del&&w.delState==='website'?clip(del,140):'';o.delState=o.delText?'website':'unconfirmed';o.delReason=clip(w.delReason,240);var sz=wpPublic(w.sz);if(sz)o.sz=clip(sz,140);return o}
 function wpClean(w){if(!w||typeof w!=='object')return undefined;var o={t:+w.t||0};
+ if(w.pendingDetails)o.pendingDetails=1;
  if(w.indexOnly){o.ok=1;o.indexOnly=1;o.nm=clip(w.nm,120);o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip='08807';o.discounted=0;wpExtras(o,w);if(!o.nm&&!o.color&&!o.delText&&!o.sz)return undefined;return o}
  if(w.ok){var p=pnum(w.p),g=pnum(w.o);if(p===null||p<=0||p>1e6)return undefined;o.ok=1;o.p=p;if(g!==null&&g>0&&g<1e6)o.o=g;o.st=/^(Sale|Outlet|Retail|Clearance)$/.test(w.st)?w.st:'';o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.nm=clip(w.nm,120);wpExtras(o,w);o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip='08807';o.discounted=w.discounted?1:0;return o}
  o.m=/^(nomatch|offline|nosku|noname|protnone|protunknown|notfound)$/.test(w.m)?w.m:'nomatch';return o}
 function wpView(x){var w=x&&x.w;if(!w)return null;if(w.ok&&VFQ.websiteStale(w,x.sku,RD.zip)){var o={},k;for(k in w)if(Object.prototype.hasOwnProperty.call(w,k))o[k]=w[k];o.stale=1;return o}return w}
 function wpSearchUrl(x){var q=(x.d||x.c||x.v||'').trim().replace(/\s+/g,' ').slice(0,80);return q?WP_SITE+'/search?page=1&redirectQuery='+encodeURIComponent(q):WP_SITE+'/'}
 function wpTime(t){if(!t)return '';var d=new Date(t),h=d.getHours(),m=d.getMinutes();return (h%12||12)+':'+(m<10?'0':'')+m+(h>=12?' PM':' AM')}
+function wpPendingLine(w){if(!w||!w.pendingDetails)return '';if(!w.sz&&w.delState!=='website')return 'Size and delivery aren\u2019t available yet.';if(!w.sz)return 'Size isn\u2019t available yet.';if(w.delState!=='website')return 'Delivery isn\u2019t available yet.';return ''}
 function wpHtml(x,i){var w=wpView(x);if(!w)return '';
  if(w.indexOnly&&!(w.p>0)){var idxName=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':'Use website name';
   var ih='<p class="rwp"><b>Website name:</b> '+esc(w.nm||'Not supplied')+'</p>';
   if(w.colorState==='website')ih+='<p class="rwp"><b>Color:</b> '+esc(w.color)+'</p>';
   if(w.sz)ih+='<p class="rwp"><b>Size:</b> '+esc(w.sz)+'</p>';
   if(w.delState==='website')ih+='<p class="rwp"><b>Delivery time frame:</b> '+esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)</p>';
+  else if(wpPendingLine(w))ih+='<p class="qfine">'+esc(wpPendingLine(w))+'</p>';
   ih+='<p class="qfine">Saved website details for this SKU. The live search did not return a price, so confirm the price before using it.</p><div class="rrow">';
   if(w.nm||w.colorState==='website'||w.sz||w.delState==='website')ih+='<button type="button" class="btn1 rbtn" data-wpall="'+i+'">Use all website info</button>';
   if(w.nm)ih+='<button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+idxName+'</button>';
@@ -1197,7 +1200,8 @@ function wpHtml(x,i){var w=wpView(x);if(!w)return '';
  h+='<p class="rwp"><b>Color:</b> '+(w.colorState==='website'?esc(w.color):'Not supplied by the website search. Confirm the color yourself.')+'</p>';
  h+='<p class="rwp"><b>Website price:</b> '+money(w.p)+(w.o&&w.o>w.p?', regular '+money(w.o):'')+(w.st?' ('+esc(w.st)+')':'')+' <span class="opt">checked '+wpTime(w.t)+'</span></p>';
  if(w.sz)h+='<p class="rwp"><b>Size:</b> '+esc(w.sz)+'</p>';
- h+='<p class="rwp"><b>Delivery time frame:</b> '+(w.delState==='website'?esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)': 'Not filled in. Delivery timing is looked up for showroom ZIP 08807 only. This app cannot read the website\u2019s Get it by / Get it in result, so nothing is filled in automatically. Type a date or a range after you confirm it. A range is not turned into a date, and a stock date is not used.')+'</p>';
+ var pending=wpPendingLine(w);
+ h+='<p class="rwp"><b>Delivery time frame:</b> '+(w.delState==='website'?esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)': pending?esc(pending): 'Not filled in. Delivery timing is looked up for showroom ZIP 08807 only. This app cannot read the website\u2019s Get it by / Get it in result, so nothing is filled in automatically. Type a date or a range after you confirm it. A range is not turned into a date, and a stock date is not used.')+'</p>';
  if(!plan.ok)h+='<p class="tgwarn">Financing longer than 18 months needs the regular price, and the website did not provide one. The sale or outlet price was not applied.</p>';
  else if(RD.ext&&w.discounted)h+='<p class="tgwarn">Financing longer than 18 months quotes the regular price '+money(plan.quoted)+'. The current price stays saved, so turning this off goes back to '+money(plan.price)+'.</p>';
  var cur=pnum(x.p),target=plan.ok?(RD.ext&&w.discounted&&plan.quoted!=null?plan.quoted:plan.price):w.p;if(cur!==null&&Math.abs(cur-target)>=0.005&&!(RD.ext&&w.discounted&&plan.ok&&Math.abs(cur-plan.price)<0.005))h+='<p class="tgwarn">Your quote has '+money(cur)+'. The website '+(RD.ext&&w.discounted&&plan.ok?'regular price to quote is '+money(plan.quoted):'price is '+money(w.p))+'. It is not copied until you tap a button.</p>';
@@ -1239,12 +1243,12 @@ function wpCheck(i){if(WP_BUSY[i])return;var x=RD.items[i],box=document.getEleme
  if(look.kind==='protnone'||look.kind==='protunknown'){done({t:Date.now(),m:look.kind});return}
  if(!sku){done({t:Date.now(),m:'nosku'});return}
  if(navigator.onLine===false||typeof fetch!=='function'){done({t:Date.now(),m:'offline'});return}
- function begin(indexEntry,allowFallback,det){
+ function begin(indexEntry,allowFallback,det,pendingDetails){
   var terms=wpTerms(x);if(!terms.length&&look.name&&!VFQ.looksGarbled(look.name))terms=[look.name];
   if(indexEntry&&indexEntry.name){var nm=indexEntry.name;terms=[nm].concat(terms.filter(function(t){return t.toLowerCase()!==nm.toLowerCase()}))}
   var fallback=allowFallback&&look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
   var fallbackAt=terms.length;terms=terms.concat(fallback);
-  function pack(base){return wpMergeDetails(base,det)}
+  function pack(base){var hit=wpMergeDetails(base,det);if(pendingDetails)hit.pendingDetails=1;return hit}
   if(!terms.length){if(indexEntry)done(pack({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:'08807'}));else done({t:Date.now(),m:'noname'});return}
   box.innerHTML='<p class="qfine">'+(indexEntry?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
   ctl=typeof AbortController==='function'?new AbortController():null;var sawOk=false,sawFail=false,step=function(n){
@@ -1254,7 +1258,7 @@ function wpCheck(i){if(WP_BUSY[i])return;var x=RD.items[i],box=document.getEleme
    wpSearchPages(terms[n],sku,'08807',ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip='08807';done(pack(r.hit));return}step(n+1)})};
   to=setTimeout(function(){if(ctl)try{ctl.abort()}catch(e){}if(indexEntry)done(pack({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:'08807'}));else done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000);
   step(0)}
- if(look.kind==='sku'){box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';Promise.all([wpIndexEntry(sku),wpSkuDetails()]).then(function(pair){if(finished)return;var entry=pair[0],det=pair[1]&&pair[1][sku];if(entry&&entry.missing){done({t:Date.now(),m:'notfound'});return}begin(entry&&entry.name?entry:null,!(entry&&entry.name),det)})}
+ if(look.kind==='sku'){box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';Promise.all([wpIndexEntry(sku),wpSkuDetails()]).then(function(pair){if(finished)return;var entry=pair[0],file=pair[1],det=file&&file[sku];if(entry&&entry.missing){done({t:Date.now(),m:'notfound'});return}begin(entry&&entry.name?entry:null,!(entry&&entry.name),det,!!(file&&!det))})}
  else begin(null,false,null)}
 function wpRememberStyle(x,w){if(x.tg&&x.tg.t)return;if(w.st==='Outlet')x.tg=tgItemClean({t:'outlet'});else if(w.st==='Sale'||w.st==='Clearance')x.tg=tgItemClean({t:'sale'})}
 function wpStorePrices(x,w){if(!(w.p>0))return false;var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));if(!plan.ok||!(plan.price>0))return false;x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';wpRememberStyle(x,w);if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u);return true}

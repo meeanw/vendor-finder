@@ -4,6 +4,19 @@ on:
     # 09:00 UTC is 4:00am EST and 5:00am EDT.
     - cron: '0 9 * * *'
   workflow_dispatch:
+    inputs:
+      new_cap:
+        description: 'New SKUs this run (nightly default 2000)'
+        default: '2000'
+        required: false
+      refresh_cap:
+        description: 'Oldest delivery notes to refresh (nightly default 300)'
+        default: '300'
+        required: false
+      minutes:
+        description: 'Stop after this many minutes (nightly default 45)'
+        default: '45'
+        required: false
 permissions:
   contents: write
 jobs:
@@ -16,6 +29,10 @@ jobs:
           node-version: '22'
       - run: node scripts/build-sku-index.js
       - run: node scripts/build-sku-details.js
+        env:
+          SKU_DETAILS_NEW: ${{ github.event.inputs.new_cap || '2000' }}
+          SKU_DETAILS_REFRESH: ${{ github.event.inputs.refresh_cap || '300' }}
+          SKU_DETAILS_MINUTES: ${{ github.event.inputs.minutes || '45' }}
       - name: Commit the index when it changed
         run: |
           git diff --quiet -- sku-index.json sku-details.json && exit 0

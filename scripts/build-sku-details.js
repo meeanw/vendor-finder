@@ -1,8 +1,9 @@
 'use strict';
 /* Incremental public details for sku-index.json.
    Writes sku-details.json only. Never saves page text or internal codes such as WSTW-.
-   Each run fetches SKUs that are new or missing dimensions, plus a small rolling
-   refresh of delivery notes. It does not fetch the whole catalog.
+   Each run fetches up to 2,000 new SKUs (3 at a time) and stops after 45 minutes,
+   plus up to 300 oldest delivery notes. A 403 or 429 stops the run and keeps
+   the rows already saved. It does not fetch the whole catalog in one night.
    Delivery comes from the public product-card JSON for showroom ZIP 08807.
    Dimensions come from that product page's CompositeWidthDepthHeight field
    ("W: … x D: … x H: …"), not the swapped length/width field.
@@ -15,8 +16,10 @@ var INDEX_FILE = path.join(__dirname, '..', 'sku-index.json');
 var OUT = path.join(__dirname, '..', 'sku-details.json');
 var CARD = 'https://www.raymourflanigan.com/api/custom/product-card';
 var SITE = 'https://www.raymourflanigan.com';
-var NEW_CAP = Math.max(1, +(process.env.SKU_DETAILS_NEW || 40));
-var REFRESH_CAP = Math.max(0, +(process.env.SKU_DETAILS_REFRESH || 15));
+var NEW_CAP = Math.max(1, +(process.env.SKU_DETAILS_NEW || 2000));
+var REFRESH_CAP = Math.max(0, +(process.env.SKU_DETAILS_REFRESH || 300));
+var MINUTES = Math.max(1, +(process.env.SKU_DETAILS_MINUTES || 45));
+var CONCURRENCY = Math.min(4, Math.max(2, +(process.env.SKU_DETAILS_CONCURRENCY || 3)));
 var PRIORITY = ['545060179', '280019716', '464034239', '700294001'];
 
 function unescapePage(raw){
@@ -117,7 +120,10 @@ function todayIso(){
   var m = d.getMonth() + 1, day = d.getDate();
   return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
 }
-function choose(index, details){
+function choose(index, details, caps){
+  caps = caps || {};
+  var newCap = caps.newCap != null ? caps.newCap : NEW_CAP;
+  var refreshCap = caps.refreshCap != null ? caps.refreshCap : REFRESH_CAP;
   var want = [];
   var seen = {};
   function add(sku, refresh){
@@ -130,7 +136,7 @@ function choose(index, details){
     if(!row || !(row.w > 0 && row.d > 0 && row.h > 0)) add(sku, false);
   });
   Object.keys(index).sort().some(function(sku){
-    if(want.length >= NEW_CAP) return true;
+    if(want.filter(function(job){ return !job.refresh; }).length >= newCap) return true;
     if(!details[sku]) add(sku, false);
     return false;
   });
@@ -138,7 +144,7 @@ function choose(index, details){
     .sort(function(a, b){ return String(details[a].checked).localeCompare(String(details[b].checked)) || a.localeCompare(b); });
   var n = 0;
   oldest.forEach(function(sku){
-    if(n >= REFRESH_CAP || seen[sku]) return;
+    if(n >= refreshCap || seen[sku]) return;
     add(sku, true);
     n++;
   });
@@ -167,17 +173,73 @@ async function getHtml(url){
   if(!res.ok) throw new Error('HTTP ' + res.status);
   return res.text();
 }
-async function cards(skus){
-  // The product-card endpoint returns nothing when several codes are joined
-  // with commas. One code per request is the call that returns JSON.
-  var map = {};
-  for(var i = 0; i < skus.length; i++){
-    var url = CARD + '?codes=' + encodeURIComponent(skus[i]) +
-      '&postalCode=08807&showAlternateItems=false&showDeliveryTimeline=true&showSecondDimension=true';
-    var data = await getJson(url);
-    (data.products || []).forEach(function(p){ if(p && p.code) map[String(p.code)] = p; });
+async function enrichJob(job, details, checked, fetchCard, fetchPage){
+  var prev = details[job.sku] || {};
+  var next = {
+    color: prev.color || '',
+    delivery: prev.delivery || '',
+    checked: prev.checked || '',
+    w: prev.w || 0,
+    d: prev.d || 0,
+    h: prev.h || 0
+  };
+  if(prev.leaf) next.leaf = prev.leaf;
+  if(prev.pieces) next.pieces = prev.pieces;
+  var card = await fetchCard(job.sku);
+  var delivery = deliveryFromCard(card);
+  var color = colorFromCard(card);
+  if(delivery){ next.delivery = delivery; next.checked = checked; }
+  if(color && !next.color) next.color = color;
+  if(!job.refresh && !(next.w && next.d && next.h) && job.path){
+    var html = await fetchPage(job.path, job.sku);
+    var parsed = parseDimensions(html, job.sku);
+    if(parsed){
+      next.w = parsed.w; next.d = parsed.d; next.h = parsed.h;
+      if(parsed.leaf) next.leaf = parsed.leaf; else delete next.leaf;
+      if(parsed.pieces) next.pieces = parsed.pieces; else delete next.pieces;
+      if(parsed.color && !next.color) next.color = parsed.color;
+    }
   }
-  return map;
+  return keep(next);
+}
+
+// Workers pull jobs until the list, the clock, or a 403/429 says stop.
+// In-flight requests finish. Whatever was saved stays in details.
+async function runBudget(opts){
+  var jobs = opts.jobs || [];
+  var details = opts.details;
+  var concurrency = Math.min(4, Math.max(1, opts.concurrency || CONCURRENCY));
+  var now = opts.now || Date.now;
+  var deadline = opts.deadline != null ? opts.deadline : now() + MINUTES * 60 * 1000;
+  var checked = opts.checked || todayIso();
+  var fetchCard = opts.fetchCard;
+  var fetchPage = opts.fetchPage;
+  var cursor = 0;
+  var stopped = false;
+  var blocked = 0;
+  var failed = 0;
+  var updated = 0;
+  async function worker(){
+    while(!stopped){
+      if(now() >= deadline){ stopped = true; return; }
+      var i = cursor++;
+      if(i >= jobs.length) return;
+      var job = jobs[i];
+      try{
+        var saved = await enrichJob(job, details, checked, fetchCard, fetchPage);
+        if(stopped) return;
+        if(saved.w || saved.delivery || saved.color){ details[job.sku] = saved; updated++; }
+      }catch(err){
+        if(err && err.blocked){ blocked++; stopped = true; process.stderr.write('stopped: site returned ' + (err.message || 'a block') + '\n'); return; }
+        failed++;
+        process.stderr.write(job.sku + ' ' + (err && err.message) + '\n');
+      }
+    }
+  }
+  var workers = [];
+  for(var w = 0; w < concurrency; w++) workers.push(worker());
+  await Promise.all(workers);
+  return {updated:updated, blocked:blocked, failed:failed, stopped:stopped};
 }
 
 async function main(){
@@ -185,74 +247,43 @@ async function main(){
   var details = {};
   if(fs.existsSync(OUT)) details = JSON.parse(fs.readFileSync(OUT, 'utf8'));
   var jobs = choose(index, details);
-  var checked = todayIso();
-  var blocked = 0, failed = 0, updated = 0;
-  process.stderr.write('details jobs ' + jobs.length + ' new cap ' + NEW_CAP + ' refresh cap ' + REFRESH_CAP + '\n');
-  for(var i = 0; i < jobs.length; i += 8){
-    var batch = jobs.slice(i, i + 8);
-    var cardMap = {};
-    try{ cardMap = await cards(batch.map(function(job){ return job.sku; })); }
-    catch(err){
-      if(err && err.blocked) blocked += batch.length;
-      else failed += batch.length;
-      process.stderr.write('product-card ' + (err && err.message) + '\n');
-      continue;
-    }
-    for(var k = 0; k < batch.length; k++){
-      var job = batch[k];
-      var prev = details[job.sku] || {};
-      var next = {
-        color: prev.color || '',
-        delivery: prev.delivery || '',
-        checked: prev.checked || '',
-        w: prev.w || 0,
-        d: prev.d || 0,
-        h: prev.h || 0
-      };
-      if(prev.leaf) next.leaf = prev.leaf;
-      if(prev.pieces) next.pieces = prev.pieces;
-      var card = cardMap[job.sku];
-      var delivery = deliveryFromCard(card);
-      var color = colorFromCard(card);
-      if(delivery){ next.delivery = delivery; next.checked = checked; }
-      if(color && !next.color) next.color = color;
-      if(!job.refresh && !(next.w && next.d && next.h) && job.path){
-        try{
-          var html = await getHtml(SITE + job.path);
-          var parsed = parseDimensions(html, job.sku);
-          if(parsed){
-            next.w = parsed.w; next.d = parsed.d; next.h = parsed.h;
-            if(parsed.leaf) next.leaf = parsed.leaf; else delete next.leaf;
-            if(parsed.pieces) next.pieces = parsed.pieces; else delete next.pieces;
-            if(parsed.color && !next.color) next.color = parsed.color;
-          }
-        }catch(err){
-          if(err && err.blocked) blocked++;
-          else failed++;
-          process.stderr.write(job.sku + ' page ' + (err && err.message) + '\n');
-        }
-      }
-      var saved = keep(next);
-      if(saved.w || saved.delivery || saved.color){ details[job.sku] = saved; updated++; }
-    }
-  }
+  var started = Date.now();
+  process.stderr.write('details jobs ' + jobs.length + ' new cap ' + NEW_CAP + ' refresh cap ' + REFRESH_CAP + ' minutes ' + MINUTES + ' concurrency ' + CONCURRENCY + '\n');
+  var result = await runBudget({
+    jobs: jobs,
+    details: details,
+    concurrency: CONCURRENCY,
+    deadline: started + MINUTES * 60 * 1000,
+    checked: todayIso(),
+    fetchCard: async function(sku){
+      var url = CARD + '?codes=' + encodeURIComponent(sku) +
+        '&postalCode=08807&showAlternateItems=false&showDeliveryTimeline=true&showSecondDimension=true';
+      var data = await getJson(url);
+      var products = data.products || [];
+      for(var i = 0; i < products.length; i++) if(products[i] && String(products[i].code) === String(sku)) return products[i];
+      return null;
+    },
+    fetchPage: function(urlPath){ return getHtml(SITE + urlPath); }
+  });
   var ordered = {};
   Object.keys(details).sort().forEach(function(sku){ ordered[sku] = details[sku]; });
   fs.writeFileSync(OUT, JSON.stringify(ordered));
   var withDims = Object.keys(ordered).filter(function(sku){ var r = ordered[sku]; return r.w && r.d && r.h; }).length;
-  process.stderr.write('sku-details ' + Object.keys(ordered).length + ' with dimensions ' + withDims + ' updated ' + updated + ' blocked ' + blocked + ' failed ' + failed + '\n');
-  if(jobs.length && updated === 0 && blocked === jobs.length){
-    console.error('raymourflanigan.com blocked every details request');
-    process.exit(1);
-  }
+  process.stderr.write('sku-details ' + Object.keys(ordered).length + ' with dimensions ' + withDims + ' updated ' + result.updated + ' blocked ' + result.blocked + ' failed ' + result.failed + ' minutes ' + ((Date.now() - started) / 60000).toFixed(1) + '\n');
 }
 
 module.exports = {
   parseDimensions:parseDimensions,
   deliveryFromCard:deliveryFromCard,
   choose:choose,
+  runBudget:runBudget,
   internal:internal,
-  cleanText:cleanText
+  cleanText:cleanText,
+  NEW_CAP:NEW_CAP,
+  REFRESH_CAP:REFRESH_CAP,
+  MINUTES:MINUTES,
+  CONCURRENCY:CONCURRENCY,
+  PRIORITY:PRIORITY
 };
 
 if(require.main === module){

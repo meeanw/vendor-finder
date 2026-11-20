@@ -6,7 +6,16 @@ var path = require('path');
 var {JSDOM} = require('jsdom');
 
 var root = path.join(__dirname, '..');
+var openPages = [];
 
+function trackTimers(window){
+  var ids = [];
+  var st = window.setTimeout.bind(window);
+  var si = window.setInterval.bind(window);
+  window.setTimeout = function(){ var id = st.apply(window, arguments); ids.push(id); return id; };
+  window.setInterval = function(){ var id = si.apply(window, arguments); ids.push(id); return id; };
+  window.__vfStop = function(){ ids.splice(0).forEach(function(id){ window.clearTimeout(id); window.clearInterval(id); }); };
+}
 function loadPage(prep){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
@@ -15,12 +24,20 @@ function loadPage(prep){
     runScripts: 'dangerously',
     url: 'https://meeanw.github.io/vendor-finder/',
     pretendToBeVisual: true,
-    beforeParse: function(window){ window.eval(rules); if(prep) prep(window); }
+    beforeParse: function(window){ trackTimers(window); window.eval(rules); if(prep) prep(window); }
   });
+  openPages.push(dom);
   var api = dom.window.vfQuoteApi;
   assert.ok(api, 'quote API did not load');
   return {dom:dom, api:api, win:dom.window, doc:dom.window.document};
 }
+test.afterEach(function(){
+  while(openPages.length){
+    var dom = openPages.pop();
+    try{ dom.window.__vfStop(); }catch(e){}
+    try{ dom.window.close(); }catch(e){}
+  }
+});
 function base(extra){
   var o = {name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08807', dl:'0', notes:'', pn:'', items:[{v:'Raymour & Flanigan', d:'Chair', p:'100.00', q:'1'}]};
   Object.keys(extra || {}).forEach(function(k){ o[k] = extra[k]; });
@@ -191,6 +208,33 @@ test('a missing SKU stops, a second tap does not start another lookup, and saved
   assert.equal(doc.getElementById('rsz0').value, '32" W x 35" D x 41" H');
   assert.match(api.email(), /Size: 32" W x 35" D x 41" H/);
   assert.match(api.text(), /Size: 32" W x 35" D x 41" H/);
+});
+
+test('a SKU in the index but not yet in the details file still fills name and price', async function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.doc;
+  var priced = {response:{total_num_results:1, results:[{value:'Ella Marie Triple Power Swivel Glider Recliner', variations:[{value:'Ella Marie Triple Power Swivel Glider Recliner', data:{
+    variation_id:'545060179',
+    url:'/nursery/rocking-chairs/ella-marie-triple-power-swivel-glider-recliner-545060179',
+    Pricing:JSON.stringify({price:799, originalPrice:999, priceStyle:'Sale'})
+  }}]}]}};
+  page.win.fetch = function(url){
+    var s = String(url);
+    if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){ return Promise.resolve({'545060179':['Ella Marie Triple Power Swivel Glider Recliner','/nursery/rocking-chairs/ella-marie-triple-power-swivel-glider-recliner-545060179']}); }});
+    if(s.indexOf('sku-details.json') >= 0) return Promise.resolve({ok:true, json:function(){ return Promise.resolve({}); }});
+    if(s.indexOf('/search/') >= 0) return Promise.resolve({ok:true, json:function(){ return Promise.resolve(priced); }});
+    return Promise.resolve({ok:false, status:404, json:function(){ return Promise.resolve({}); }});
+  };
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'BR ~ Hie AR RE', sku:'545060179', p:'10.00', q:'1', e:'', sz:''}]}));
+  doc.querySelector('[data-wp="0"]').click();
+  await wait();
+  assert.match(doc.getElementById('rw0').textContent, /Size and delivery aren.t available yet/);
+  doc.querySelector('[data-wpall="0"]').click();
+  assert.equal(doc.getElementById('rd0').value, 'Ella Marie Triple Power Swivel Glider Recliner');
+  assert.equal(doc.getElementById('rp0').value, '799.00');
+  assert.equal(doc.getElementById('rsz0').value, '');
+  assert.equal(doc.getElementById('re0').value, '');
 });
 
 test('logging reads a text response and a rep with no log URL is told so', async function(){
