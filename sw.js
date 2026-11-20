@@ -1,11 +1,16 @@
-/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.7.5). */
-var VERSION='2.7.5';
+/* Furniture Vendor Finder service worker. Version is stamped at build time (v2.7.6). */
+var VERSION='2.7.6';
 var CACHE='vf-'+VERSION;
-var PRECACHE=['./','index.html','quote-rules.js','sku-index.json','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico','ocr/tesseract-5.1.1/tesseract.min.js','ocr/tesseract-5.1.1/worker.min.js','ocr/core-5.1.1/tesseract-core-lstm.wasm.js','ocr/core-5.1.1/tesseract-core-simd-lstm.wasm.js','ocr/lang/eng.traineddata.gz'];
+var PRECACHE=['./','index.html','quote-rules.js','manifest.json','manifest-naeem.json','manifest-hans.json','zxing-0.21.3.min.js','apple-touch-icon.png','naeem.jpg','icon-192.png','icon-512.png','og.png','favicon.png','favicon.ico','ocr/tesseract-5.1.1/tesseract.min.js','ocr/tesseract-5.1.1/worker.min.js','ocr/core-5.1.1/tesseract-core-lstm.wasm.js','ocr/core-5.1.1/tesseract-core-simd-lstm.wasm.js','ocr/lang/eng.traineddata.gz'];
+var LAZY=['sku-index.json','sku-details.json'];
 self.addEventListener('install',function(e){
-  // fetch with cache:'reload' so we never precache a stale copy from the HTTP cache
+  // fetch with cache:'reload' so we never precache a stale copy from the HTTP cache.
+  // sku-index.json and sku-details.json are fetched separately: a failed download must not
+  // fail this install, or the app stays stuck on the previous worker.
   e.waitUntil(caches.open(CACHE).then(function(c){
-    return Promise.all(PRECACHE.map(function(u){return c.add(new Request(u,{cache:'reload'}))}));
+    return Promise.all(PRECACHE.map(function(u){return c.add(new Request(u,{cache:'reload'}))})).then(function(){
+      return Promise.all(LAZY.map(function(u){return c.add(new Request(u,{cache:'reload'})).catch(function(){})}));
+    });
   }).then(function(){return self.skipWaiting()}));
 });
 self.addEventListener('activate',function(e){

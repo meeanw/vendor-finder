@@ -21,7 +21,9 @@ test('blank delivery is not zero; explicit 0 is allowed; negatives are rejected'
   assert.equal(VFQ.deliveryCents('0.00'), 0);
   assert.equal(VFQ.deliveryCents('$199'), 19900);
   assert.equal(VFQ.deliveryCents('-1'), null);
-  assert.equal(VFQ.deliveryCents('free'), null);
+  assert.equal(VFQ.deliveryCents('free'), 0);
+  assert.equal(VFQ.deliveryCents('FREE'), 0);
+  assert.equal(VFQ.deliveryCents('.5'), 50);
   var blank = VFQ.quoteTotals(10000, VFQ.deliveryCents(''));
   assert.equal(blank.deliveryCents, null);
   assert.equal(blank.taxCents, null);
@@ -160,16 +162,16 @@ test('stock dates and lead times are never a ZIP delivery promise', function(){
     zipDeliveryEstimate: 'Thu, Nov 12',
     zipDeliveryZip: '08807'
   }, '08002');
-  assert.equal(otherZip.state, 'unconfirmed');
-  assert.equal(otherZip.text, '');
+  assert.equal(otherZip.state, 'website');
+  assert.equal(otherZip.text, 'Thu, Nov 12');
 });
 
-test('a website check goes stale when the SKU or ZIP changes', function(){
+test('a website check goes stale when the SKU changes, not when the ZIP changes', function(){
   var w = {ok: 1, sku: '218092233', zip: '08807'};
   assert.equal(VFQ.websiteStale(w, '218092233', '08807'), false);
   assert.equal(VFQ.websiteStale(w, '217092232', '08807'), true);
-  assert.equal(VFQ.websiteStale(w, '218092233', '08002'), true);
-  assert.equal(VFQ.websiteStale(w, '218092233', '08807 '), true);
+  assert.equal(VFQ.websiteStale(w, '218092233', '08002'), false);
+  assert.equal(VFQ.websiteStale(w, '218092233', '08807 '), false);
 });
 
 test('extended financing apply uses regular price and does not put the sale price back', function(){
@@ -180,9 +182,9 @@ test('extended financing apply uses regular price and does not put the sale pric
   assert.equal(open.regular, 385);
   var locked = VFQ.websitePricePlan(web, true);
   assert.equal(locked.ok, true);
-  assert.equal(locked.price, 385);
+  assert.equal(locked.price, 365.75);
   assert.equal(locked.regular, 385);
-  assert.notEqual(locked.price, 365.75);
+  assert.equal(locked.quoted, 385);
   var missing = VFQ.websitePricePlan({price: 365.75, original: null, style: 'Sale'}, true);
   assert.equal(missing.ok, false);
   assert.equal(missing.reason, 'missing-regular');

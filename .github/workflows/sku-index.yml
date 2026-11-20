@@ -15,11 +15,12 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/build-sku-index.js
+      - run: node scripts/build-sku-details.js
       - name: Commit the index when it changed
         run: |
-          git diff --quiet -- sku-index.json && exit 0
+          git diff --quiet -- sku-index.json sku-details.json && exit 0
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add sku-index.json
-          git commit -m "Refresh the public website SKU index"
+          git add sku-index.json sku-details.json
+          git commit -m "Refresh the public website SKU index and details"
           git push
