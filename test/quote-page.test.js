@@ -7,7 +7,16 @@ var {JSDOM} = require('jsdom');
 
 var root = path.join(__dirname, '..');
 var DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+var openPages = [];
 
+function trackTimers(window){
+  var ids = [];
+  var st = window.setTimeout.bind(window);
+  var si = window.setInterval.bind(window);
+  window.setTimeout = function(){ var id = st.apply(window, arguments); ids.push(id); return id; };
+  window.setInterval = function(){ var id = si.apply(window, arguments); ids.push(id); return id; };
+  window.__vfStop = function(){ ids.splice(0).forEach(function(id){ window.clearTimeout(id); window.clearInterval(id); }); };
+}
 function loadPage(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   var rules = fs.readFileSync(path.join(root, 'quote-rules.js'), 'utf8');
@@ -16,13 +25,21 @@ function loadPage(){
     runScripts: 'dangerously',
     url: 'https://meeanw.github.io/vendor-finder/',
     pretendToBeVisual: true,
-    beforeParse: function(window){ window.eval(rules); }
+    beforeParse: function(window){ trackTimers(window); window.eval(rules); }
   });
+  openPages.push(dom);
   var api = dom.window.vfQuoteApi;
   var err = dom.window.document.getElementById('nj-err');
   assert.ok(api, 'quote API did not load' + (err && err.textContent ? ': ' + err.textContent.slice(0, 300) : ''));
   return {dom: dom, api: api};
 }
+test.afterEach(function(){
+  while(openPages.length){
+    var dom = openPages.pop();
+    try{ dom.window.__vfStop(); }catch(e){}
+    try{ dom.window.close(); }catch(e){}
+  }
+});
 
 test('the page source keeps cart preview hidden until pieces are added and does not ship new secrets', function(){
   var html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
@@ -139,9 +156,8 @@ test('applying website prices while financing is longer than 18 months does not 
   assert.equal(api.items()[0].fin, 'Rep color');
   assert.equal(api.items()[0].e, 'Ask the warehouse');
   api.applyPrice(0);
-  assert.equal(api.items()[0].p, '385.00');
+  assert.equal(api.items()[0].p, '365.75');
   assert.equal(api.items()[0].rg, '385.00');
-  assert.notEqual(api.items()[0].p, '365.75');
   assert.equal(api.items()[0].d, 'My note name');
   assert.equal(api.items()[0].e, 'Ask the warehouse');
   api.applyName(0);
@@ -204,7 +220,8 @@ test('a one-letter name cannot be sent until the rep confirms it, and a short re
   });
   var text = api.text();
   var email = api.email();
-  assert.match(email, /Est\. delivery \(showroom ZIP 08807\): Get it in 3-5 Weeks/);
+  assert.match(email, /Estimated delivery: Get it in 3-5 Weeks/);
+  assert.equal(email.indexOf('Est. delivery (showroom ZIP 08807)'), -1);
   assert.match(email, /showroom ZIP 08807/);
   assert.match(text, /Delivery timing is an estimate based on showroom ZIP 08807\./);
   assert.match(text, /subject to confirmation and is not a guarantee/);
@@ -314,12 +331,13 @@ test('a garbled name does not block SKU 280019716, and one tap fills the website
     Pricing:'{"price":499.99,"originalPrice":899.99,"priceStyle":"Outlet"}',
     facets:[{name:'Color', values:['Gray']}],
     zipDeliveryEstimate:'Get it in 2-4 weeks',
-    zipDeliveryZip:'08002'
+    zipDeliveryZip:'08807'
   }}]}]}};
   var terms = [];
   win.fetch = function(url){
     var s = String(url);
-    if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
+    if(s.indexOf('sku-index.json') >= 0 || s.indexOf('sku-details.json') >= 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
+    if(s.indexOf('/search/') < 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
     var term = decodeURIComponent(s.split('/search/')[1].split('?')[0]);
     terms.push(term);
     var body = term.toLowerCase() === 'recliner' ? fixture : {response:{total_num_results:0, results:[]}};
@@ -345,9 +363,9 @@ test('a garbled name does not block SKU 280019716, and one tap fills the website
   doc.querySelector('[data-wp="0"]').click();
   await new Promise(function(r){setTimeout(r, 80)});
   doc.querySelector('[data-wpall="0"]').click();
-  assert.equal(doc.getElementById('rp0').value, '899.99');
+  assert.equal(doc.getElementById('rp0').value, '499.99');
   assert.equal(doc.getElementById('rg0').value, '899.99');
-  assert.notEqual(doc.getElementById('rp0').value, '499.99');
+  assert.match(api.email(), /Regular price: \$899\.99/);
   assert.equal(doc.getElementById('rd0').value, 'Adrienne Power Recliner');
   assert.equal(doc.getElementById('re0').value, 'Get it in 2-4 weeks');
 });
@@ -367,13 +385,14 @@ test('the SKU index names Ella Marie and Adrienne before any category search', a
       Pricing:JSON.stringify({price:price, originalPrice:price + 100, priceStyle:'Outlet'}),
       facets:[{name:'Color', values:['Gray']}],
       zipDeliveryEstimate:'Get it by Thu',
-      zipDeliveryZip:'08002'
+      zipDeliveryZip:'08807'
     }}]}]}};
   }
   var searched = [];
   win.fetch = function(url){
     var s = String(url);
     if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){return Promise.resolve(index)}});
+    if(s.indexOf('sku-details.json') >= 0 || s.indexOf('/search/') < 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
     var term = decodeURIComponent(s.split('/search/')[1].split('?')[0]);
     searched.push(term);
     if(term === 'Ella Marie Triple Power Swivel Glider Recliner') return Promise.resolve({ok:true, json:function(){return Promise.resolve(hit(term, '545060179', index['545060179'][1], 799))}});
@@ -401,6 +420,7 @@ test('the SKU index names Ella Marie and Adrienne before any category search', a
   win.fetch = function(url){
     var s = String(url);
     if(s.indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){return Promise.resolve(index)}});
+    if(s.indexOf('sku-details.json') >= 0 || s.indexOf('/search/') < 0) return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
     searched.push(decodeURIComponent(s.split('/search/')[1].split('?')[0]));
     return Promise.resolve({ok:true, json:function(){return Promise.resolve({response:{total_num_results:0, results:[]}})}});
   };
@@ -419,7 +439,11 @@ test('SKU lookup starts for an unreadable name and does not replace a typed name
   var doc = page.dom.window.document;
   var win = page.dom.window;
   var payload = {products:[{code:'797015027', displayName:'Magdalena 7-pc. Dining Set', url:'/dining-rooms/dining-sets/magdalena-7-pc-dining-set-797015027'}]};
-  win.fetch = function(){return Promise.resolve({ok:true, json:function(){return Promise.resolve(payload)}})};
+  win.fetch = function(url){
+    var s = String(url);
+    if(String(s).indexOf('sku-index.json') >= 0) return Promise.resolve({ok:true, json:function(){return Promise.resolve({'797015027':['Magdalena 7-pc. Dining Set','/dining-rooms/dining-sets/magdalena-7-pc-dining-set-797015027']})}});
+    return Promise.resolve({ok:false, status:404, json:function(){return Promise.resolve({})}});
+  };
   page.dom.window.vfCart.seedReview([{sku:'797015027', name:'- -', price:'1099.00', reg:'1099.00'}]);
   doc.querySelector('[data-cart=skulookup]').click();
   await new Promise(function(r){setTimeout(r, 30)});
@@ -461,7 +485,7 @@ test('Platinum Protection adds the tier for eligible furniture and each option h
   assert.match(email, /Estimated total: \$2,420\.27/);
   assert.match(text, /Estimated total: \$2,420\.27/);
   assert.match(email, /Amount saved: \$150\.00/);
-  var invest = email.slice(email.indexOf('Your Total'), email.indexOf('This price is held'));
+  var invest = email.slice(email.indexOf('Your Investment'), email.indexOf('This price is held'));
   assert.ok(invest.indexOf('Delivery to 08807: $199.99') < invest.indexOf('5-Year Platinum Protection: $219.95'));
   assert.ok(invest.indexOf('5-Year Platinum Protection: $219.95') < invest.indexOf('Sales tax (NJ 6.625%): $150.38'));
   assert.ok(invest.indexOf('Sales tax (NJ 6.625%): $150.38') < invest.indexOf('Estimated total: $2,420.27'));
@@ -585,7 +609,7 @@ test('the email is quieter by default, and a heads-up text is previewed before M
   assert.ok(email.indexOf('The gray one is the one we sat on') < email.indexOf('Could you reply to let me know this came through?'));
   assert.ok(email.indexOf('Could you reply to let me know this came through?') < email.indexOf('What You Picked'));
   assert.match(email, /What You Picked/);
-  assert.match(email, /Your Total/);
+  assert.match(email, /Your Investment/);
   assert.match(email, /Make It Last/);
   assert.match(email, /Ready When You Are/);
   assert.match(email, /Estimated total:/);

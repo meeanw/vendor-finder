@@ -5,7 +5,7 @@
 <meta name="description" content="Vendor reference by room, furniture type and style.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="vf-updated" content="Nov 20, 2026">
-<meta name="vf-version" content="2.7.5">
+<meta name="vf-version" content="2.7.6">
 <link rel="canonical" href="https://meeanw.github.io/vendor-finder/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Furniture Vendor Finder">
 <meta property="og:title" content="Furniture Vendor Finder"><meta property="og:description" content="Find vendors by room, furniture type and style.">
@@ -643,7 +643,7 @@ body.scan-open{overflow:hidden}
 <div class="rrow"><button type="button" class="btn2 rbtn" id="radd">+ Add item</button></div>
 <p class="qfine rcartnote" id="rcartnote"></p>
 <div class="qf"><label for="rdel">Delivery charge <span class="req">(required before preview or send)</span></label><input id="rdel" type="text" inputmode="decimal" autocomplete="off" maxlength="12" placeholder="Type the charge. Use 0 if free"></div>
-<div class="rpair"><div class="qf"><label for="rzip">Delivery ZIP or town <span class="opt">(optional)</span></label><input id="rzip" type="text" autocomplete="off" maxlength="60"></div>
+<div class="rpair"><div class="qf"><label for="rzip">Delivery ZIP</label><input id="rzip" type="text" inputmode="numeric" autocomplete="off" maxlength="5" placeholder="5 digits, e.g. 08807"></div>
 <div class="qf"><label for="rneeded">Needed by <span class="opt">(optional)</span></label><input id="rneeded" type="date"></div></div>
 <div id="rtaxbox" hidden><p class="tgwarn" id="rtaxnote" role="status"></p><div class="qf"><label for="rtax">Confirm sales tax rate (%)</label><input id="rtax" type="text" inputmode="decimal" autocomplete="off" maxlength="8" placeholder="e.g. 8.875"></div><label class="rextlab"><input type="checkbox" id="rtaxok"> <span id="rtaxoklab">Use this rate for this ZIP</span></label></div>
 <div class="qf"><label for="rref">Customer request # <span class="opt">(reference, optional)</span></label><input id="rref" type="text" autocomplete="off" autocapitalize="characters" maxlength="30" placeholder="Q-YYMMDD-XXXX"></div>
@@ -711,8 +711,10 @@ var REPS={
  naeem:{name:'Na\u2019eem Ward',phone:'+18626862065',email:'nward@raymourflanigan.com',mono:'NW',photo:'naeem.jpg',title:'Home Furnishing Lead & Sleep Consultant',badge:'President\u2019s Club',work:'+19088952445',li:'https://www.linkedin.com/in/naeemward/',store:'Bridgewater',addr:'744 US Highway 202 South, Bridgewater, NJ 08807'},
  hans:{name:'Hans Attys',phone:'+19736871864',email:'HAttys@raymourflanigan.com',mono:'HA',photo:'',title:'Home Furnishing & Sleep Consultant',badge:'President\u2019s Club',work:'+18563211817',li:'',store:'Cherry Hill',addr:'2100 Route 38 Mall Drive, Cherry Hill, NJ 08002'}};
 var REPOPTS=[{id:'either',label:'Either one',to:['naeem','hans']},{id:'naeem',label:'Na\u2019eem Ward',to:['naeem']},{id:'hans',label:'Hans Attys',to:['hans']}];
-// Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md). Leave an endpoint EMPTY to switch that rep's logging off (skipped quietly).
-// The tokens only filter stray POSTs - they sit in this public page, so they are NOT strong security.
+// Google Sheet logs of rep quotes: one separate log per rep (see apps-script/Code.gs and HANS-SETUP.md).
+// An empty endpoint means that rep has no log. The quote screen says so; it does not skip quietly.
+// TODO: rotate the public log token and web-app URL. They stay in this file so logging still works. Do not copy them into other files or messages.
+// The tokens only filter stray POSTs. They are not strong security.
 var LOG_ENDPOINT_NAEEM='https://script.google.com/macros/s/AKfycbwlvtiX1nGzFO2E7EdX9zUr3ku2qVFuF7An73wiRrwLvyTJKcj0RvKJmkcCsDKQrhu9BA/exec';
 var LOG_ENDPOINT_HANS='';
 var LOG_TOKEN_NAEEM='cb9f0bea4b454a9921229fe084717b89';
@@ -721,7 +723,7 @@ var PINCFG={"it":150000,"naeem":{"s":"f75b4c28cf6bfb8e6b4d0bbe31645300","h":"454
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 var LAST_UPDATED=(document.querySelector('meta[name="vf-updated"]')||{}).content||'Nov 20, 2026';
-var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.5';
+var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.6';
 var LINKS_CHECKED='Nov 2, 2026';
 function stampFreshness(){
  var upd=document.getElementById('upd');if(upd)upd.textContent='Last updated '+LAST_UPDATED;
@@ -881,7 +883,8 @@ function newQno(){var d=new Date(),b=new Uint8Array(4),s='',i;
  return 'Q-'+String(d.getFullYear()).slice(2)+p2(d.getMonth()+1)+p2(d.getDate())+'-'+s}
 function qnoDate(n){var m=QNO.exec(n||'');return m?'20'+m[1]+'-'+m[2]+'-'+m[3]:''}
 function qnoOk(n){return QNO.test(n||'')&&qnoDate(n)===isoToday()}
-function qtyOf(v){var n=parseInt(String(v==null?'':v).replace(/\D/g,''),10);return n>=1?Math.min(n,999):1}
+function qtyOf(v){var s=String(v==null?'':v).trim();if(s==='')return 1;if(!/^\d{1,3}$/.test(s))return null;var n=+s;return n>=1&&n<=999?n:null}
+function qtyKeep(v){var s=String(v==null?'':v).trim();if(!s)return '1';var n=qtyOf(s);return n===null?s.slice(0,6):String(n)}
 function clip(v,n){return String(v==null?'':v).slice(0,n)}
 
 /* ---------- quote-request list (customer) ---------- */
@@ -1041,7 +1044,7 @@ els.qsheet.addEventListener('keydown',function(e){if(e.key!=='Tab')return;
 
 /* ---------- rep quote screen (#rep) ---------- */
 var RS='vf-rep-v1',LOGQ='vf-logq-v1';
-function rblank(){return {v:'',d:'',sku:'',vn:'',c:'',q:'1',fin:'',p:'',rg:'',e:'',nt:'',k:'',u:'',ph:[]}}
+function rblank(){return {v:'',d:'',sku:'',vn:'',c:'',q:'1',fin:'',p:'',rg:'',e:'',sz:'',nt:'',k:'',u:'',ph:[]}}
 var RD={rep:'naeem',name:'',phone:'',email:'',zip:'',needed:'',notes:'',dl:'',ref:'',op:'stop',qn:'',pn:'',ext:false,taxRate:'',taxOk:false,taxZip:'',plat:false,platOpt:{},links:false,items:[rblank()],imp:[]};
 var STORE_ADDR='Raymour & Flanigan Bridgewater, 744 US Hwy 202 S, Bridgewater, NJ 08807';
 var rsh=document.getElementById('rsheet'),rbk=document.getElementById('qback'),rEl={};
@@ -1063,6 +1066,10 @@ function rBasis(){return RD.ext?'Displayed prices are regular prices. Financing 
 function rItemName(x){var v=x.v.trim(),d=x.d.trim();if(d&&(!v||v===RF_NAME))return d;return rItemHead(x)}
 function rItemShort(x){var n=rItemName(x).replace(/\s+/g,' ');if(n.length>38){var w=n.split(' '),o='';for(var k=0;k<w.length&&(o+' '+w[k]).trim().length<=38;k++)o=(o+' '+w[k]).trim();n=o||n.slice(0,38)}return n}
 function rDims(x){var o=[],r=[];String(x.nt||'').split(/\s*\u00b7\s*/).forEach(function(p){p=p.trim();if(!p)return;if(!o.length&&(/^size:\s*\S/i.test(p)||/\d\s*["\u201d]?\s*[WDHL]\b.*\bx\b/i.test(p)))o.push(p.replace(/^size:\s*/i,''));else r.push(p)});return {dims:o[0]||'',rest:r.join(' \u00b7 ')}}
+function rSizeText(x){var s=String(x&&x.sz||'').trim().replace(/^size:\s*/i,'');if(s)return s;return rDims(x).dims}
+function rFloorLine(){return 'Floor sample, sold as is. No layaways, no warranties.'}
+function rSoonSaleIso(){var soon='';RD.items.forEach(function(x){if(!ritemOn(x)||RD.ext||!x.tg||x.tg.t!=='sale'||!validIso(x.tg.se))return;if(x.tg.se>=isoToday()&&x.tg.se<rExpiryIso()&&(!soon||x.tg.se<soon))soon=x.tg.se});return soon}
+function rHoldSentence(){var soon=rSoonSaleIso();if(soon)return 'Sale price good through '+dshow(soon)+'; quote otherwise valid 72 hours.';return 'This price is held for you for 72 hours, until '+rExpiry()+'.'}
 function rSaleLines(x){var g=x.tg,u=rUnit(x),a=[],w=u.reg,p=u.sp,sv=null,e=g?tgSaleEndTxt(g.se):'';
  if(g&&g.t==='sale')sv=pnum(g.s);if((sv===null||sv<=0)&&w!==null&&p!==null&&w>p)sv=Math.round((w-p)*100)/100;
  if(sv!==null&&sv>0)a.push('You\u2019re saving '+tgWasTxt(sv)+(w!==null?' off the regular '+tgWasTxt(w):'')+'.');else a.push('On sale'+(w!==null?', regular price '+tgWasTxt(w):'')+'.');
@@ -1074,7 +1081,7 @@ function rTgLines(x,full){var g=x.tg,a=[];var u=rUnit(x);
  if(g.t==='sale'&&RD.ext){a.push(rExtLine())}
  else if(g.t==='sale'){a=a.concat(rSaleLines(x))}
  else if(g.t==='floor'){var w2=tgWasTxt(g.w);if(w2){var sv2=n!==null&&pnum(g.w)>n?' (save '+tgWasTxt((pnum(g.w)-n).toFixed(2))+')':'';a.push('Was '+w2+sv2)}a.push('Floor sample, sold as is. No layaways, no warranties.')}
- else if(g.t==='outlet')a.push('Outlet item');
+ else if(g.t==='outlet'){if(RD.ext)a.push(rExtLine());a.push('Outlet item');}
  if(g.cm&&g.cm.length){if(full){a.push('Includes:');g.cm.forEach(function(c){a.push('  - '+[c.d||'Piece',c.s?'SKU '+c.s:'',c.z,c.c].filter(Boolean).join(', '))})}
   else a.push('Includes: '+g.cm.map(function(c){return (c.d||'Piece')+(c.s?' (SKU '+c.s+')':'')}).join(' \u00b7 '))}
  return a}
@@ -1090,7 +1097,7 @@ function rTgRow(x,i){var g=x.tg;if(!g||!TGT[g.t])return '';var w=tgSaleWarn(g),o
  return '<div class="qf rtgrow"><label for="rtt'+i+'">Tag type <span class="tgbadge tgb-'+g.t+'">'+esc(TGT[g.t])+'</span></label><select id="rtt'+i+'" data-tgt="'+i+'">'+o+'</select>'
  +(g.t==='sale'&&(g.w||g.s||g.se)&&!RD.ext?'<p class="qfine">'+esc(rTgLines(x,false).slice(0,2).join(' '))+'</p>':'')+(g.t==='floor'?'<p class="qfine">Sold as is. The quote says no layaways, no warranties, and leaves out Platinum Protection for this item.</p>':'')
  +(g.cm&&g.cm.length?'<p class="qfine">Includes: '+esc(g.cm.map(function(c){return c.d||'Piece'}).join(', '))+'</p>':'')+(w?'<p class="tgwarn" role="status">'+esc(w)+'</p>':'')+'</div>'}
-function ritemClean(x){x=x||{};var d=clip(x.d,400),opt=+x.opt;return {v:clip(x.v,60),d:d,c:clip(x.c,80),nt:clip(x.nt,200),sku:clip(x.sku,80),vn:clip(x.vn,60),q:String(qtyOf(x.q)),fin:clip(x.fin,80),p:clip(x.p,30),rg:clip(x.rg,30),e:clip(x.e,100),k:clip(x.k,40),u:rfOk(x.u),ph:phIds(x.ph),tg:tgItemClean(x.tg),w:wpClean(x.w),nameOk:VFQ.productNameState(d)==='incomplete'&&x.nameOk===true,opt:opt>1&&opt<21?Math.round(opt):0,adl:clip(x.adl,12)}}
+function ritemClean(x){x=x||{};var d=clip(x.d,400),opt=+x.opt;return {v:clip(x.v,60),d:d,c:clip(x.c,80),nt:clip(x.nt,200),sku:clip(x.sku,80),vn:clip(x.vn,60),q:qtyKeep(x.q),fin:clip(x.fin,80),p:clip(x.p,30),rg:clip(x.rg,30),e:clip(x.e,100),sz:clip(x.sz,140),k:clip(x.k,40),u:rfOk(x.u),ph:phIds(x.ph),tg:tgItemClean(x.tg),w:wpClean(x.w),nameOk:VFQ.productNameState(d)==='incomplete'&&x.nameOk===true,opt:opt>1&&opt<21?Math.round(opt):0,adl:clip(x.adl,12)}}
 function rload(){try{var o=JSON.parse(localStorage.getItem(RS)||'null');if(!o)return;
  if(o.rep==='naeem'||o.rep==='hans')RD.rep=o.rep;
  ['name','phone','email','notes'].forEach(function(k){if(typeof o[k]==='string')RD[k]=o[k].slice(0,2000)});
@@ -1105,16 +1112,16 @@ function rload(){try{var o=JSON.parse(localStorage.getItem(RS)||'null');if(!o)re
  if(Array.isArray(o.items)&&o.items.length)RD.items=o.items.slice(0,40).map(ritemClean).map(function(x){var z=!x.v&&x.k&&x.d.match(/^(?:[^\u2013]*?\s\u2013\s)?(.+?)\s\u2013\s(?:All product lines|[A-Za-z\/& ]{3,30}):\s/);if(z){x.v=clip(z[1],60);x.d=''}return x}); // v1.6 drafts: keep only the vendor name from carried-over lines
  if(Array.isArray(o.imp))RD.imp=o.imp.filter(function(k){return typeof k==='string'}).slice(0,60).map(function(k){return k.slice(0,40)})}catch(e){}}
 function rsave(){try{localStorage.setItem(RS,JSON.stringify(RD))}catch(e){}}
-function rstamp(){if(!qnoOk(RD.qn)){RD.qn=newQno();return true}return false}
+function rstamp(){if(!QNO.test(RD.qn||'')){RD.qn=newQno();return true}return false}
 function money(n){var a=Math.abs(n).toFixed(2).split('.');return (n<0?'-':'')+'$'+a[0].replace(/\B(?=(\d{3})+(?!\d))/g,',')+'.'+a[1]}
 function pnum(t){var x=String(t||'').replace(/[$,\s]/g,'');if(!/^-?\d+(\.\d+)?$|^-?\.\d+$/.test(x))return null;var n=parseFloat(x);return isFinite(n)?n:null}
 function pshow(t){var n=pnum(t);return n===null?(String(t||'').trim()||'Price to be confirmed'):money(n)}
 /* ---- v2.0: regular vs sale price, and the extended-financing switch (more than 18 months deferred interest: sale prices don't apply) ---- */
 function rRegN(x){var r=pnum(x.rg);if(r!==null&&r>0)return r;var g=x.tg;if(g&&g.t==='sale'){var w=pnum(g.w);if(w!==null&&w>0)return w}return null} // regular price: typed, else the sale tag's was-price
 function rWasN(x){var r=rRegN(x);if(r!==null)return r;var g=x.tg,w=g?pnum(g.w):null;return w!==null&&w>0?w:null}
-function rOnSale(x){var g=x.tg;if(g&&g.t==='sale')return true;var r=pnum(x.rg),n=pnum(x.p);return r!==null&&r>0&&n!==null&&r>n}
+function rOnSale(x){var g=x.tg;if(g&&(g.t==='sale'||g.t==='outlet'))return true;var r=pnum(x.rg),n=pnum(x.p);return r!==null&&r>0&&n!==null&&r>n}
 function rUnit(x){var n=pnum(x.p),on=rOnSale(x),r=rRegN(x);if(VFQ.restrictsSale(VFQ.financeMonths(RD.ext))&&on)return {n:r,sale:true,reg:r,swapped:r!==null,need:r===null,sp:n};return {n:n,sale:on,reg:r,swapped:false,need:false,sp:n}}
-function rcents(x){var n=rUnit(x).n;return n===null?null:Math.round(n*100)*qtyOf(x.q)}
+function rcents(x){var n=rUnit(x).n,q=qtyOf(x.q);return n===null||q===null?null:Math.round(n*100)*q}
 function ritemOn(x){return !!(x.v.trim()||x.d.trim()||x.sku.trim()||x.u||(x.ph&&x.ph.length))}
 function rIsMain(x){return !(x&&x.opt>1)}
 function rsubtotal(pred){var c=0,miss=0,cnt=0;RD.items.forEach(function(x){if(!ritemOn(x))return;if(pred&&!pred(x))return;cnt++;var k=rcents(x);if(k===null)miss++;else c+=k});return {sum:c/100,miss:miss,cnt:cnt,c:c}}
@@ -1122,7 +1129,7 @@ function rline(x){var q=qtyOf(x.q),n=rUnit(x).n;
  if(n===null)return (q>1?'Qty '+q+' \u2013 ':'')+pshow(x.p);
  return q+' \u00d7 '+money(n)+(q>1?' = '+money(rcents(x)/100):'')}
 function rdelC(){return VFQ.deliveryCents(RD.dl)}
-function rAppliedTax(){return VFQ.appliedSalesTax(RD.zip,{ok:!!RD.taxOk,zip:RD.taxZip,rateBp:VFQ.rateBpFromPercent(RD.taxRate)})}
+function rAppliedTax(){var z=String(RD.zip||'').trim();if(!/^\d{5}$/.test(z))return {needsConfirm:true,rateBp:null,zip:'',note:'Enter a 5-digit delivery ZIP. A blank ZIP is not taxed as New Jersey.',jurisdiction:'',guessBp:null};return VFQ.appliedSalesTax(z,{ok:!!RD.taxOk,zip:RD.taxZip,rateBp:VFQ.rateBpFromPercent(RD.taxRate)})}
 function rPlatEligible(x){if(!x||!ritemOn(x))return false;if(x.tg&&x.tg.t==='floor')return false;var p=VFQ.protectorByCode(x.sku);return !(p&&p.known)}
 function rPlatBasisCents(pred){var c=0;RD.items.forEach(function(x){if(!rPlatEligible(x))return;if(pred&&!pred(x))return;var k=rcents(x);if(k!==null&&k>0)c+=k});return c}
 function rPlatChosen(opt){if(opt>1){var k=String(opt);if(RD.platOpt&&Object.prototype.hasOwnProperty.call(RD.platOpt,k))return !!RD.platOpt[k]}return !!RD.plat}
@@ -1159,37 +1166,56 @@ function rltxt(i){var el=document.getElementById('rl'+i),x=RD.items[i];if(el&&x)
    Color is taken only from a color/finish facet. Lead time, stock status and out-of-stock dates are never a delivery promise.
    Nothing is written over the rep's fields until they tap a button. No vendor stock numbers are kept. ---- */
 var WP_KEY='key_1tigFZoUEs7Ygkww',WP_SITE='https://www.raymourflanigan.com';
+function wpPublic(s){s=String(s==null?'':s).replace(/\s+/g,' ').trim();if(!s||/WSTW-|\b[A-Z]{2,6}-\d{2,}\b/.test(s))return '';return s}
+function wpExtras(o,w){var color=wpPublic(w.color);o.color=color&&w.colorState==='website'?clip(color,80):'';o.colorState=o.color?'website':'unconfirmed';var del=wpPublic(w.delText);o.delText=del&&w.delState==='website'?clip(del,140):'';o.delState=o.delText?'website':'unconfirmed';o.delReason=clip(w.delReason,240);var sz=wpPublic(w.sz);if(sz)o.sz=clip(sz,140);return o}
 function wpClean(w){if(!w||typeof w!=='object')return undefined;var o={t:+w.t||0};
- if(w.indexOnly){o.ok=1;o.indexOnly=1;o.nm=clip(w.nm,120);o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip=clip(w.zip,60);o.color='';o.colorState='unconfirmed';o.delState='unconfirmed';o.delText='';o.discounted=0;if(!o.nm)return undefined}
- else if(w.ok){var p=pnum(w.p),g=pnum(w.o);if(p===null||p<=0||p>1e6)return undefined;o.ok=1;o.p=p;if(g!==null&&g>0&&g<1e6)o.o=g;o.st=/^(Sale|Outlet|Retail|Clearance)$/.test(w.st)?w.st:'';o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.nm=clip(w.nm,120);o.color=clip(w.color,80);o.colorState=w.colorState==='website'&&o.color?'website':'unconfirmed';o.delState=w.delState==='website'&&String(w.delText||'').trim()?'website':'unconfirmed';o.delText=o.delState==='website'?clip(w.delText,100):'';o.delReason=clip(w.delReason,240);o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip=clip(w.zip,60);o.discounted=w.discounted?1:0}
- else o.m=/^(nomatch|offline|nosku|noname|protnone|protunknown)$/.test(w.m)?w.m:'nomatch';return o}
+ if(w.pendingDetails)o.pendingDetails=1;
+ if(w.indexOnly){o.ok=1;o.indexOnly=1;o.nm=clip(w.nm,120);o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip='08807';o.discounted=0;wpExtras(o,w);if(!o.nm&&!o.color&&!o.delText&&!o.sz)return undefined;return o}
+ if(w.ok){var p=pnum(w.p),g=pnum(w.o);if(p===null||p<=0||p>1e6)return undefined;o.ok=1;o.p=p;if(g!==null&&g>0&&g<1e6)o.o=g;o.st=/^(Sale|Outlet|Retail|Clearance)$/.test(w.st)?w.st:'';o.u=/^\/[A-Za-z0-9\/_.\-]{3,200}$/.test(w.u||'')?w.u:'';o.nm=clip(w.nm,120);wpExtras(o,w);o.sku=/^\d{9}$/.test(String(w.sku||''))?String(w.sku):'';o.zip='08807';o.discounted=w.discounted?1:0;return o}
+ o.m=/^(nomatch|offline|nosku|noname|protnone|protunknown|notfound)$/.test(w.m)?w.m:'nomatch';return o}
 function wpView(x){var w=x&&x.w;if(!w)return null;if(w.ok&&VFQ.websiteStale(w,x.sku,RD.zip)){var o={},k;for(k in w)if(Object.prototype.hasOwnProperty.call(w,k))o[k]=w[k];o.stale=1;return o}return w}
 function wpSearchUrl(x){var q=(x.d||x.c||x.v||'').trim().replace(/\s+/g,' ').slice(0,80);return q?WP_SITE+'/search?page=1&redirectQuery='+encodeURIComponent(q):WP_SITE+'/'}
 function wpTime(t){if(!t)return '';var d=new Date(t),h=d.getHours(),m=d.getMinutes();return (h%12||12)+':'+(m<10?'0':'')+m+(h>=12?' PM':' AM')}
+function wpPendingLine(w){if(!w||!w.pendingDetails)return '';if(!w.sz&&w.delState!=='website')return 'Size and delivery aren\u2019t available yet.';if(!w.sz)return 'Size isn\u2019t available yet.';if(w.delState!=='website')return 'Delivery isn\u2019t available yet.';return ''}
 function wpHtml(x,i){var w=wpView(x);if(!w)return '';
- if(w.indexOnly){var idxName=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':'Use website name';
-  var ih='<p class="rwp"><b>Website name:</b> '+esc(w.nm)+'</p><p class="qfine">This name is from the site index. The live search did not return a price, color, or delivery time, so confirm those before using them.</p><div class="rrow"><button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+idxName+'</button>';
+ if(w.indexOnly&&!(w.p>0)){var idxName=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':'Use website name';
+  var ih='<p class="rwp"><b>Website name:</b> '+esc(w.nm||'Not supplied')+'</p>';
+  if(w.colorState==='website')ih+='<p class="rwp"><b>Color:</b> '+esc(w.color)+'</p>';
+  if(w.sz)ih+='<p class="rwp"><b>Size:</b> '+esc(w.sz)+'</p>';
+  if(w.delState==='website')ih+='<p class="rwp"><b>Delivery time frame:</b> '+esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)</p>';
+  else if(wpPendingLine(w))ih+='<p class="qfine">'+esc(wpPendingLine(w))+'</p>';
+  ih+='<p class="qfine">Saved website details for this SKU. The live search did not return a price, so confirm the price before using it.</p><div class="rrow">';
+  if(w.nm||w.colorState==='website'||w.sz||w.delState==='website')ih+='<button type="button" class="btn1 rbtn" data-wpall="'+i+'">Use all website info</button>';
+  if(w.nm)ih+='<button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+idxName+'</button>';
+  if(w.colorState==='website')ih+='<button type="button" class="btn2 rbtn" data-wpcolor="'+i+'">Use website color</button>';
+  if(w.sz)ih+='<button type="button" class="btn2 rbtn" data-wpsize="'+i+'">Use website size</button>';
+  if(w.delState==='website')ih+='<button type="button" class="btn2 rbtn" data-wpdel="'+i+'">Use website delivery time frame</button>';
   if(w.u)ih+='<a class="rwlink" href="'+esc(WP_SITE+w.u)+'" target="_blank" rel="noopener noreferrer">Open on raymourflanigan.com \u2197</a>';
   return ih+'</div>'}
- if(!w.ok){var digits=String(x.sku||'').replace(/\D/g,''),msg=w.m==='offline'?'Could not reach the Raymour website. Check your connection and try again.':w.m==='noname'?'Enter the item name or collection, then check again. Searching the SKU digits alone does not return a Raymour product.':w.m==='protnone'?'This protector isn\u2019t listed on the website, so confirm delivery in store.':w.m==='protunknown'?'This code isn\u2019t in the protector list. Enter the 9-digit website SKU to check the website.':w.m==='nosku'?(digits?'Enter the 9-digit website SKU, then check again.':'Enter the SKU first, then check the website.'):'Could not match SKU '+esc(x.sku.trim())+' in the website\u2019s search by name, so nothing was filled in. ';
+ if(!w.ok){var digits=String(x.sku||'').replace(/\D/g,''),msg=w.m==='notfound'?'SKU not found on raymourflanigan.com':w.m==='offline'?'Could not reach the Raymour website. Check your connection and try again.':w.m==='noname'?'Enter the item name or collection, then check again. Searching the SKU digits alone does not return a Raymour product.':w.m==='protnone'?'This protector isn\u2019t listed on the website, so confirm delivery in store.':w.m==='protunknown'?'This code isn\u2019t in the protector list. Enter the 9-digit website SKU to check the website.':w.m==='nosku'?(digits?'Enter the 9-digit website SKU, then check again.':'Enter the SKU first, then check the website.'):'Could not match SKU '+esc(x.sku.trim())+' in the website\u2019s search by name, so nothing was filled in. ';
   return '<p class="tgwarn">'+msg+(w.m==='nomatch'?'<a href="'+esc(wpSearchUrl(x))+'" target="_blank" rel="noopener noreferrer">Search the website for this item \u2197</a>':'')+'</p>'}
- if(w.stale)return '<p class="tgwarn">This website check is out of date because the SKU or delivery ZIP changed. It is not verified. Check again before using it.</p>';
+ if(w.stale)return '<p class="tgwarn">This website check is out of date because the SKU changed. It is not verified. Check again before using it.</p>';
  var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));
  var h='<p class="rwp"><b>Website name:</b> '+esc(w.nm||'Not supplied')+'</p>';
  h+='<p class="rwp"><b>Color:</b> '+(w.colorState==='website'?esc(w.color):'Not supplied by the website search. Confirm the color yourself.')+'</p>';
  h+='<p class="rwp"><b>Website price:</b> '+money(w.p)+(w.o&&w.o>w.p?', regular '+money(w.o):'')+(w.st?' ('+esc(w.st)+')':'')+' <span class="opt">checked '+wpTime(w.t)+'</span></p>';
- h+='<p class="rwp"><b>Delivery time frame:</b> '+(w.delState==='website'?esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)': 'Not filled in. Delivery timing is looked up for showroom ZIP 08807 only. This app cannot read the website\u2019s Get it by / Get it in result, so nothing is filled in automatically. Type a date or a range after you confirm it. A range is not turned into a date, and a stock date is not used.')+'</p>';
- if(!plan.ok)h+='<p class="tgwarn">Financing longer than 18 months needs the regular price, and the website did not provide one. The sale price was not applied.</p>';
- var cur=pnum(x.p),target=plan.ok?plan.price:w.p;if(cur!==null&&Math.abs(cur-target)>=0.005)h+='<p class="tgwarn">Your quote has '+money(cur)+'. The website '+(RD.ext&&w.discounted&&plan.ok?'regular price to quote is '+money(plan.price):'price is '+money(w.p))+'. It is not copied until you tap a button.</p>';
+ if(w.sz)h+='<p class="rwp"><b>Size:</b> '+esc(w.sz)+'</p>';
+ var pending=wpPendingLine(w);
+ h+='<p class="rwp"><b>Delivery time frame:</b> '+(w.delState==='website'?esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)': pending?esc(pending): 'Not filled in. Delivery timing is looked up for showroom ZIP 08807 only. This app cannot read the website\u2019s Get it by / Get it in result, so nothing is filled in automatically. Type a date or a range after you confirm it. A range is not turned into a date, and a stock date is not used.')+'</p>';
+ if(!plan.ok)h+='<p class="tgwarn">Financing longer than 18 months needs the regular price, and the website did not provide one. The sale or outlet price was not applied.</p>';
+ else if(RD.ext&&w.discounted)h+='<p class="tgwarn">Financing longer than 18 months quotes the regular price '+money(plan.quoted)+'. The current price stays saved, so turning this off goes back to '+money(plan.price)+'.</p>';
+ var cur=pnum(x.p),target=plan.ok?(RD.ext&&w.discounted&&plan.quoted!=null?plan.quoted:plan.price):w.p;if(cur!==null&&Math.abs(cur-target)>=0.005&&!(RD.ext&&w.discounted&&plan.ok&&Math.abs(cur-plan.price)<0.005))h+='<p class="tgwarn">Your quote has '+money(cur)+'. The website '+(RD.ext&&w.discounted&&plan.ok?'regular price to quote is '+money(plan.quoted):'price is '+money(w.p))+'. It is not copied until you tap a button.</p>';
  var nameLabel=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':((x.d||'').trim()&&(x.d||'').trim()!==(w.nm||'')?'Replace your item name with the website name':'Use website name');
  var colorLabel=(x.fin||'').trim()&&(x.fin||'').trim()!==(w.color||'')?'Replace your color with the website color':'Use website color';
  var delLabel=(x.e||'').trim()&&w.delText&&(x.e||'').trim()!==w.delText?'Replace your delivery time frame with the website estimate':'Use website delivery time frame';
- var canAll=!!(w.nm||(w.colorState==='website'&&w.color)||plan.ok||(w.delState==='website'&&w.delText));
+ var sizeLabel=(x.sz||'').trim()&&w.sz&&(x.sz||'').trim()!==w.sz?'Replace your size with the website size':'Use website size';
+ var canAll=!!(w.nm||(w.colorState==='website'&&w.color)||plan.ok||(w.delState==='website'&&w.delText)||w.sz);
  h+='<div class="rrow">';
  if(canAll)h+='<button type="button" class="btn1 rbtn" data-wpall="'+i+'">Use all website info</button>';
  if(w.nm)h+='<button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+nameLabel+'</button>';
  if(w.colorState==='website')h+='<button type="button" class="btn2 rbtn" data-wpcolor="'+i+'">'+colorLabel+'</button>';
- if(plan.ok)h+='<button type="button" class="btn2 rbtn" data-wpuse="'+i+'">'+(RD.ext&&w.discounted?'Use regular price':'Use website prices')+'</button>';
+ if(plan.ok)h+='<button type="button" class="btn2 rbtn" data-wpuse="'+i+'">Use website prices</button>';
+ if(w.sz)h+='<button type="button" class="btn2 rbtn" data-wpsize="'+i+'">'+sizeLabel+'</button>';
  if(w.delState==='website')h+='<button type="button" class="btn2 rbtn" data-wpdel="'+i+'">'+delLabel+'</button>';
  if(w.u)h+='<a class="rwlink" href="'+esc(WP_SITE+w.u)+'" target="_blank" rel="noopener noreferrer">Open on raymourflanigan.com \u2197</a>';
  h+='</div><p class="qfine">Your typing stays until you tap a button. Stock dates and lead times are not delivery promises.</p>';return h}
@@ -1202,43 +1228,51 @@ function wpSearchPages(term,sku,zip,signal,maxPages){var page=1,netOk=false;maxP
    var total=(j&&j.response&&+j.response.total_num_results)||0;if(page*100>=total||page>=maxPages)return {hit:null,ok:true};page++;return one()})}
  return one().then(function(r){r.ok=true;return r},function(err){var aborted=!!(err&&(err.name==='AbortError'||/abort/i.test(String(err&&err.message||err))));if(aborted)return {hit:null,ok:true,aborted:true};return {hit:null,ok:netOk}})}
 function wpLookupSku(x){var nine=VFQ.sku9(x&&x.sku);if(nine)return {sku:nine,kind:'sku'};var p=VFQ.protectorByCode(x&&x.sku);if(!p)return {sku:'',kind:'nosku'};if(!p.known)return {sku:'',kind:'protunknown'};if(!p.websiteSku)return {sku:'',kind:'protnone'};return {sku:p.websiteSku,kind:'protector',name:p.websiteName||p.listName}}
-var SKU_INDEX=null,SKU_INDEX_P=null;
+var SKU_INDEX=null,SKU_INDEX_P=null,SKU_DETAILS=null,SKU_DETAILS_P=null,WP_BUSY={};
 function wpSkuIndex(){if(SKU_INDEX)return Promise.resolve(SKU_INDEX);if(SKU_INDEX_P)return SKU_INDEX_P;
- SKU_INDEX_P=fetch('sku-index.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){SKU_INDEX=(j&&typeof j==='object')?j:{};return SKU_INDEX},function(){SKU_INDEX_P=null;return {}});
+ SKU_INDEX_P=fetch('sku-index.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){if(!j||typeof j!=='object'||Array.isArray(j))throw new Error('bad');SKU_INDEX=j;return SKU_INDEX},function(){SKU_INDEX=null;SKU_INDEX_P=null;return null});
  return SKU_INDEX_P}
-function wpIndexEntry(sku){return wpSkuIndex().then(function(idx){var row=idx&&idx[sku];if(!row||!row.length)return null;var name=String(row[0]||'').replace(/\s+/g,' ').trim();var urlPath=String(row[1]||'').split('?')[0];if(!name)return null;return {name:name.slice(0,120),url:/^\/[A-Za-z0-9\/_.-]{3,200}$/.test(urlPath)?urlPath:''}})}
-function wpCheck(i){var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;var look=wpLookupSku(x),sku=look.sku,finished=false,to=0,ctl=null;
- var done=function(w){if(finished)return;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);if(ctl)try{ctl.abort()}catch(e){}x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
+function wpIndexEntry(sku){return wpSkuIndex().then(function(idx){if(!idx)return {failed:1};var row=idx[sku];if(!row||!row.length)return {missing:1};var name=String(row[0]||'').replace(/\s+/g,' ').trim();var urlPath=String(row[1]||'').split('?')[0];if(!name)return {missing:1};return {name:name.slice(0,120),url:/^\/[A-Za-z0-9\/_.-]{3,200}$/.test(urlPath)?urlPath:''}})}
+function wpSkuDetails(){if(SKU_DETAILS)return Promise.resolve(SKU_DETAILS);if(SKU_DETAILS_P)return SKU_DETAILS_P;
+ SKU_DETAILS_P=fetch('sku-details.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){SKU_DETAILS=(j&&typeof j==='object'&&!Array.isArray(j))?j:{};return SKU_DETAILS},function(){SKU_DETAILS={};SKU_DETAILS_P=null;return SKU_DETAILS});
+ return SKU_DETAILS_P}
+function wpDetailNote(det){var note=wpPublic(det&&det.delivery);if(!note)return '';var when=VFQ.checkedLabel(det.checked);if(when&&note.toLowerCase().indexOf('checked ')<0)note+=' (checked '+when+')';return note.slice(0,140)}
+function wpMergeDetails(hit,det){hit=hit||{};if(!det)return hit;var color=wpPublic(det.color);if(color&&hit.colorState!=='website'){hit.color=color;hit.colorState='website'}var note=wpDetailNote(det);if(note){hit.delText=note;hit.delState='website'}var sz=VFQ.formatSize(det);if(sz&&wpPublic(sz))hit.sz=sz;return hit}
+function wpCheck(i){if(WP_BUSY[i])return;var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;WP_BUSY[i]=1;var look=wpLookupSku(x),sku=look.sku,finished=false,to=0,ctl=null;
+ var done=function(w){if(finished)return;WP_BUSY[i]=0;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);if(ctl)try{ctl.abort()}catch(e){}x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
  if(look.kind==='protnone'||look.kind==='protunknown'){done({t:Date.now(),m:look.kind});return}
  if(!sku){done({t:Date.now(),m:'nosku'});return}
  if(navigator.onLine===false||typeof fetch!=='function'){done({t:Date.now(),m:'offline'});return}
- function begin(indexEntry){
+ function begin(indexEntry,allowFallback,det,pendingDetails){
   var terms=wpTerms(x);if(!terms.length&&look.name&&!VFQ.looksGarbled(look.name))terms=[look.name];
   if(indexEntry&&indexEntry.name){var nm=indexEntry.name;terms=[nm].concat(terms.filter(function(t){return t.toLowerCase()!==nm.toLowerCase()}))}
-  var fallback=look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
+  var fallback=allowFallback&&look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
   var fallbackAt=terms.length;terms=terms.concat(fallback);
-  if(!terms.length){if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done({t:Date.now(),m:'noname'});return}
-  box.innerHTML='<p class="qfine">'+(fallbackAt?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
+  function pack(base){var hit=wpMergeDetails(base,det);if(pendingDetails)hit.pendingDetails=1;return hit}
+  if(!terms.length){if(indexEntry)done(pack({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:'08807'}));else done({t:Date.now(),m:'noname'});return}
+  box.innerHTML='<p class="qfine">'+(indexEntry?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
   ctl=typeof AbortController==='function'?new AbortController():null;var sawOk=false,sawFail=false,step=function(n){
    if(finished)return;
-   if(n>=terms.length){if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
+   if(n>=terms.length){if(indexEntry)done(pack({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:'08807'}));else done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
    if(n===fallbackAt&&fallback.length)box.innerHTML='<p class="qfine">Searching the Raymour site by SKU\u2026</p>';
-   wpSearchPages(terms[n],sku,RD.zip,ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip=RD.zip;done(r.hit);return}step(n+1)})};
-  to=setTimeout(function(){if(ctl)try{ctl.abort()}catch(e){}if(indexEntry)done({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:RD.zip});else done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000);
+   wpSearchPages(terms[n],sku,'08807',ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip='08807';done(pack(r.hit));return}step(n+1)})};
+  to=setTimeout(function(){if(ctl)try{ctl.abort()}catch(e){}if(indexEntry)done(pack({t:Date.now(),indexOnly:1,nm:indexEntry.name,u:indexEntry.url,sku:sku,zip:'08807'}));else done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000);
   step(0)}
- if(look.kind==='sku'){box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';wpIndexEntry(sku).then(function(entry){if(!finished)begin(entry)})}
- else begin(null)}
-function wpUse(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale)return;var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));if(!plan.ok)return;
- x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u);rrenderItems(false);rhref()}
+ if(look.kind==='sku'){box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';Promise.all([wpIndexEntry(sku),wpSkuDetails()]).then(function(pair){if(finished)return;var entry=pair[0],file=pair[1],det=file&&file[sku];if(entry&&entry.missing){done({t:Date.now(),m:'notfound'});return}begin(entry&&entry.name?entry:null,!(entry&&entry.name),det,!!(file&&!det))})}
+ else begin(null,false,null)}
+function wpRememberStyle(x,w){if(x.tg&&x.tg.t)return;if(w.st==='Outlet')x.tg=tgItemClean({t:'outlet'});else if(w.st==='Sale'||w.st==='Clearance')x.tg=tgItemClean({t:'sale'})}
+function wpStorePrices(x,w){if(!(w.p>0))return false;var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));if(!plan.ok||!(plan.price>0))return false;x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';wpRememberStyle(x,w);if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u);return true}
+function wpUse(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale)return;wpStorePrices(x,w);rrenderItems(false);rhref()}
 function wpUseAll(i){var x=RD.items[i],w=wpView(x);if(!x||!w||!w.ok||w.stale)return;
  if(w.nm)x.d=w.nm;
  if(w.colorState==='website'&&w.color)x.fin=w.color;
- if(w.p>0){var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));
-  if(plan.ok&&plan.price>0){x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u)}}
+ if(w.sz)x.sz=w.sz;
+ wpStorePrices(x,w);
  if(w.delState==='website'&&w.delText)x.e=w.delText;
  rrenderItems(false);rhref()}
 function wpUseName(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||!w.nm)return;x.d=w.nm;rrenderItems(false);rhref()}
 function wpUseColor(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||w.colorState!=='website'||!w.color)return;x.fin=w.color;rrenderItems(false);rhref()}
+function wpUseSize(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||!w.sz)return;x.sz=w.sz;rrenderItems(false);rhref()}
 function wpUseDel(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||w.delState!=='website'||!w.delText)return;x.e=w.delText;rrenderItems(false);rhref()}
 function rProtHtml(x,i){var p=VFQ.protectorByCode(x.sku);if(!p||!p.known)return '';
  var h='<p class="qfine">Protector code '+esc(p.code)+': '+esc(p.listName)+', '+money(p.price)+'. Includes the 5-Year Platinum Mattress Plan.</p>';
@@ -1269,7 +1303,8 @@ function rrenderItems(focusLast){var h='';
   +'<div class="qf"><label for="rg'+i+'">Regular price <span class="opt">(if this item is on sale)</span></label><input id="rg'+i+'" data-rf="rg" data-i="'+i+'" type="text" inputmode="decimal" autocomplete="off" maxlength="30" placeholder="'+esc(rRegN({rg:'',tg:x.tg})!==null?'From the tag: '+money(rRegN({rg:'',tg:x.tg})):'$0.00 (leave blank if not on sale)')+'" value="'+esc(x.rg)+'"></div>'
   +'<p class="rxs qfine" id="rxs'+i+'" hidden></p>'
   +'<div class="rweb"><button type="button" class="btn2 rbtn" data-wp="'+i+'">Check website details</button><div class="rwres" id="rw'+i+'" role="status" aria-live="polite">'+wpHtml(x,i)+'</div></div>'
-  +'<div class="qf"><label for="re'+i+'">Est. delivery</label><input id="re'+i+'" data-rf="e" data-i="'+i+'" type="text" autocomplete="off" maxlength="100" placeholder="Confirm the time frame, e.g. 2-4 weeks" value="'+esc(x.e)+'"></div>'
+  +'<div class="qf"><label for="rsz'+i+'">Size <span class="opt">(optional)</span></label><input id="rsz'+i+'" data-rf="sz" data-i="'+i+'" type="text" autocomplete="off" maxlength="140" placeholder="32&quot; W x 35&quot; D x 41&quot; H" value="'+esc(x.sz||'')+'"></div>'
+  +'<div class="qf"><label for="re'+i+'">Est. delivery</label><input id="re'+i+'" data-rf="e" data-i="'+i+'" type="text" autocomplete="off" maxlength="140" placeholder="Confirm the time frame, e.g. 2-4 weeks" value="'+esc(x.e)+'"></div>'
   +'<div class="qf"><label for="rnt'+i+'">Notes for this item <span class="opt">(optional)</span></label><input id="rnt'+i+'" data-rf="nt" data-i="'+i+'" type="text" autocomplete="off" maxlength="200" value="'+esc(x.nt)+'"></div>'
   +linkRow(x,'r',i)+photoRow(x,'r',i)+'<p class="rlt" id="rl'+i+'"></p></div>'});
  rEl.ritems.innerHTML=h;phGCsoon();rtotxt();RD.items.forEach(function(x,i){rltxt(i)});
@@ -1282,17 +1317,27 @@ function rsync(){ // everything except item rows
  }
 function rhasVendors(){var seen={},h='';V.forEach(function(v){if(!seen[v.n]){seen[v.n]=1;h+='<option value="'+esc(v.n)+'">'}});rEl.rvlist.innerHTML=h}
 function rphoneSms(t){var d=qdigits(t);if(d.length===10)return '+1'+d;if(d.length===11&&d[0]==='1')return '+'+d;return d.length>=10?'+'+d:''}
+function rPriceProblem(raw){var s=String(raw==null?'':raw).trim();if(!s)return 'blank';var n=pnum(s);if(n===null)return 'bad';if(n<0)return 'neg';return ''}
 function rvalid(kind){var m=[];
  if(!RD.name.trim())m.push(['rname','Please enter the customer\u2019s name.']);
  if(kind==='sms'&&!rphoneSms(RD.phone))m.push(['rphone','Please enter the customer\u2019s phone number to text the quote.']);
  if(kind==='mail'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(RD.email.trim()))m.push(['remail','Please enter a valid customer email to email the quote.']);
  if(RD.email.trim()&&kind==='sms'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(RD.email.trim()))m.push(['remail','That email address does not look right.']);
  if(RD.needed&&!validIso(RD.needed))m.push(['rneeded','Please pick a valid \u201cNeeded by\u201d date.']);
+ if(!/^\d{5}$/.test(String(RD.zip||'').trim()))m.push(['rzip','Enter a 5-digit delivery ZIP. A blank ZIP is not taxed as New Jersey.']);
  if(!rsubtotal(rIsMain).cnt)m.push(['rv0','Add at least one main-quote item (a vendor or a description). Alternatives are extra options and are not the main quote.']);
- if(rAppliedTax().needsConfirm)m.push(['rtax','Confirm the sales tax rate for this delivery ZIP before preview or send. New Jersey’s 6.625% is not used unless the ZIP is in New Jersey.']);
- RD.items.forEach(function(x,i){if(!ritemOn(x)||!VFQ.restrictsSale(VFQ.financeMonths(RD.ext)))return;var w=wpView(x),websiteNeeds=w&&w.ok&&!w.stale&&w.discounted&&rRegN(x)===null;if(rUnit(x).need||websiteNeeds)m.push(['rg'+i,'Item '+(i+1)+' is discounted. Financing longer than 18 months needs its confirmed regular price before preview or send. At 18 months or less, turn this off to quote the current price.'])});
- RD.items.forEach(function(x,i){if(!ritemOn(x))return;if(VFQ.productNameState(x.d)==='incomplete'&&!x.nameOk)m.push(['rd'+i,'Item '+(i+1)+' name looks incomplete. Type the product name, or confirm the short name, before preview or send. A product name is not invented to replace it.'])});
- if(rdelC()===null)m.push(['rdel',String(RD.dl||'').trim()?'Delivery charge should be a number, like 199 or 0.':'Enter the delivery charge before preview or send. Use 0 if delivery is free. A blank charge is not $0.']);
+ if(rAppliedTax().needsConfirm&&/^\d{5}$/.test(String(RD.zip||'').trim()))m.push(['rtax','Confirm the sales tax rate for this delivery ZIP before preview or send. New Jersey’s 6.625% is not used unless the ZIP is in New Jersey.']);
+ RD.items.forEach(function(x,i){if(!ritemOn(x)||!VFQ.restrictsSale(VFQ.financeMonths(RD.ext)))return;var w=wpView(x),websiteNeeds=w&&w.ok&&!w.stale&&w.discounted&&rRegN(x)===null;if(rUnit(x).need||websiteNeeds)m.push(['rg'+i,'Item '+(i+1)+' is discounted. Financing longer than 18 months needs its confirmed regular price before preview or send. Sale and outlet prices are not used. At 18 months or less, turn this off to quote the current price.'])});
+ RD.items.forEach(function(x,i){if(!ritemOn(x))return;
+  if(qtyOf(x.q)===null)m.push(['rq'+i,'Item '+(i+1)+' quantity must be a whole number, like 1 or 2. 1.5 is not 15.']);
+  if(!String(x.d||'').trim())m.push(['rd'+i,'Item '+(i+1)+' needs a product name before preview or send.']);
+  else if(VFQ.productNameState(x.d)==='incomplete'&&!x.nameOk)m.push(['rd'+i,'Item '+(i+1)+' name looks incomplete. Type the product name, or confirm the short name, before preview or send. A product name is not invented to replace it.']);
+  else if(VFQ.looksGarbled(x.d)&&!(String(x.d).trim().split(/\s+/).length<=2&&/^[A-Za-z][A-Za-z '&-]+$/.test(String(x.d).trim())))m.push(['rd'+i,'Item '+(i+1)+' name looks unreadable. Tap the website-name button or retype it before sending.']);
+  var pp=rPriceProblem(x.p);if(pp==='blank')m.push(['rp'+i,'Item '+(i+1)+' needs a price. A blank price is not $0.']);else if(pp)m.push(['rp'+i,'Item '+(i+1)+' price must be a number, like 499 or .5. Negative prices are not accepted.']);
+  if(String(x.rg||'').trim()&&rPriceProblem(x.rg))m.push(['rg'+i,'Item '+(i+1)+' regular price must be a number, like 899 or .5.']);
+  if(x.opt>1&&String(x.adl||'').trim()&&VFQ.deliveryCents(x.adl)===null)m.push(['radl'+i,'Option '+x.opt+' delivery should be a number, like 149, .5, or free.']);
+ });
+ if(rdelC()===null)m.push(['rdel',String(RD.dl||'').trim()?'Delivery charge should be a number, like 199, .5, or free.':'Enter the delivery charge before preview or send. Use 0 or free if delivery is free. A blank charge is not $0.']);
  return m}
 function rparts(x){var q=qtyOf(x.q),n=rUnit(x).n,a=[];if(x.d.trim())a.push(x.d.trim());if(x.sku.trim())a.push('SKU '+x.sku.trim());if(x.c.trim())a.push('Collection: '+x.c.trim());if(x.fin.trim())a.push('Finish: '+x.fin.trim());a.push('Qty '+q);
  if(n!==null)a.push(q>1?money(n)+' ea = '+money(rcents(x)/100):money(n));else if(x.p.trim())a.push('Price: '+x.p.trim());return a} // vendor # is never included
@@ -1306,19 +1351,19 @@ var RF_PROT='https://www.raymourflanigan.com/raymour-services/platinum-protectio
 var ROPEN={stop:'great meeting you today!',speak:'great speaking with you today!'};
 function rItemsShort(){var on=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)});if(!on.length)return '';var a=on.map(rItemShort);return a.length===1?a[0]:a.length===2?a[0]+' and '+a[1]:a[0]+' and '+(a.length-1)+' more'}
 function rSubject(){rstamp();var f=RD.name.trim().split(/\s+/)[0]||'Hello';var sh=rItemsShort();return sh?f+', the details from your Raymour & Flanigan visit \u2014 '+sh+' (Quote #'+RD.qn+')':f+', the details from your Raymour & Flanigan visit (Quote #'+RD.qn+')'}
-function rPriceLine(x,full){var q=qtyOf(x.q),u=rUnit(x),n=u.n;if(u.need)return 'Regular price to be confirmed, Qty '+q;if(n!==null){var label=RD.ext?'Regular price: ':'';return label+money(n)+(q>1?(full?' each':' ea')+', Qty '+q+' = '+money(rcents(x)/100):', Qty '+q)}return (x.p.trim()?'Price: '+x.p.trim()+', ':'Price to be confirmed, ')+'Qty '+q}
-function rItemBlock(x,full,num){var L=[],nm=rItemName(x),fin=x.fin.trim(),dm=rDims(x),sk=[];
- L.push(num+'. '+nm+(fin?', '+fin:''));if(dm.dims)L.push('   '+dm.dims);L.push('   '+rPriceLine(x,full));
+function rPriceLine(x,full){var q=qtyOf(x.q);if(q===null)return 'Quantity must be a whole number, like 1 or 2';var u=rUnit(x),n=u.n;if(u.need)return 'Regular price to be confirmed, Qty '+q;if(n!==null){var label=RD.ext?'Regular price: ':'';return label+money(n)+(q>1?(full?' each':' ea')+', Qty '+q+' = '+money(rcents(x)/100):', Qty '+q)}return (x.p.trim()?'Price: '+x.p.trim()+', ':'Price to be confirmed, ')+'Qty '+q}
+function rItemBlock(x,full,num){var L=[],nm=rItemName(x),fin=x.fin.trim(),dm=rDims(x),sk=[],tag=rSimpleTag(x),sz=rSizeText(x);
+ L.push(num+'. '+nm+(fin?', '+fin:'')+(tag?', '+tag:''));if(sz)L.push('   Size: '+sz);L.push('   '+rPriceLine(x,full));
  if(x.sku.trim())sk.push('SKU '+x.sku.trim());if(x.c.trim())sk.push('Collection: '+x.c.trim());if(sk.length)L.push('   '+sk.join(' \u00b7 '));
  rTgLines(x,full).forEach(function(l){L.push('   '+l)});
- if(x.e.trim())L.push('   Est. delivery (showroom ZIP 08807): '+x.e.trim());if(dm.rest)L.push('   Notes: '+dm.rest.replace(/\r?\n/g,' / '));
+ if(x.e.trim())L.push('   '+(full?'Estimated delivery: ':'Est. delivery: ')+x.e.trim());if(dm.rest)L.push('   Notes: '+dm.rest.replace(/\r?\n/g,' / '));
  if(x.u&&(!full||RD.links))L.push('   View online:','   '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)');L.push('');return L}
 function rPnote(){return RD.pn.trim().replace(/\s*\r?\n\s*/g,' ').slice(0,300)}
 function rTotals(cl,full){var to=rtotLines(cl,full),z=RD.zip.trim().replace(/\r?\n/g,' ');
  var lines=to.lines.map(function(l){return (z&&l.indexOf('Delivery: ')===0)?'Delivery to '+z+': '+l.slice(10):l});return {lines:lines,est:to.est}}
-function rSimpleTag(x){var g=x.tg&&x.tg.t;if(g==='floor')return 'Floor sample';if(g==='outlet')return 'Outlet';if(g==='accessory')return 'Accessory';if(!RD.ext&&rOnSale(x))return 'Sale';return ''}
+function rSimpleTag(x){var g=x.tg&&x.tg.t;if(g==='floor')return 'Floor sample';if(g==='outlet')return 'Outlet';if(g==='accessory')return 'Accessory';if(g==='sale'||(!RD.ext&&rOnSale(x)))return 'Sale';return ''}
 function rSimpleItemLine(x,num){var q=qtyOf(x.q),u=rUnit(x),tag=rSimpleTag(x),name=rItemName(x),title=name+(tag?', '+tag:''),price;
- if(u.need)price='regular price to be confirmed';else if(u.n===null)price=x.p.trim()||'price to be confirmed';else if(q>1)price=money(u.n)+' each, Qty '+q+' = '+money(rcents(x)/100);else price=money(u.n);
+ if(q===null)price='quantity must be a whole number';else if(u.need)price='regular price to be confirmed';else if(u.n===null)price=x.p.trim()||'price to be confirmed';else if(q>1)price=money(u.n)+' each, Qty '+q+' = '+money(rcents(x)/100);else price=money(u.n);
  return num+'. '+title+' \u2014 '+price}
 function rSavedRows(pred){var rows=[];RD.items.forEach(function(x){if(!ritemOn(x))return;if(pred&&!pred(x))return;var u=rUnit(x),was=rWasN(x);rows.push({qty:qtyOf(x.q),quotedCents:u.n===null?null:Math.round(u.n*100),wasCents:was===null?null:Math.round(was*100)})});return rows}
 function rSavedLine(pred){var saved=VFQ.amountSavedCents(rSavedRows(pred));return saved>0?'Amount saved: '+money(saved/100):''}
@@ -1331,7 +1376,7 @@ function rOptHeadsUp(){var n=rOptGroups().length;if(!n)return '';return 'I also 
 function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
  var L=['',full?'Other Options':'OTHER OPTIONS','Each option is a separate choice. Its total is not added to the main quote.',''];
  var z=RD.zip.trim().replace(/\r?\n/g,' ');
- groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1))});
+ groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));if(x.tg&&x.tg.t==='floor')L.push(rFloorLine())});
   var cl=rOptCalc(g);if(cl.needDel){L.push('Delivery: not entered');L.push('Estimated total: enter the delivery charge');}
   else{L.push((z?'Delivery to '+z+': ':'Delivery: ')+money(cl.delC/100));if(cl.platC>0)L.push('5-Year Platinum Protection: '+money(cl.platC/100));
    if(cl.needTax||cl.taxC===null){L.push('Sales tax: confirm the rate for this ZIP');L.push('Estimated total: confirm the sales tax rate')}
@@ -1339,15 +1384,17 @@ function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
   L.push('')});
  return L}
 function rOptSummary(){return rOptGroups().map(function(g){var cl=rOptCalc(g),names=g.items.map(function(x){return rItemName(x)}).join(' + '),plat=cl.platC>0?' (Platinum '+money(cl.platC/100)+')':'';return 'Option '+g.opt+': '+names+' '+(cl.estC===null?'total TBC':money(cl.estC/100))+plat}).join('; ').slice(0,1000)}
-function rHasFloor(){return RD.items.some(function(x){return ritemOn(x)&&rIsMain(x)&&x.tg&&x.tg.t==='floor'})}
+function rHasFloor(){return RD.items.some(function(x){return ritemOn(x)&&x.tg&&x.tg.t==='floor'})}
+function rTextItems(){var on=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)});if(on.length>3||!on.length)return [];var L=[];on.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));var sz=rSizeText(x);if(sz)L.push('Size: '+sz);if(x.tg&&x.tg.t==='sale'&&!RD.ext&&validIso(x.tg.se)&&x.tg.se>=isoToday()&&x.tg.se<rExpiryIso())L.push('Sale price good through '+dshow(x.tg.se)+'.')});return L}
 function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to the emailed full quote (the email keeps the long form in rbody(true))
  var r=REPS[RD.rep],L=[],first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
  var op=ROPEN[RD.op]||ROPEN.stop,cl=rcalc(),to=rTotals(cl,false),sh=rItemsShort(),pn=rPnote();
  L.push('Hi '+first+', '+op+(sh?' Here'+AP+'s your quote for '+sh+'.':' Here'+AP+'s your quote.'),'');
  var heads=rOptHeadsUp();if(heads)L.push(heads,'');
  if(pn)L.push(pn,'');
+ var brief=rTextItems();if(brief.length){brief.forEach(function(l){L.push(l)});L.push('')}
  to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedLine=rSavedLine(rIsMain);if(savedLine)L.push(savedLine);if(rEstNote())L.push(rEstNote());
- L.push('This price is held for you for 72 hours, until '+exp+' \u00b7 Quote #'+RD.qn);if(rHasFloor())L.push('Floor sample pieces themselves can'+AP+'t be held \u2014 they'+AP+'re one of a kind.');
+ L.push(rHoldSentence().replace(/\.$/,'')+' \u00b7 Quote #'+RD.qn);if(rHasFloor()){L.push(rFloorLine());L.push('Floor sample pieces themselves can'+AP+'t be held \u2014 they'+AP+'re one of a kind.');}
  if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(RD.needed&&validIso(RD.needed))L.push('Needed by: '+dshow(RD.needed));if(rBasis())L.push(rBasis());
  var pa=rPlatApply(0);
  if(pa.add>0){L.push('5-Year Platinum Protection is included in this quote.')}
@@ -1367,8 +1414,8 @@ function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],first=RD.nam
  L.push('Could you reply to let me know this came through?','');
  L.push('What You Picked');var n=0;RD.items.forEach(function(x){if(!ritemOn(x)||!rIsMain(x))return;n++;rItemBlock(x,true,n).forEach(function(l){L.push(l)})});
  if(RD.notes.trim())L.push('Notes: '+RD.notes.trim().replace(/\r?\n/g,' / '),'');
- L.push('Your Total');to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedMail=rSavedLine(rIsMain);if(savedMail)L.push(savedMail);if(rEstNote())L.push(rEstNote());
- L.push('This price is held for you for 72 hours, until '+exp+'.');if(rHasFloor())L.push('Floor sample pieces themselves can'+AP+'t be held \u2014 they'+AP+'re one of a kind.');if(rBasis())L.push(rBasis());
+ L.push('Your Investment');to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedMail=rSavedLine(rIsMain);if(savedMail)L.push(savedMail);if(rEstNote())L.push(rEstNote());
+ L.push(rHoldSentence());if(rHasFloor()){L.push(rFloorLine());L.push('Floor sample pieces themselves can'+AP+'t be held \u2014 they'+AP+'re one of a kind.');}if(rBasis())L.push(rBasis());
  if(RD.zip.trim()&&!to.lines.some(function(l){return l.indexOf('Delivery to')===0}))L.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));
  L.push('Quote #'+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn))+' \u00b7 Prepared by '+r.name);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());L.push('');
  rOptionLines(true).forEach(function(l){L.push(l)});
@@ -1450,7 +1497,7 @@ function rparse(t){var o={name:'',phone:'',email:'',zip:'',needed:'',ref:'',cont
    if(/^(?:All product lines|[A-Za-z\/& ]{3,30}):\s/.test(d))d=''; // older requests listed the vendor's categories - not wanted
    cur=ritemClean({v:v,d:d,sku:sku,c:col,fin:fin,q:q});o.items.push(cur);return}
   if(cur&&/^\s+\S/.test(l)){l.trim().split('|').forEach(function(seg){var k=seg.match(/^\s*(Item\/SKU|SKU|Qty|Finish|Notes?|Link)\s*:\s*(.+?)\s*$/i);if(!k)return;
-   var key=k[1].toLowerCase();if(key==='qty')cur.q=String(qtyOf(k[2]));else if(key==='finish')cur.fin=clip(k[2],80);else if(key.charAt(0)==='n')cur.nt=clip(k[2],200);else if(key==='link')cur.u=rfOk(k[2]);else cur.sku=clip(k[2],80)})}});
+   var key=k[1].toLowerCase();if(key==='qty')cur.q=qtyKeep(k[2]);else if(key==='finish')cur.fin=clip(k[2],80);else if(key.charAt(0)==='n')cur.nt=clip(k[2],200);else if(key==='link')cur.u=rfOk(k[2]);else cur.sku=clip(k[2],80)})}});
  return o}
 /* ---- Google Sheet logs: ONLY rep quotes the rep taps Send on, one separate log (endpoint + offline queue) per rep. Customer requests are never logged. ---- */
 var LOGREPS=['naeem','hans'];
@@ -1459,9 +1506,14 @@ function logKey(rep){return LOGQ+'-'+rep}
 function logLoad(rep){try{var a=JSON.parse(localStorage.getItem(logKey(rep))||'[]');return Array.isArray(a)?a.filter(function(x){return x&&x.rep===REPS[rep].name}):[]}catch(e){return []}}
 function logSave(rep,a){try{localStorage.setItem(logKey(rep),JSON.stringify(a.slice(-50)))}catch(e){}}
 var logBusy={naeem:false,hans:false},logTimer={naeem:0,hans:0};
-function logStatus(){var parts=[];
- LOGREPS.forEach(function(rep){var n=logOn(rep)&&!logBusy[rep]?logLoad(rep).length:0;if(n)parts.push(REPS[rep].name.split(' ')[0]+(n>1?' ('+n+')':''))});
- if(!AUTH)parts=[];rEl.rlogbar.hidden=!parts.length;rEl.rlog.textContent=parts.length?'Not logged yet \u2013 '+parts.join(', ')+'. Will retry automatically.':''}
+var logNote='';
+function logStatus(){if(!rEl.rlogbar)return;
+ if(AUTH&&!logOn(AUTH)){rEl.rlogbar.hidden=false;if(rEl.rlogretry)rEl.rlogretry.hidden=true;rEl.rlog.textContent=REPS[AUTH].name.split(' ')[0]+' has no quote log set up, so quotes are not logged.';return}
+ if(rEl.rlogretry)rEl.rlogretry.hidden=false;
+ var n=AUTH&&logOn(AUTH)&&!logBusy[AUTH]?logLoad(AUTH).length:0;
+ if(n){rEl.rlogbar.hidden=false;rEl.rlog.textContent='Not logged, will retry';return}
+ if(logNote==='Logged'){rEl.rlogbar.hidden=false;rEl.rlog.textContent='Logged';return}
+ rEl.rlogbar.hidden=true;rEl.rlog.textContent=''}
 function logSummary(){var a=[];RD.items.forEach(function(x){if(!ritemOn(x))return;var q=qtyOf(x.q),u=rUnit(x),n=u.n,m=[];if(u.swapped)m.push('regular price; sale '+(u.sp!==null?money(u.sp)+' ':'')+'not applied');
  if(x.sku.trim())m.push('SKU '+x.sku.trim());if(x.vn.trim())m.push('Vendor # '+x.vn.trim());if(x.c.trim())m.push('Collection: '+x.c.trim());if(x.fin.trim())m.push('Finish: '+x.fin.trim());if(x.tg&&TGT[x.tg.t])m.push('Tag: '+TGT[x.tg.t]+(x.tg.w?', was '+tgWasTxt(x.tg.w):'')+(x.tg.se?', sale ends '+tgSaleEndTxt(x.tg.se):''));if(x.nt.trim())m.push('Note: '+x.nt.trim());if(x.u)m.push('Link: '+x.u);
  a.push(q+' \u00d7 '+itemHead(x.v,x.d.trim()?[x.d.trim()]:[])+(m.length?' ('+m.join('; ')+')':'')+' @ '+(n===null?'price TBC':money(n)))});return ((RD.ext?'[Extended financing >18 mo: regular prices] ':'')+a.join('; ')).slice(0,3000)}
@@ -1474,10 +1526,10 @@ function logFlush(rep){
  var q=logLoad(rep);if(!q.length){logStatus();return}
  if(navigator.onLine===false||typeof fetch!=='function'){logStatus();return}
  var e=q[0],ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},15000);logBusy[rep]=true;logStatus();
- var fin=function(ok){clearTimeout(to);logBusy[rep]=false;
+ var fin=function(ok){clearTimeout(to);logBusy[rep]=false;logNote=ok?'Logged':'Not logged, will retry';
   if(ok){var cur=logLoad(rep).filter(function(x){return x.id!==e.id});logSave(rep,cur);logStatus();if(cur.length)logFlush(rep)}
   else{logStatus();logTimer[rep]=setTimeout(function(){logFlush(rep)},60000)}};
- try{fetch(LOGCFG[rep].url,{method:'POST',mode:'no-cors',keepalive:true,body:JSON.stringify(e),signal:ctl?ctl.signal:undefined}).then(function(){fin(true)},function(){fin(false)})}catch(er){fin(false)}}
+ try{fetch(LOGCFG[rep].url,{method:'POST',mode:'cors',credentials:'omit',headers:{'Content-Type':'text/plain;charset=UTF-8'},keepalive:true,body:JSON.stringify(e),signal:ctl?ctl.signal:undefined}).then(function(res){return res.text().then(function(txt){var ok=!!(res&&res.ok);try{var j=JSON.parse(txt);if(j&&(j.ok===false||j.success===false||j.result==='error'))ok=false}catch(err){}fin(ok)},function(){fin(false)})},function(){fin(false)})}catch(er){fin(false)}}
 var logLast={};
 function logSend(kind){try{var rep=AUTH;if(!rep||RD.rep!==rep||!logOn(rep))return;var lk=rep+'|'+RD.qn+'|'+kind,nw=Date.now();if(logLast[lk]&&nw-logLast[lk]<8000)return;logLast[lk]=nw;var q=logLoad(rep),e=logEntry(rep,kind);if(!q.some(function(x){return x.id===e.id})){q.push(e);logSave(rep,q)}logFlush(rep)}catch(er){}}
 window.addEventListener('online',function(){logFlush()});
@@ -1541,14 +1593,14 @@ rEl.rswcancel.addEventListener('click',function(){rEl.rswitch.hidden=true;swTarg
 rEl.rpn.addEventListener('input',rpnCount);
 [['rname','name'],['rphone','phone'],['remail','email'],['rnotes','notes'],['rpn','pn'],['rzip','zip'],['rneeded','needed'],['rref','ref'],['rdel','dl']].forEach(function(a){['input','change'].forEach(function(ev){rEl[a[0]].addEventListener(ev,function(){RD[a[1]]=rEl[a[0]].value;rEl.rerr.textContent='';rEl[a[0]].removeAttribute('aria-invalid');if(a[1]==='zip'&&VFQ.zip5(RD.zip)!==RD.taxZip){RD.taxOk=false;RD.taxRate=''}rhref();if(a[1]==='zip'){rtaxSync();RD.items.forEach(function(x,i){var box=document.getElementById('rw'+i);if(box)box.innerHTML=wpHtml(x,i)})}})})});
 rEl.ritems.addEventListener('input',function(e){var t=e.target,k=t.getAttribute&&t.getAttribute('data-rf');if(!k)return;var i=+t.getAttribute('data-i');
- if(k==='q'){var cl=t.value.replace(/\D/g,'').slice(0,3);if(cl!==t.value)t.value=cl;RD.items[i][k]=cl}else{if(k==='d')RD.items[i].nameOk=false;if(k==='adl'){var op=RD.items[i].opt;RD.items.forEach(function(it){if(it.opt===op)it.adl=t.value})}else RD.items[i][k]=t.value}rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rltxt(i);if(k==='sku'||k==='d'||k==='p'){var box=document.getElementById('rw'+i);if(box&&k==='sku')box.innerHTML=wpHtml(RD.items[i],i);if(k==='d'){var warn=document.getElementById('rnamebox'+i);if(warn)warn.outerHTML=rNameWarn(RD.items[i],i)}rProtRefresh(i)}rhref()});
-rEl.ritems.addEventListener('change',function(e){var t=e.target;if(t.getAttribute&&t.hasAttribute('data-opt')){var ix=+t.getAttribute('data-opt'),xn=RD.items[ix];if(!xn)return;var v=t.value;if(v==='new'){var max=1;RD.items.forEach(function(it){if(it.opt>max)max=it.opt});xn.opt=max+1}else{xn.opt=+v||0;if(!(xn.opt>1))xn.adl=''}rrenderItems(false);rhref();return}if(t.getAttribute&&t.hasAttribute('data-nameok')){var ix=+t.getAttribute('data-nameok'),xn=RD.items[ix];if(xn)xn.nameOk=!!t.checked;rrenderItems(false);rhref();return}if(!t.getAttribute||!t.hasAttribute('data-tgt'))return;var i=+t.getAttribute('data-tgt'),x=RD.items[i];if(!x)return;var v=t.value,g=x.tg||{};
+ if(k==='q'){var cl=t.value.slice(0,6);if(cl!==t.value)t.value=cl;RD.items[i].q=cl}else{if(k==='d')RD.items[i].nameOk=false;if(k==='adl'){var op=RD.items[i].opt;RD.items.forEach(function(it){if(it.opt===op)it.adl=t.value})}else RD.items[i][k]=t.value}rEl.rerr.textContent='';t.removeAttribute('aria-invalid');rtotxt();rltxt(i);if(k==='sku'||k==='d'||k==='p'){var box=document.getElementById('rw'+i);if(box&&k==='sku')box.innerHTML=wpHtml(RD.items[i],i);if(k==='d'){var warn=document.getElementById('rnamebox'+i);if(warn)warn.outerHTML=rNameWarn(RD.items[i],i)}rProtRefresh(i)}rhref()});
+rEl.ritems.addEventListener('change',function(e){var t=e.target;if(t.getAttribute&&t.hasAttribute('data-opt')){var ix=+t.getAttribute('data-opt'),xn=RD.items[ix];if(!xn)return;var v=t.value;if(v==='new'){var max=1;RD.items.forEach(function(it){if(it.opt>max)max=it.opt});xn.opt=max+1;xn.adl=''}else{var next=+v||0;if(!(next>1))xn.adl='';else{var fee='';RD.items.forEach(function(it){if(it!==xn&&+it.opt===next&&String(it.adl||'').trim())fee=String(it.adl).trim()});xn.adl=fee}xn.opt=next}rrenderItems(false);rhref();return}if(t.getAttribute&&t.hasAttribute('data-nameok')){var ix=+t.getAttribute('data-nameok'),xn=RD.items[ix];if(xn)xn.nameOk=!!t.checked;rrenderItems(false);rhref();return}if(!t.getAttribute||!t.hasAttribute('data-tgt'))return;var i=+t.getAttribute('data-tgt'),x=RD.items[i];if(!x)return;var v=t.value,g=x.tg||{};
  if(!TGT[v])delete x.tg;else x.tg=tgItemClean({t:v,w:g.w,s:g.s,se:g.se,cm:g.cm});rrenderItems(false);rhref()});
-rEl.ritems.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttribute)return;var rf=t.getAttribute('data-rf');if(rf==='sku'){rProtRefresh(+t.getAttribute('data-i'));return}if(rf!=='q')return;var i=+t.getAttribute('data-i');RD.items[i].q=String(qtyOf(RD.items[i].q));t.value=RD.items[i].q;rtotxt();rltxt(i);rhref()});
+rEl.ritems.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttribute)return;var rf=t.getAttribute('data-rf');if(rf==='sku'){rProtRefresh(+t.getAttribute('data-i'));return}if(rf!=='q')return;var i=+t.getAttribute('data-i'),n=qtyOf(RD.items[i].q);if(n!==null){RD.items[i].q=String(n);t.value=RD.items[i].q}rtotxt();rltxt(i);rhref()});
 rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rrm]'):null;if(!b)return;var gone=RD.items.splice(+b.getAttribute('data-rrm'),1)[0];
  if(gone&&gone.k&&QI[gone.k]){QL=QL.filter(function(x){return x.k!==gone.k});delete QI[gone.k];RD.imp=RD.imp.filter(function(k){return k!==gone.k});qsync()}
  if(!RD.items.length)RD.items.push(rblank());rrenderItems(false);rhref()});
-rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-wp],[data-wpall],[data-wpuse],[data-wpname],[data-wpcolor],[data-wpdel],[data-protuse]'):null;if(!b)return;if(b.hasAttribute('data-protuse')){protUse(+b.getAttribute('data-protuse'));return}if(b.hasAttribute('data-wpall')){wpUseAll(+b.getAttribute('data-wpall'));return}if(b.hasAttribute('data-wp'))wpCheck(+b.getAttribute('data-wp'));else if(b.hasAttribute('data-wpuse'))wpUse(+b.getAttribute('data-wpuse'));else if(b.hasAttribute('data-wpname'))wpUseName(+b.getAttribute('data-wpname'));else if(b.hasAttribute('data-wpcolor'))wpUseColor(+b.getAttribute('data-wpcolor'));else wpUseDel(+b.getAttribute('data-wpdel'))});
+rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-wp],[data-wpall],[data-wpuse],[data-wpname],[data-wpcolor],[data-wpdel],[data-wpsize],[data-protuse]'):null;if(!b)return;if(b.hasAttribute('data-protuse')){protUse(+b.getAttribute('data-protuse'));return}if(b.hasAttribute('data-wpall')){wpUseAll(+b.getAttribute('data-wpall'));return}if(b.hasAttribute('data-wpsize')){wpUseSize(+b.getAttribute('data-wpsize'));return}if(b.hasAttribute('data-wp'))wpCheck(+b.getAttribute('data-wp'));else if(b.hasAttribute('data-wpuse'))wpUse(+b.getAttribute('data-wpuse'));else if(b.hasAttribute('data-wpname'))wpUseName(+b.getAttribute('data-wpname'));else if(b.hasAttribute('data-wpcolor'))wpUseColor(+b.getAttribute('data-wpcolor'));else wpUseDel(+b.getAttribute('data-wpdel'))});
 rEl.rext.addEventListener('change',function(){RD.ext=!!rEl.rext.checked;rEl.rextnote.hidden=!RD.ext;rEl.rerr.textContent='';rrenderItems(false);rhref()});
 rEl.rplat.addEventListener('change',function(){RD.plat=!!rEl.rplat.checked;rEl.rerr.textContent='';rhref()});
 rEl.rlinks.addEventListener('change',function(){RD.links=!!rEl.rlinks.checked;rEl.rerr.textContent='';rhref()});
@@ -1578,7 +1630,7 @@ rEl.rtext.addEventListener('click',rsend('sms'));rEl.rmail.addEventListener('cli
 rEl.rheadsup.addEventListener('click',function(ev){if(!AUTH||!rphoneSms(RD.phone)){ev.preventDefault();return}var body=rHeadsUpBody();
  if(RPREV.head!==body){ev.preventDefault();RPREV.head=body;rEl.rpreview.hidden=false;if(rEl.rpreviewtitle)rEl.rpreviewtitle.textContent='Heads-up text';rEl.rpreviewnote.textContent='Heads-up text preview. Tap the button again to open Messages.';rEl.rpreviewbody.textContent=body;rEl.rheadsup.setAttribute('href','#');try{rEl.rpreview.scrollIntoView({block:'nearest'})}catch(e){}return}
  rEl.rheadsup.setAttribute('href','sms:'+rphoneSms(RD.phone)+'?&body='+encodeURIComponent(body))});
-window.vfQuoteApi={load:function(d){if(!d)return;['name','phone','email','zip','dl','notes','pn'].forEach(function(k){if(d[k]!=null)RD[k]=d[k]});if(d.ext!=null)RD.ext=!!d.ext;if(d.taxRate!=null)RD.taxRate=String(d.taxRate);if(d.taxOk!=null)RD.taxOk=!!d.taxOk;if(d.taxZip!=null)RD.taxZip=String(d.taxZip);RD.plat=!!d.plat;RD.platOpt={};if(d.platOpt&&typeof d.platOpt==='object')Object.keys(d.platOpt).forEach(function(k){RD.platOpt[String(k)]=!!d.platOpt[k]});RD.links=!!d.links;if(d.items)RD.items=d.items.map(function(x){return ritemClean(x)});if(!RD.items.length)RD.items=[rblank()];rsync();rrenderItems(false);rhref()},text:function(){return rsms()},email:function(){return rbody(true)},valid:function(k){return rvalid(k)},preview:function(k){rPreview(k);return {sms:RPREV.sms,mail:RPREV.mail,hidden:rEl.rpreview.hidden,body:rEl.rpreviewbody.textContent}},items:function(){return RD.items.map(function(x){return {p:x.p,rg:x.rg,d:x.d,fin:x.fin,e:x.e,sku:x.sku}})},applyPrice:function(i){wpUse(i)},applyName:function(i){wpUseName(i)},applyColor:function(i){wpUseColor(i)},logFields:function(){var e=logEntry(RD.rep||'naeem','mail');return {delivery:e.delivery,tax:e.tax,estTotal:e.estTotal,subtotal:e.subtotal,platinum:e.platinum,optionsSummary:e.optionsSummary,keys:Object.keys(e)}}};
+window.vfQuoteApi={load:function(d){if(!d)return;['name','phone','email','zip','dl','notes','pn'].forEach(function(k){if(d[k]!=null)RD[k]=d[k]});if(d.qn!=null)RD.qn=String(d.qn);if(d.ext!=null)RD.ext=!!d.ext;if(d.taxRate!=null)RD.taxRate=String(d.taxRate);if(d.taxOk!=null)RD.taxOk=!!d.taxOk;if(d.taxZip!=null)RD.taxZip=String(d.taxZip);RD.plat=!!d.plat;RD.platOpt={};if(d.platOpt&&typeof d.platOpt==='object')Object.keys(d.platOpt).forEach(function(k){RD.platOpt[String(k)]=!!d.platOpt[k]});RD.links=!!d.links;if(d.items)RD.items=d.items.map(function(x){return ritemClean(x)});if(!RD.items.length)RD.items=[rblank()];if(rEl.rext){rEl.rext.checked=!!RD.ext;if(rEl.rextnote)rEl.rextnote.hidden=!RD.ext}rsync();rrenderItems(false);rhref()},text:function(){return rsms()},email:function(){return rbody(true)},valid:function(k){return rvalid(k)},preview:function(k){rPreview(k);return {sms:RPREV.sms,mail:RPREV.mail,hidden:rEl.rpreview.hidden,body:rEl.rpreviewbody.textContent}},items:function(){return RD.items.map(function(x){return {p:x.p,rg:x.rg,d:x.d,fin:x.fin,e:x.e,sku:x.sku,q:x.q,sz:x.sz||'',adl:x.adl||'',opt:x.opt||0}})},applyPrice:function(i){wpUse(i)},applyAll:function(i){wpUseAll(i)},applyName:function(i){wpUseName(i)},applyColor:function(i){wpUseColor(i)},applySize:function(i){wpUseSize(i)},setExt:function(on){RD.ext=!!on;if(rEl.rext)rEl.rext.checked=!!on;if(rEl.rextnote)rEl.rextnote.hidden=!RD.ext;rrenderItems(false);rhref()},quoteNo:function(){return RD.qn},sign:function(rep){authSet(rep==='naeem'||rep==='hans'?rep:null);if(AUTH)RD.rep=AUTH;rview();logStatus()},sendLog:function(kind){logSend(kind||'mail')},logText:function(){return rEl.rlog?rEl.rlog.textContent:''},logFields:function(){var e=logEntry(RD.rep||'naeem','mail');return {delivery:e.delivery,tax:e.tax,estTotal:e.estTotal,subtotal:e.subtotal,platinum:e.platinum,optionsSummary:e.optionsSummary,keys:Object.keys(e)}}};
 rEl.rclose.addEventListener('click',function(){ropen(false)});
 rbk.addEventListener('click',function(){if(ropened())ropen(false)});
 rsh.addEventListener('keydown',function(e){if(e.key!=='Tab')return;
@@ -2292,7 +2344,8 @@ function cartScroll(selector){var e=document.querySelector(selector);if(e&&e.scr
 function cartStatus(){var s=cartSummary(),el=document.getElementById('rcartstatus');if(el){el.textContent=s.text;el.className=s.warn?'tgwarn':'qfine'}var b=document.querySelector('[data-cart=add]');if(b){var needName=s.selected.some(function(r){return VFQ.productNameBlocks(r.name,r.nameOk)});b.disabled=CART.busy||!s.selected.length||needName||((s.short||s.mismatch)&&!CART.verified);b.textContent='Add checked pieces ('+s.selected.length+')'}var pv=document.querySelector('[data-cart=preview]');if(pv)pv.hidden=!cartPreviewReady();return s}
 function cartSkuActions(r,i){var sku=VFQ.sku9(r.sku);if(!sku)return '<p class="qfine">Enter the 9-digit SKU to look up the website name.</p>';var h='<p class="rrow"><button type="button" class="btn2 rbtn" data-cart="skulookup" data-cartrow="'+i+'">Look up name by SKU</button></p>';var L=r.lookup;if(!L)return h;if(L.m==='checking')return h+'<p class="qfine">Looking up exact SKU '+esc(sku)+'\u2026</p>';if(L.m==='ok'){h+='<p class="rwp"><b>Website name:</b> '+esc(L.name)+'</p>';if(String(r.name||'').trim()!==L.name)h+='<p class="rrow"><button type="button" class="btn2 rbtn" data-cart="usename" data-cartrow="'+i+'">Use website name</button></p>';return h}if(L.m==='nomatch')return h+'<p class="tgwarn">No product with exact SKU '+esc(sku)+' was returned. No name was invented.</p>';return h+'<p class="tgwarn">Lookup ran for SKU '+esc(sku)+'. The description did not block it. The website product service did not allow this page to read the result, so no name was filled in.</p>'}
 function cartNameReview(r,i){var st=VFQ.productNameState(r.name),h='';if(st==='incomplete')h='<p class="tgwarn" id="cartname'+i+'">Name is only one letter. Type the product name, or confirm this short name.</p><label class="rextlab"><input type="checkbox" data-cartrow="'+i+'" data-cartfield="nameOk"'+(r.nameOk?' checked':'')+'> <span>Confirm this short name</span></label>';else if(st!=='ok')h='<p class="tgwarn" id="cartname'+i+'">Name not readable'+(r.name&&String(r.name).trim()?' ('+esc(r.name)+' is not a product name)':'')+'. Type the product name, or look it up from the SKU. Punctuation is not a product name.</p>';return h+cartSkuActions(r,i)}
-function cartSkuLookup(i){var r=CART.rows[i];if(!r)return;var sku=VFQ.sku9(r.sku);if(!sku){r.lookup={m:'nosku'};cartDraw();return}r.lookup={m:'checking',sku:sku};cartDraw();var url='https://www.raymourflanigan.com/api/custom/product-card?codes='+encodeURIComponent(sku)+'&postalCode=08807&showAlternateItems=true&showDeliveryTimeline=true&showSecondDimension=true';Promise.resolve().then(function(){return fetch(url,{credentials:'omit'})}).then(function(res){if(!res.ok)throw new Error('http');return res.json()}).then(function(j){if(CART.rows[i]!==r)return;var hit=VFQ.officialNameFromProductCard(j,sku);if(!hit){r.lookup={m:'nomatch',sku:sku};cartDraw();return}r.lookup={m:'ok',sku:sku,name:hit.name,url:hit.url};var st=VFQ.productNameState(r.name);if(!r.nameTouched&&(st==='missing'||st==='unresolved')){r.name=hit.name;r.nameOk=false}cartDraw()},function(){if(CART.rows[i]!==r)return;r.lookup={m:'blocked',sku:sku};cartDraw()})}
+var CART_BUSY={};
+function cartSkuLookup(i){var r=CART.rows[i];if(!r||CART_BUSY[i])return;var sku=VFQ.sku9(r.sku);if(!sku){r.lookup={m:'nosku'};cartDraw();return}CART_BUSY[i]=1;r.lookup={m:'checking',sku:sku};cartDraw();wpIndexEntry(sku).then(function(entry){CART_BUSY[i]=0;if(CART.rows[i]!==r)return;if(!entry||entry.failed){r.lookup={m:'blocked',sku:sku};cartDraw();return}if(entry.missing||!entry.name){r.lookup={m:'nomatch',sku:sku};cartDraw();return}r.lookup={m:'ok',sku:sku,name:entry.name,url:entry.url||''};var st=VFQ.productNameState(r.name);if(!r.nameTouched&&(st==='missing'||st==='unresolved')){r.name=entry.name;r.nameOk=false}cartDraw()})}
 function cartUseWebsiteName(i){var r=CART.rows[i];if(!r||!r.lookup||r.lookup.m!=='ok'||!r.lookup.name)return;r.name=r.lookup.name;r.nameTouched=true;r.nameOk=false;cartDraw()}
 function cartRowsHtml(){var h='<ol class="cartrows">';CART.rows.forEach(function(r,i){var known=cartKnown(r.sku),fld=function(k,label,v,mode){var id='cart'+i+k;return '<div class="qf"><label for="'+id+'">'+label+'</label><input id="'+id+'" data-cartrow="'+i+'" data-cartfield="'+k+'" value="'+esc(v)+'" type="text" autocomplete="off" maxlength="'+(k==='name'?200:80)+'"'+(mode?' inputmode="'+mode+'"':'')+'></div>'};h+='<li class="cartrow"><label class="cartpick"><input type="checkbox" data-cartrow="'+i+'" data-cartfield="on"'+(r.on&&!known?' checked':'')+(known?' disabled':'')+'> <b>Piece '+(i+1)+(known?' · Already in quote':'')+'</b></label>'+fld('name','Item / description',r.name)+cartNameReview(r,i)+fld('sku','SKU (9 digits)',r.sku,'numeric')+'<div class="rpair">'+fld('color','Color',r.color)+fld('qty','Quantity',r.qty,'numeric')+'</div><div class="rpair">'+fld('reg','Regular / was price',r.reg,'decimal')+fld('price','Current / sale price',r.price,'decimal')+'</div>'+fld('note','Availability note',r.note)+'<p class="qfine">Confirm prices and availability. Extended financing uses the regular price.</p></li>'});return h+'</ol>'}
 function cartActions(){return '<div class="cartactions"><p class="qfine cartnext">'+(cartPreviewReady()?'These pieces are now in your quote.':'Not added yet. Review the pieces, then tap Add checked pieces.')+'</p><div class="tgbtns"><button type="button" class="btn1 rgbtn" data-cart="add"'+(cartPreviewReady()?' hidden':'')+'>Add checked pieces</button><button type="button" class="btn1 rgbtn" data-cart="preview"'+(cartPreviewReady()?'':' hidden')+'>Preview quote</button>'+(cartPreviewReady()?'<button type="button" class="btn2 rbtn" data-cart="items">Edit quote items</button>':'')+'</div></div>'}

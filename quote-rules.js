@@ -19,8 +19,9 @@
   function deliveryCents(raw){
     var s = String(raw == null ? '' : raw).trim();
     if(!s) return null;
+    if(/^free$/i.test(s)) return 0;
     var x = s.replace(/[$,\s]/g, '');
-    if(!/^\d+(\.\d+)?$/.test(x)) return null;
+    if(!/^\d+(\.\d+)?$/.test(x) && !/^\.\d+$/.test(x)) return null;
     var n = parseFloat(x);
     if(!isFinite(n) || n < 0) return null;
     return Math.round(n * 100);
@@ -278,17 +279,13 @@
     return {color:parts.join(' / ').slice(0, 80), state:'website'};
   }
 
-  function deliveryAssessment(data, zip){
-    var raw = String(zip || '');
-    var zip5 = (raw.match(/\d{5}/) || [])[0] || '';
+  function deliveryAssessment(data){
+    // Delivery timing is always the showroom ZIP 08807. The customer's ZIP does not change it.
     var estimate = '';
-    if(data && typeof data.zipDeliveryEstimate === 'string' && data.zipDeliveryEstimate.trim() && zip5 && String(data.zipDeliveryZip || '') === zip5)
-      estimate = data.zipDeliveryEstimate.trim().slice(0, 100);
-    if(estimate) return {state:'website', text:estimate, zip:zip5, reason:''};
-    var reason = zip5
-      ? 'No ZIP-based delivery estimate for ' + zip5 + ' is in the website search. Stock dates and lead times are not delivery promises.'
-      : 'No ZIP-based delivery estimate is in the website search. Enter the customer ZIP and confirm the time frame yourself. Stock dates are not delivery promises.';
-    return {state:'unconfirmed', text:'', zip:zip5, reason:reason};
+    if(data && typeof data.zipDeliveryEstimate === 'string' && data.zipDeliveryEstimate.trim() && String(data.zipDeliveryZip || '') === SHOWROOM_ZIP)
+      estimate = data.zipDeliveryEstimate.trim().slice(0, 140);
+    if(estimate) return {state:'website', text:estimate, zip:SHOWROOM_ZIP, reason:''};
+    return {state:'unconfirmed', text:'', zip:SHOWROOM_ZIP, reason:'No delivery estimate for showroom ZIP 08807 is in the website search. Stock dates and lead times are not delivery promises.'};
   }
 
   function parsePricing(raw){
@@ -347,26 +344,59 @@
     return null;
   }
 
-  function websiteStale(w, sku, zip){
+  function websiteStale(w, sku){
     if(!w || !w.ok) return false;
     var want = sku9(sku);
     var prot = protectorByCode(sku);
     if(prot && prot.known && prot.websiteSku) want = prot.websiteSku;
     if(String(w.sku || '') !== want) return true;
-    if(String(w.zip == null ? '' : w.zip) !== String(zip == null ? '' : zip)) return true;
     return false;
   }
 
+  // price is always the current website price (sale or outlet). regular is the higher
+  // price when the site published one. quoted is what the customer sees: regular while
+  // financing is longer than 18 months, otherwise the current price. Both stay available
+  // so turning long financing off returns to the sale or outlet price.
   function websitePricePlan(web, extended){
     var price = round2(web.price);
     var original = web.original == null || web.original === '' ? null : round2(web.original);
     var style = web.style || '';
     var discounted = (original != null && original > price) || !!DISCOUNT_STYLES[style];
+    var regular = (original != null && original > price) ? original : null;
     if(extended && discounted){
-      if(!(original > 0)) return {ok:false, reason:'missing-regular'};
-      return {ok:true, price:original, regular:original, quoted:original};
+      if(!(original > 0)) return {ok:false, reason:'missing-regular', price:price, regular:null, quoted:null};
+      return {ok:true, price:price, regular:original, quoted:original};
     }
-    return {ok:true, price:price, regular:(original != null && original > price) ? original : null, quoted:price};
+    return {ok:true, price:price, regular:regular, quoted:price};
+  }
+
+  function sizeNum(n){
+    var x = Math.round((+n) * 100) / 100;
+    if(!isFinite(x) || x <= 0) return '';
+    return String(x);
+  }
+  function formatSize(dim){
+    if(!dim) return '';
+    var w = sizeNum(dim.w), d = sizeNum(dim.d), h = sizeNum(dim.h);
+    if(!w || !d || !h) return '';
+    var s = w + '" W x ' + d + '" D x ' + h + '" H';
+    var leaf = sizeNum(dim.leaf);
+    if(leaf) s += ' (' + leaf + '" W with leaf)';
+    if(dim.pieces && dim.pieces.length){
+      s += '; ' + dim.pieces.map(function(p){
+        var name = p && p.name ? String(p.name).replace(/\s+/g, ' ').trim() + ': ' : '';
+        if(p && sizeNum(p.l) && sizeNum(p.w) && sizeNum(p.h)) return name + sizeNum(p.l) + '" L x ' + sizeNum(p.w) + '" W x ' + sizeNum(p.h) + '" H';
+        if(p && sizeNum(p.w) && sizeNum(p.d) && sizeNum(p.h)) return name + sizeNum(p.w) + '" W x ' + sizeNum(p.d) + '" D x ' + sizeNum(p.h) + '" H';
+        return '';
+      }).filter(Boolean).join('; ');
+    }
+    return s;
+  }
+  function checkedLabel(iso){
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
+    if(!m) return '';
+    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return months[+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1];
   }
 
   function quotedUnit(months, item){
@@ -555,6 +585,8 @@
     colorFromFacets:colorFromFacets,
     websiteStale:websiteStale,
     websitePricePlan:websitePricePlan,
+    formatSize:formatSize,
+    checkedLabel:checkedLabel,
     quotedUnit:quotedUnit,
     customerFinanceLines:customerFinanceLines,
     PET_EXCLUSION:PET_EXCLUSION,
