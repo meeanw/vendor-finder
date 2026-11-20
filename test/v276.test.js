@@ -374,6 +374,20 @@ test('quote wording fixes from the v2.7.7 sample review', function(){
   assert.equal(api.email().indexOf('Delivery to 088071'), -1);
 });
 
+test('the quote number sits on its own line, with no period before a dot', function(){
+  var api = loadPage().api;
+  function noDot(msg){ assert.equal(msg.indexOf('. \u00b7'), -1, msg); assert.equal(msg.indexOf('.\u00b7'), -1); }
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Chair', p:'100.00', q:'1'}]}));
+  noDot(api.text()); noDot(api.email());
+  assert.match(api.text(), /This price is held for you for 72 hours, until .+\nQuote #Q-/);
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale', se:'2026-11-21'}}]}));
+  noDot(api.text()); noDot(api.email());
+  assert.match(api.text(), /quote otherwise valid 72 hours\.\nQuote #Q-/);
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
+  noDot(api.text()); noDot(api.email());
+  assert.match(api.text(), /may sell before then\.\nQuote #Q-/);
+});
+
 test('the service worker can install when the SKU files are missing', function(){
   var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   assert.match(sw, /VERSION='2\.7\.7'/);

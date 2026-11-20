@@ -1406,7 +1406,7 @@ function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to
  if(pn)L.push(pn,'');
  var brief=rTextItems();if(brief.length){brief.forEach(function(l){L.push(l)});L.push('')}
  to.lines.forEach(function(l){L.push(l)});L.push(to.est);var savedLine=rSavedLine(rIsMain);if(savedLine)L.push(savedLine);if(rEstNote())L.push(rEstNote());
- L.push(rHoldSentence()+' \u00b7 Quote #'+RD.qn);var floorNote=rFloorReserveLine();if(floorNote)L.push(floorNote);if(rHasFloor())L.push(rFloorLine());
+ L.push(rHoldSentence(),'Quote #'+RD.qn);var floorNote=rFloorReserveLine();if(floorNote)L.push(floorNote);if(rHasFloor())L.push(rFloorLine());
  if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());if(RD.needed&&validIso(RD.needed))L.push('Needed by: '+dshow(RD.needed));if(rBasis())L.push(rBasis());
  var pa=rPlatApply(0);
  if(pa.add>0){L.push('5-Year Platinum Protection is included in this quote.')}
