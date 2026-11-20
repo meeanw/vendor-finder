@@ -4,6 +4,8 @@
 <title>Furniture Vendor Finder</title>
 <meta name="description" content="Vendor reference by room, furniture type and style.">
 <meta name="robots" content="noindex,nofollow">
+<meta name="vf-updated" content="Nov 20, 2026">
+<meta name="vf-version" content="2.7.4">
 <link rel="canonical" href="https://meeanw.github.io/vendor-finder/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Furniture Vendor Finder">
 <meta property="og:title" content="Furniture Vendor Finder"><meta property="og:description" content="Find vendors by room, furniture type and style.">
@@ -491,7 +493,7 @@ body.scan-open{overflow:hidden}
 <button class="tab" role="tab" id="tab-vendors" data-mode="vendors" aria-selected="false" tabindex="-1" aria-controls="panel">Vendor Directory<span class="tsub">All vendors, A–Z</span></button></div>
 </div></div>
 <main>
-<div class="notice"><p><b>Brand-level guidance only.</b> <span id="ntxt">Styles are estimates by manufacturer, not item pricing or stock.</span> Confirm the collection, current price and Raymour orderability before promising a customer. <span class="upd">Last updated Nov 2, 2026</span></p>
+<div class="notice"><p><b>Brand-level guidance only.</b> <span id="ntxt">Styles are estimates by manufacturer, not item pricing or stock.</span> Confirm the collection, current price and Raymour orderability before promising a customer. <span class="upd" id="upd">Last updated Nov 20, 2026</span></p>
 <div id="legendwrap"></div></div>
 <div id="nojs"><div class="nj-note"><b>Simple mode:</b> scripts are blocked or off in this browser, so Quick Picks, search and sorting are unavailable. The dropdowns below still filter the vendor list. Open this page in Safari or Chrome for the full tool.<div id="nj-err" class="nj-err"></div></div>
 <div class="nj-f"><div><label for="nj-room">Room</label><select id="nj-room"><option value="">All rooms</option><option value="bedroom">Bedroom</option><option value="commercial-office">Commercial Office</option><option value="decor-accessories">Decor &amp; Accessories</option><option value="dining-room">Dining Room</option><option value="entertainment">Entertainment</option><option value="home-office">Home Office</option><option value="kids-nursery">Kids &amp; Nursery</option><option value="living-room">Living Room</option><option value="outdoor">Outdoor</option></select></div><div><label for="nj-type">Furniture type</label><select id="nj-type"><option value="">All types</option><option value="accent-lounge-chairs">Accent &amp; lounge chairs</option><option value="beds-headboards">Beds &amp; headboards</option><option value="buffets-servers-bars">Buffets, servers &amp; bars</option><option value="coffee-end-console-tables">Coffee, end &amp; console tables</option><option value="commercial-lobby-meeting">Commercial, lobby &amp; meeting</option><option value="decor-accessories">Decor &amp; accessories</option><option value="desks">Desks</option><option value="dining-chairs-bar-stools">Dining chairs &amp; bar stools</option><option value="dining-sets">Dining sets</option><option value="dining-tables">Dining tables</option><option value="dressers-chests-nightstands">Dressers, chests &amp; nightstands</option><option value="kids-nursery">Kids &amp; nursery</option><option value="lighting">Lighting</option><option value="office-chairs">Office chairs</option><option value="office-storage-files">Office storage &amp; files</option><option value="ottomans-benches">Ottomans &amp; benches</option><option value="outdoor-patio">Outdoor &amp; patio</option><option value="recliners-motion-seating">Recliners &amp; motion seating</option><option value="rugs">Rugs</option><option value="sofas-sectionals">Sofas &amp; sectionals</option><option value="storage-cabinets-bookcases">Storage, cabinets &amp; bookcases</option><option value="tv-media-furniture">TV &amp; media furniture</option><option value="theater-game-room-seating">Theater &amp; game-room seating</option><option value="wall-art-mirrors">Wall art &amp; mirrors</option></select></div><div><label for="nj-style">Design style</label><select id="nj-style"><option value="">All styles</option><option value="adirondack">Adirondack</option><option value="bohemian">Bohemian</option><option value="casual">Casual</option><option value="classic-luxury">Classic Luxury</option><option value="coastal">Coastal</option><option value="contemporary">Contemporary</option><option value="eclectic">Eclectic</option><option value="farmhouse">Farmhouse</option><option value="glam">Glam</option><option value="industrial">Industrial</option><option value="mid-century-modern">Mid-Century Modern</option><option value="minimalist">Minimalist</option><option value="modern">Modern</option><option value="organic-modern">Organic Modern</option><option value="rustic">Rustic</option><option value="scandinavian">Scandinavian</option><option value="traditional">Traditional</option><option value="transitional">Transitional</option><option value="tropical">Tropical</option></select></div><div><label for="nj-use">Use</label><select id="nj-use"><option value="">All uses</option><option value="commercial-contract">Commercial / contract</option><option value="functional-motion-massage-lift">Functional (motion, massage, lift)</option><option value="kids">Kids</option><option value="outdoor">Outdoor</option><option value="seasonal">Seasonal</option><option value="senior-living">Senior living</option><option value="theater-media">Theater / media</option></select></div><div><label for="nj-chan">Raymour channel</label><select id="nj-chan"><option value="">Any channel</option><option value="check-vendor-catalog">Check vendor/catalog</option><option value="commercial-b2b">Commercial / B2B</option><option value="custom">Custom</option><option value="direct-ship-web">Direct ship / web</option><option value="outlet">Outlet</option><option value="special-order">Special order</option><option value="stocked">Stocked</option></select></div></div><p style="font-size:14px;color:#516173;margin:0 0 10px">A vendor can appear under several styles/channels, so filter counts can add up to more than the vendor total.</p>
@@ -585,7 +587,7 @@ body.scan-open{overflow:hidden}
 </div>
 <footer><details><summary>Full notes</summary><p id="fuse"><b>How to use:</b> Pick a view, then search or open Filters to narrow by room, furniture type, style, use and Raymour channel. Tap <b>Visit website</b> to browse a manufacturer. Add this page to your Home Screen to open it like an app.</p><p id="fimp"><b>Important:</b> Styles are manufacturer-family estimates, not item-level pricing or verified inventory. Confirm exact collections, current prices and Raymour orderability before promising anything to a customer. Mattress and bedding vendors, and entries without website links, were excluded from the original workbook.</p><p>Raymour status chips come from the original vendor list (&ldquo;Check vendor/catalog&rdquo; means no list status was recorded). Vendor links were checked Nov 2, 2026; a few could not be verified and are flagged on their cards. This is a personal reference tool and is not an official Raymour &amp; Flanigan site.</p></details></footer>
 <p class="replink"><a href="#rep" id="rlink">For Raymour &amp; Flanigan reps</a></p>
-<p class="ver" id="ver">Data updated Nov 17, 2026 &middot; v2.7.3</p>
+<p class="ver" id="ver">Data updated Nov 20, 2026 &middot; v2.7.4</p>
 </main>
 <div class="updbar" id="updbar" role="status" hidden><span>Updated protection wording is ready. Your saved quote stays on this phone.</span><button type="button" id="updbtn">Update</button></div>
 <button type="button" class="qfab" id="qfab" aria-expanded="false" aria-controls="qsheet" aria-label="Quote list, 0 items"><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M4 4h2l1.6 8.2h8L17.5 6H6.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="15" cy="16" r="1.3" fill="currentColor"/></svg><span id="qfablab">Quote list</span><em class="badge zero" id="qcount">0</em></button>
@@ -718,7 +720,14 @@ var LOG_TOKEN_HANS='f6d306fe0e62d96566cd11e22f907870';
 var PINCFG={"it":150000,"naeem":{"s":"f75b4c28cf6bfb8e6b4d0bbe31645300","h":"454d1479650342a2710d88a69102c37e2179ab52fc8d078d0fcab5d789462a07"},"hans":{"s":"094eb5680b3af3352a25186c1f71c842","h":"019494205677711642ed2e90c465d6b0a50456bb32df386931433f2e17cb6bc8"}}; // salted PBKDF2-SHA256 hashes only (built from env vars at build time); the PINs themselves are never in the site
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
-function boot(){
+var LAST_UPDATED=(document.querySelector('meta[name="vf-updated"]')||{}).content||'Nov 20, 2026';
+var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.4';
+var LINKS_CHECKED='Nov 2, 2026';
+function stampFreshness(){
+ var upd=document.getElementById('upd');if(upd)upd.textContent='Last updated '+LAST_UPDATED;
+ var ver=document.getElementById('ver');if(ver)ver.textContent='Data updated '+LAST_UPDATED+' \u00b7 v'+APP_VERSION;
+}
+function boot(){stampFreshness();
 var D=JSON.parse(document.getElementById('data').textContent);
 var MODES=['picks','products','vendors'];
 var KEYS=['room','cat','style','use','tier','chan'];
@@ -1167,10 +1176,12 @@ function wpHtml(x,i){var w=wpView(x);if(!w)return '';
  h+='<p class="rwp"><b>Delivery time frame:</b> '+(w.delState==='website'?esc(w.delText)+' (estimated, subject to confirmation, not a guarantee)': 'Not filled in. Delivery timing is looked up for showroom ZIP 08807 only. This app cannot read the website\u2019s Get it by / Get it in result, so nothing is filled in automatically. Type a date or a range after you confirm it. A range is not turned into a date, and a stock date is not used.')+'</p>';
  if(!plan.ok)h+='<p class="tgwarn">Financing longer than 18 months needs the regular price, and the website did not provide one. The sale price was not applied.</p>';
  var cur=pnum(x.p),target=plan.ok?plan.price:w.p;if(cur!==null&&Math.abs(cur-target)>=0.005)h+='<p class="tgwarn">Your quote has '+money(cur)+'. The website '+(RD.ext&&w.discounted&&plan.ok?'regular price to quote is '+money(plan.price):'price is '+money(w.p))+'. It is not copied until you tap a button.</p>';
- var nameLabel=(x.d||'').trim()&&(x.d||'').trim()!==(w.nm||'')?'Replace your item name with the website name':'Use website name';
+ var nameLabel=VFQ.looksGarbled(x.d)?'Replace the unreadable name with the website name':((x.d||'').trim()&&(x.d||'').trim()!==(w.nm||'')?'Replace your item name with the website name':'Use website name');
  var colorLabel=(x.fin||'').trim()&&(x.fin||'').trim()!==(w.color||'')?'Replace your color with the website color':'Use website color';
  var delLabel=(x.e||'').trim()&&w.delText&&(x.e||'').trim()!==w.delText?'Replace your delivery time frame with the website estimate':'Use website delivery time frame';
+ var canAll=!!(w.nm||(w.colorState==='website'&&w.color)||plan.ok||(w.delState==='website'&&w.delText));
  h+='<div class="rrow">';
+ if(canAll)h+='<button type="button" class="btn1 rbtn" data-wpall="'+i+'">Use all website info</button>';
  if(w.nm)h+='<button type="button" class="btn2 rbtn" data-wpname="'+i+'">'+nameLabel+'</button>';
  if(w.colorState==='website')h+='<button type="button" class="btn2 rbtn" data-wpcolor="'+i+'">'+colorLabel+'</button>';
  if(plan.ok)h+='<button type="button" class="btn2 rbtn" data-wpuse="'+i+'">'+(RD.ext&&w.discounted?'Use regular price':'Use website prices')+'</button>';
@@ -1178,27 +1189,39 @@ function wpHtml(x,i){var w=wpView(x);if(!w)return '';
  if(w.u)h+='<a class="rwlink" href="'+esc(WP_SITE+w.u)+'" target="_blank" rel="noopener noreferrer">Open on raymourflanigan.com \u2197</a>';
  h+='</div><p class="qfine">Your typing stays until you tap a button. Stock dates and lead times are not delivery promises.</p>';return h}
 function wpTerms(x){var d=String(x.d||'').replace(/\s+/g,' ').trim(),a=[];
- if(d){a.push(d);var c=d.replace(/\b\d+(\.\d+)?\s*(\"|\u201d|in\b|inch)/gi,' ').replace(/[^A-Za-z0-9\s'&-]/g,' ').replace(/\s+/g,' ').trim();if(c)a.push(c);var wds=c.split(' ');if(wds.length>3)a.push(wds.slice(0,3).join(' '));if(wds.length>2)a.push(wds.slice(0,2).join(' '))}
- var cc=String(x.c||'').trim();if(cc)a.push(cc);var seen={};return a.filter(function(t){var k=t.toLowerCase();if(!t||seen[k])return false;seen[k]=1;return true}).slice(0,4)}
-function wpSearchPages(term,sku,zip,signal){var page=1,netOk=false;
+ if(d&&!VFQ.looksGarbled(d)){a.push(d);var c=d.replace(/\b\d+(\.\d+)?\s*(\"|\u201d|in\b|inch)/gi,' ').replace(/[^A-Za-z0-9\s'&-]/g,' ').replace(/\s+/g,' ').trim();if(c&&!VFQ.looksGarbled(c))a.push(c);var wds=c?c.split(' '):[];if(wds.length>3)a.push(wds.slice(0,3).join(' '));if(wds.length>2)a.push(wds.slice(0,2).join(' '))}
+ var cc=String(x.c||'').trim();if(cc&&!VFQ.looksGarbled(cc))a.push(cc);var seen={};return a.filter(function(t){var k=t.toLowerCase();if(!t||seen[k])return false;seen[k]=1;return true}).slice(0,4)}
+function wpSearchPages(term,sku,zip,signal,maxPages){var page=1,netOk=false;maxPages=maxPages||3;
  function one(){var u='https://ac.cnstrc.com/search/'+encodeURIComponent(term)+'?key='+WP_KEY+'&c=ciojs-client-2.35.2&num_results_per_page=100&page='+page;
   return fetch(u,{signal:signal,credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){netOk=true;var hit=VFQ.matchResults(j,sku,zip);if(hit)return {hit:hit,ok:true};
-   var total=(j&&j.response&&+j.response.total_num_results)||0;if(page*100>=total||page>=3)return {hit:null,ok:true};page++;return one()})}
- return one().then(function(r){r.ok=true;return r},function(){return {hit:null,ok:netOk}})}
+   var total=(j&&j.response&&+j.response.total_num_results)||0;if(page*100>=total||page>=maxPages)return {hit:null,ok:true};page++;return one()})}
+ return one().then(function(r){r.ok=true;return r},function(err){var aborted=!!(err&&(err.name==='AbortError'||/abort/i.test(String(err&&err.message||err))));if(aborted)return {hit:null,ok:true,aborted:true};return {hit:null,ok:netOk}})}
 function wpLookupSku(x){var nine=VFQ.sku9(x&&x.sku);if(nine)return {sku:nine,kind:'sku'};var p=VFQ.protectorByCode(x&&x.sku);if(!p)return {sku:'',kind:'nosku'};if(!p.known)return {sku:'',kind:'protunknown'};if(!p.websiteSku)return {sku:'',kind:'protnone'};return {sku:p.websiteSku,kind:'protector',name:p.websiteName||p.listName}}
-function wpCheck(i){var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;var look=wpLookupSku(x),sku=look.sku;
- var done=function(w){var cur=RD.items[i];if(cur!==x)return;x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
+function wpCheck(i){var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;var look=wpLookupSku(x),sku=look.sku,finished=false;
+ var done=function(w){if(finished)return;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
  if(look.kind==='protnone'||look.kind==='protunknown'){done({t:Date.now(),m:look.kind});return}
  if(!sku){done({t:Date.now(),m:'nosku'});return}
  if(navigator.onLine===false||typeof fetch!=='function'){done({t:Date.now(),m:'offline'});return}
- var terms=wpTerms(x);if(!terms.length&&look.name)terms=[look.name];if(!terms.length){done({t:Date.now(),m:'noname'});return}
- box.innerHTML='<p class="qfine">Checking the Raymour website for this 9-digit SKU\u2026</p>';
- var ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort()},20000),sawOk=false,sawFail=false,step=function(n){
-  if(n>=terms.length){clearTimeout(to);done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
-  wpSearchPages(terms[n],sku,RD.zip,ctl?ctl.signal:undefined).then(function(r){if(r.ok)sawOk=true;else sawFail=true;if(r.hit){clearTimeout(to);r.hit.t=Date.now();r.hit.zip=RD.zip;done(r.hit);return}step(n+1)})};
+ var terms=wpTerms(x);if(!terms.length&&look.name&&!VFQ.looksGarbled(look.name))terms=[look.name];
+ var fallback=look.kind==='sku'?VFQ.skuFallbackTerms(x.sku).filter(function(t){return terms.every(function(h){return h.toLowerCase()!==t.toLowerCase()})}):[];
+ var fallbackAt=terms.length;terms=terms.concat(fallback);
+ if(!terms.length){done({t:Date.now(),m:'noname'});return}
+ box.innerHTML='<p class="qfine">'+(fallbackAt?'Checking the Raymour website for this 9-digit SKU\u2026':'Searching the Raymour site by SKU\u2026')+'</p>';
+ var ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(function(){if(ctl)ctl.abort();done(sawOk?{t:Date.now(),m:'nomatch'}:{t:Date.now(),m:'offline'})},fallback.length?45000:20000),sawOk=false,sawFail=false,step=function(n){
+  if(finished)return;
+  if(n>=terms.length){done(sawOk?{t:Date.now(),m:'nomatch'}:(sawFail?{t:Date.now(),m:'offline'}:{t:Date.now(),m:'nomatch'}));return}
+  if(n===fallbackAt&&fallback.length)box.innerHTML='<p class="qfine">Searching the Raymour site by SKU\u2026</p>';
+  wpSearchPages(terms[n],sku,RD.zip,ctl?ctl.signal:undefined,n>=fallbackAt?10:3).then(function(r){if(finished||r.aborted)return;if(r.ok)sawOk=true;else sawFail=true;if(r.hit){r.hit.t=Date.now();r.hit.zip=RD.zip;done(r.hit);return}step(n+1)})};
  step(0)}
 function wpUse(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale)return;var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));if(!plan.ok)return;
  x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u);rrenderItems(false);rhref()}
+function wpUseAll(i){var x=RD.items[i],w=wpView(x);if(!x||!w||!w.ok||w.stale)return;
+ if(w.nm)x.d=w.nm;
+ if(w.colorState==='website'&&w.color)x.fin=w.color;
+ var plan=VFQ.websitePricePlan({price:w.p,original:w.o,style:w.st},VFQ.restrictsSale(VFQ.financeMonths(RD.ext)));
+ if(plan.ok){x.p=Number(plan.price).toFixed(2);x.rg=plan.regular!=null?Number(plan.regular).toFixed(2):'';if(!x.u&&w.u)x.u=rfOk(WP_SITE+w.u)}
+ if(w.delState==='website'&&w.delText)x.e=w.delText;
+ rrenderItems(false);rhref()}
 function wpUseName(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||!w.nm)return;x.d=w.nm;rrenderItems(false);rhref()}
 function wpUseColor(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||w.colorState!=='website'||!w.color)return;x.fin=w.color;rrenderItems(false);rhref()}
 function wpUseDel(i){var x=RD.items[i],w=wpView(x);if(!w||!w.ok||w.stale||w.delState!=='website'||!w.delText)return;x.e=w.delText;rrenderItems(false);rhref()}
@@ -1510,7 +1533,7 @@ rEl.ritems.addEventListener('focusout',function(e){var t=e.target;if(!t.getAttri
 rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-rrm]'):null;if(!b)return;var gone=RD.items.splice(+b.getAttribute('data-rrm'),1)[0];
  if(gone&&gone.k&&QI[gone.k]){QL=QL.filter(function(x){return x.k!==gone.k});delete QI[gone.k];RD.imp=RD.imp.filter(function(k){return k!==gone.k});qsync()}
  if(!RD.items.length)RD.items.push(rblank());rrenderItems(false);rhref()});
-rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-wp],[data-wpuse],[data-wpname],[data-wpcolor],[data-wpdel],[data-protuse]'):null;if(!b)return;if(b.hasAttribute('data-protuse')){protUse(+b.getAttribute('data-protuse'));return}if(b.hasAttribute('data-wp'))wpCheck(+b.getAttribute('data-wp'));else if(b.hasAttribute('data-wpuse'))wpUse(+b.getAttribute('data-wpuse'));else if(b.hasAttribute('data-wpname'))wpUseName(+b.getAttribute('data-wpname'));else if(b.hasAttribute('data-wpcolor'))wpUseColor(+b.getAttribute('data-wpcolor'));else wpUseDel(+b.getAttribute('data-wpdel'))});
+rEl.ritems.addEventListener('click',function(e){var b=e.target.closest?e.target.closest('[data-wp],[data-wpall],[data-wpuse],[data-wpname],[data-wpcolor],[data-wpdel],[data-protuse]'):null;if(!b)return;if(b.hasAttribute('data-protuse')){protUse(+b.getAttribute('data-protuse'));return}if(b.hasAttribute('data-wpall')){wpUseAll(+b.getAttribute('data-wpall'));return}if(b.hasAttribute('data-wp'))wpCheck(+b.getAttribute('data-wp'));else if(b.hasAttribute('data-wpuse'))wpUse(+b.getAttribute('data-wpuse'));else if(b.hasAttribute('data-wpname'))wpUseName(+b.getAttribute('data-wpname'));else if(b.hasAttribute('data-wpcolor'))wpUseColor(+b.getAttribute('data-wpcolor'));else wpUseDel(+b.getAttribute('data-wpdel'))});
 rEl.rext.addEventListener('change',function(){RD.ext=!!rEl.rext.checked;rEl.rextnote.hidden=!RD.ext;rEl.rerr.textContent='';rrenderItems(false);rhref()});
 rEl.rplat.addEventListener('change',function(){RD.plat=!!rEl.rplat.checked;rEl.rerr.textContent='';rhref()});
 rEl.rlinks.addEventListener('change',function(){RD.links=!!rEl.rlinks.checked;rEl.rerr.textContent='';rhref()});

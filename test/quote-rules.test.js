@@ -76,6 +76,24 @@ test('customer lines itemize delivery, NJ tax, and the grand total', function(){
   assert.equal(free[3], 'Estimated total: $213.25');
 });
 
+test('garbled names are recognized and recliner SKUs search recliner first', function(){
+  assert.equal(VFQ.looksGarbled('BR ~ Hie AR RE'), true);
+  assert.equal(VFQ.looksGarbled('Adrienne Power Recliner'), false);
+  assert.equal(VFQ.looksGarbled(''), false);
+  assert.deepEqual(VFQ.skuFallbackTerms('280019716').slice(0, 3), ['recliner', 'chair', 'power recliner']);
+  assert.deepEqual(VFQ.skuFallbackTerms('299087859').slice(0, 3), ['living room set', 'sofa', 'sectional']);
+  var adrienne = {response:{results:[{value:'Adrienne Power Recliner', variations:[{value:'Adrienne Power Recliner', data:{
+    variation_id:'280019716',
+    url:'/outlet/chairs-recliners-clearance/adrienne-power-recliner-280019716',
+    Pricing:'{"price":499.99,"originalPrice":899.99,"priceStyle":"Outlet"}',
+    facets:[{name:'Color', values:['Gray']}]
+  }}]}]}};
+  var hit = VFQ.matchResults(adrienne, '280019716', '08002');
+  assert.equal(hit.nm, 'Adrienne Power Recliner');
+  assert.equal(hit.sku, '280019716');
+  assert.equal(VFQ.matchResults(adrienne, '280019717', '08002'), null);
+});
+
 test('exact 9-digit SKU match does not accept a shorter, longer, or neighboring SKU', function(){
   var payload = {response: {results: [
     {value: 'Other sofa', data: {}, variations: [
