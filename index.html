@@ -5,7 +5,7 @@
 <meta name="description" content="Vendor reference by room, furniture type and style.">
 <meta name="robots" content="noindex,nofollow">
 <meta name="vf-updated" content="Nov 20, 2026">
-<meta name="vf-version" content="2.7.6">
+<meta name="vf-version" content="2.7.7">
 <link rel="canonical" href="https://meeanw.github.io/vendor-finder/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Furniture Vendor Finder">
 <meta property="og:title" content="Furniture Vendor Finder"><meta property="og:description" content="Find vendors by room, furniture type and style.">
@@ -723,7 +723,7 @@ var PINCFG={"it":150000,"naeem":{"s":"f75b4c28cf6bfb8e6b4d0bbe31645300","h":"454
 var LOGCFG={naeem:{url:LOG_ENDPOINT_NAEEM,token:LOG_TOKEN_NAEEM},hans:{url:LOG_ENDPOINT_HANS,token:LOG_TOKEN_HANS}};
 /* ==================================================================== */
 var LAST_UPDATED=(document.querySelector('meta[name="vf-updated"]')||{}).content||'Nov 20, 2026';
-var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.6';
+var APP_VERSION=(document.querySelector('meta[name="vf-version"]')||{}).content||'2.7.7';
 var LINKS_CHECKED='Nov 2, 2026';
 function stampFreshness(){
  var upd=document.getElementById('upd');if(upd)upd.textContent='Last updated '+LAST_UPDATED;
@@ -1376,7 +1376,7 @@ function rOptHeadsUp(){var n=rOptGroups().length;if(!n)return '';return 'I also 
 function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
  var L=['',full?'Other Options':'OTHER OPTIONS','Each option is a separate choice. Its total is not added to the main quote.',''];
  var z=RD.zip.trim().replace(/\r?\n/g,' ');
- groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));if(x.tg&&x.tg.t==='floor')L.push(rFloorLine())});
+ groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));var sz=rSizeText(x);if(sz)L.push('   Size: '+sz);if(x.tg&&x.tg.t==='floor')L.push(rFloorLine())});
   var cl=rOptCalc(g);if(cl.needDel){L.push('Delivery: not entered');L.push('Estimated total: enter the delivery charge');}
   else{L.push((z?'Delivery to '+z+': ':'Delivery: ')+money(cl.delC/100));if(cl.platC>0)L.push('5-Year Platinum Protection: '+money(cl.platC/100));
    if(cl.needTax||cl.taxC===null){L.push('Sales tax: confirm the rate for this ZIP');L.push('Estimated total: confirm the sales tax rate')}
@@ -1385,7 +1385,9 @@ function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
  return L}
 function rOptSummary(){return rOptGroups().map(function(g){var cl=rOptCalc(g),names=g.items.map(function(x){return rItemName(x)}).join(' + '),plat=cl.platC>0?' (Platinum '+money(cl.platC/100)+')':'';return 'Option '+g.opt+': '+names+' '+(cl.estC===null?'total TBC':money(cl.estC/100))+plat}).join('; ').slice(0,1000)}
 function rHasFloor(){return RD.items.some(function(x){return ritemOn(x)&&x.tg&&x.tg.t==='floor'})}
-function rTextItems(){var on=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)});if(on.length>3||!on.length)return [];var L=[];on.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));var sz=rSizeText(x);if(sz)L.push('Size: '+sz);if(x.tg&&x.tg.t==='sale'&&!RD.ext&&validIso(x.tg.se)&&x.tg.se>=isoToday()&&x.tg.se<rExpiryIso())L.push('Sale price good through '+dshow(x.tg.se)+'.')});return L}
+function rOnCount(){var n=0;RD.items.forEach(function(x){if(ritemOn(x))n++});return n}
+function rTextItems(){var on=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)});if(on.length>3||!on.length)return [];var sized=rOnCount()<=3,L=[];on.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));if(sized){var sz=rSizeText(x);if(sz)L.push('Size: '+sz)}if(x.tg&&x.tg.t==='sale'&&!RD.ext&&validIso(x.tg.se)&&x.tg.se>=isoToday()&&x.tg.se<rExpiryIso())L.push('Sale price good through '+dshow(x.tg.se)+'.')});return L}
+function rTextOptionSizes(){if(rOnCount()>3)return [];var L=[];rOptGroups().forEach(function(g){g.items.forEach(function(x){var sz=rSizeText(x);if(sz)L.push('Size: '+sz)})});return L}
 function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to the emailed full quote (the email keeps the long form in rbody(true))
  var r=REPS[RD.rep],L=[],first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
  var op=ROPEN[RD.op]||ROPEN.stop,cl=rcalc(),to=rTotals(cl,false),sh=rItemsShort(),pn=rPnote();
@@ -1400,7 +1402,7 @@ function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to
  if(pa.add>0){L.push('5-Year Platinum Protection is included in this quote.')}
  else if(pa.tier.ok){L.push('Add 5-Year Platinum Protection for '+money(pa.tier.priceCents/100)+(RD.email.trim()?' \u2014 details in the email.':'.'))}
  L.push('Damage caused by pets is not covered.','Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.');
- if(rOptGroups().length)L.push('Other options: '+rOptSummary(),'Other options are separate choices \u2014 not added to the main quote total.');
+ if(rOptGroups().length){L.push('Other options: '+rOptSummary());rTextOptionSizes().forEach(function(l){L.push(l)});L.push('Other options are separate choices \u2014 not added to the main quote total.');}
  if(RD.email.trim())L.push('Full details emailed.');L.push('');
  L.push('Reply YES (Quote #'+RD.qn+') and I'+AP+'ll '+(cl.miss>0?'confirm the remaining price(s) and lock in your order':'lock in your order')+(RD.needed&&validIso(RD.needed)?' and work on getting it to you by '+dshow(RD.needed):'')+'. Call or text me anytime.','','Prices, availability and the final amount are confirmed at time of purchase.','');
  L.push(r.name+' \u00b7 Raymour & Flanigan '+(r.store||'Bridgewater'),'Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));

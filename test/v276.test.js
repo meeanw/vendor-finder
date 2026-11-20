@@ -164,6 +164,54 @@ test('moving an item onto an option takes that option fee, and short texts inclu
   assert.doesNotMatch(api.text(), /^1\. /m);
 });
 
+test('option items show their size in the email and in a short text of three or fewer items', function(){
+  var api = loadPage().api;
+  var leaf = '60" W x 42" D x 30" H (78" W with leaf)';
+  api.load(base({items:[
+    {v:'Raymour & Flanigan', d:'Main chair', p:'100.00', q:'1', sz:'32" W x 35" D x 41" H'},
+    {v:'Raymour & Flanigan', d:'Fowler Dining Table', p:'200.00', q:'1', opt:2, sz:leaf},
+    {v:'Raymour & Flanigan', d:'No size chair', p:'50.00', q:'1', opt:2, sz:''}
+  ]}));
+  var email = api.email();
+  var opt = email.slice(email.indexOf('Option 2'));
+  assert.match(opt, /1\. Fowler Dining Table/);
+  assert.ok(opt.indexOf('   Size: ' + leaf) > opt.indexOf('1. Fowler Dining Table'));
+  assert.ok(opt.indexOf('   Size: ' + leaf) < opt.indexOf('2. No size chair'));
+  assert.equal(opt.split('Size:').length, 2);
+  var text = api.text();
+  assert.match(text, /Size: 32" W x 35" D x 41" H/);
+  assert.match(text, new RegExp('Size: ' + leaf.replace(/[()]/g, '\\$&')));
+
+  api.load(base({items:[
+    {v:'Raymour & Flanigan', d:'Main chair', p:'100.00', q:'1', sz:'32" W x 35" D x 41" H'},
+    {v:'Raymour & Flanigan', d:'One', p:'10.00', q:'1', opt:2, sz:leaf},
+    {v:'Raymour & Flanigan', d:'Two', p:'10.00', q:'1', opt:3},
+    {v:'Raymour & Flanigan', d:'Three', p:'10.00', q:'1', opt:3}
+  ]}));
+  assert.equal(api.text().indexOf('Size:'), -1);
+  assert.match(api.email(), /Size: 60" W x 42" D x 30" H \(78" W with leaf\)/);
+});
+
+test('an option item can take the website size from its own buttons', function(){
+  var page = loadPage();
+  var api = page.api;
+  var doc = page.doc;
+  var web = {ok:1, t:Date.now(), p:499.99, st:'Retail', nm:'Adrienne Power Recliner', sku:'280019716', sz:'36" W x 39.5" D x 41" H', u:'/outlet/chairs-recliners-clearance/adrienne-power-recliner-280019716', colorState:'unconfirmed', delState:'unconfirmed'};
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Chair', sku:'280019716', p:'10.00', q:'1', opt:2, sz:'', w:web}]}));
+  assert.equal(doc.getElementById('rplace0').value, '2');
+  assert.ok(doc.getElementById('rsz0'));
+  assert.ok(doc.querySelector('[data-wpsize="0"]'));
+  doc.querySelector('[data-wpsize="0"]').click();
+  assert.equal(doc.getElementById('rsz0').value, '36" W x 39.5" D x 41" H');
+  assert.equal(api.items()[0].opt, 2);
+  api.load(base({items:[{v:'Raymour & Flanigan', d:'Chair', sku:'280019716', p:'10.00', q:'1', opt:2, sz:'', w:web}]}));
+  doc.querySelector('[data-wpall="0"]').click();
+  assert.equal(doc.getElementById('rsz0').value, '36" W x 39.5" D x 41" H');
+  assert.equal(doc.getElementById('rd0').value, 'Adrienne Power Recliner');
+  assert.equal(api.items()[0].opt, 2);
+  assert.match(api.email(), /Size: 36" W x 39\.5" D x 41" H/);
+});
+
 test('a missing SKU stops, a second tap does not start another lookup, and saved details fill the quote', async function(){
   var page = loadPage();
   var api = page.api;
@@ -265,7 +313,7 @@ test('logging reads a text response and a rep with no log URL is told so', async
 
 test('the service worker can install when the SKU files are missing', function(){
   var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  assert.match(sw, /VERSION='2\.7\.6'/);
+  assert.match(sw, /VERSION='2\.7\.7'/);
   var precache = sw.match(/var PRECACHE=\[(.*?)\]/)[1];
   assert.equal(precache.indexOf('sku-index.json'), -1);
   assert.equal(precache.indexOf('sku-details.json'), -1);
