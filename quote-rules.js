@@ -164,40 +164,13 @@
     return bad * 2 > tokens.length;
   }
 
-  // First two digits of a Raymour website SKU, from a Nov 20, 2026 sample of
-  // public Constructor search (page 1, variation_id). 28 is power recliners
-  // (280019716 Adrienne Power Recliner). 29 is sectionals and living-room sets.
-  // 20 sofas, 21 chairs and ottomans, 17 rugs, 11 lamps, 46-48 mattresses,
-  // 50 and 59 beds, 51 nightstands, 54 dressers, 70 and 79 dining.
-  var SKU_PREFIX_TERMS = {
-    '11': ['lamp'],
-    '17': ['rug'],
-    '20': ['sofa', 'sectional'],
-    '21': ['chair', 'ottoman', 'recliner'],
-    '28': ['recliner', 'chair', 'power recliner'],
-    '29': ['living room set', 'sofa', 'sectional'],
-    '46': ['mattress'],
-    '47': ['mattress'],
-    '48': ['mattress'],
-    '50': ['bed', 'headboard'],
-    '51': ['nightstand', 'dresser'],
-    '54': ['dresser'],
-    '59': ['bed', 'headboard'],
-    '70': ['dining', 'table'],
-    '79': ['dining', 'table']
-  };
-  var SKU_FALLBACK_GENERIC = ['sofa', 'sectional', 'recliner', 'chair', 'bed', 'dresser', 'nightstand', 'mattress', 'dining', 'table', 'rug', 'lamp', 'outlet'];
+  // Last-resort search words when the SKU index and the typed name both miss.
+  // A prefix map was dropped: the same two digits cover unrelated categories
+  // (54 is dressers and also the Ella Marie nursery glider 545060179).
+  var SKU_FALLBACK_GENERIC = ['sofa', 'sectional', 'recliner', 'chair', 'bed', 'dresser', 'nightstand', 'mattress', 'dining', 'table', 'rug', 'lamp', 'outlet', 'glider', 'rocking chair', 'nursery', 'swivel chair', 'accent chair', 'ottoman', 'bench', 'tv stand', 'desk', 'bookcase', 'mirror', 'cabinet', 'kids'];
   function skuFallbackTerms(raw){
-    var nine = sku9(raw);
-    var pref = nine && SKU_PREFIX_TERMS[nine.slice(0, 2)] || [];
-    var out = [], seen = {};
-    pref.concat(SKU_FALLBACK_GENERIC).forEach(function(t){
-      var k = String(t).toLowerCase();
-      if(!k || seen[k]) return;
-      seen[k] = 1;
-      out.push(t);
-    });
-    return out;
+    if(!sku9(raw)) return [];
+    return SKU_FALLBACK_GENERIC.slice();
   }
 
 
