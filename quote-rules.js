@@ -395,8 +395,80 @@
   function checkedLabel(iso){
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
     if(!m) return '';
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return months[+m[2] - 1] + ' ' + (+m[3]) + ', ' + m[1];
+    return customerDateText(+m[1], +m[2] - 1, +m[3]);
+  }
+  var CUST_DAY = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  var CUST_MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function customerDateText(year, monthIndex, day){
+    var dt = new Date(year, monthIndex, day);
+    if(dt.getFullYear() !== year || dt.getMonth() !== monthIndex || dt.getDate() !== day) return '';
+    return CUST_DAY[dt.getDay()] + ', ' + CUST_MON[monthIndex] + ' ' + day + ', ' + year;
+  }
+  function customerRefDate(refIso){
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(refIso || ''));
+    if(m) return new Date(+m[1], +m[2] - 1, +m[3]);
+    var n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  }
+  function customerMonthIndex(name){
+    var n = String(name || '').toLowerCase().replace(/\./g, '');
+    if(n === 'sept') n = 'sep';
+    var i;
+    for(i = 0; i < CUST_MON.length; i++) if(CUST_MON[i].toLowerCase() === n.slice(0, 3)) return i;
+    return -1;
+  }
+  // A month-and-day phrase, with an optional weekday and year. The written weekday is not trusted.
+  var CUST_ONE = /^(?:(?:Sunday|Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sun|Mon|Tue|Tues|Wed|Thu|Thur|Thurs|Fri|Sat|Today|Tomorrow),?\s+)?(January|February|March|April|May|June|July|August|September|October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?$/i;
+  function customerOneDate(phrase, ref, rollForward, start){
+    var m = CUST_ONE.exec(String(phrase || '').trim());
+    if(!m) return null;
+    var month = customerMonthIndex(m[1]), day = +m[2], year = m[3] ? +m[3] : 0;
+    if(month < 0 || day < 1 || day > 31) return null;
+    if(!year){
+      if(start){
+        year = start.getFullYear();
+        if(new Date(year, month, day) < start) year += 1;
+      }else{
+        year = ref.getFullYear();
+        if(rollForward && new Date(year, month, day) < new Date(ref.getFullYear(), ref.getMonth(), ref.getDate())) year += 1;
+      }
+    }
+    var dt = new Date(year, month, day);
+    if(dt.getFullYear() !== year || dt.getMonth() !== month || dt.getDate() !== day) return null;
+    return dt;
+  }
+  function customerSplitRange(rest){
+    var m = /^(.*?)\s+(?:and|to|through)\s+(.*)$/i.exec(rest);
+    if(m) return [m[1].trim(), m[2].trim()];
+    m = /^(.*?)\s+[\u2013\u2014-]\s+(.*)$/.exec(rest);
+    if(m) return [m[1].trim(), m[2].trim()];
+    return null;
+  }
+  function formatCustomerDateNote(note, refIso){
+    var raw = String(note == null ? '' : note).replace(/\s+/g, ' ').trim();
+    if(!raw) return '';
+    var ref = customerRefDate(refIso), body = raw, checked = '';
+    var cm = /^(.*?)(?:\s*\(checked\s+(.+?)\))\s*$/i.exec(raw);
+    if(cm){ body = cm[1].trim(); checked = cm[2].trim(); }
+    var formatted = '', head = /^(Get it by|Get it between|Get it in|Special order:?)\s+([\s\S]+)$/i.exec(body);
+    if(head){
+      var kind = head[1].toLowerCase().replace(/:$/, ''), rest = head[2].trim(), parts = customerSplitRange(rest);
+      if(kind === 'get it by' && !parts){
+        var one = customerOneDate(rest, ref, true, null);
+        if(one) formatted = 'Get it by ' + customerDateText(one.getFullYear(), one.getMonth(), one.getDate());
+      }else if(parts && kind !== 'get it by'){
+        var start = customerOneDate(parts[0], ref, true, null);
+        var end = start && customerOneDate(parts[1], ref, false, start);
+        if(start && end) formatted = 'Get it between ' + customerDateText(start.getFullYear(), start.getMonth(), start.getDate()) + ' and ' + customerDateText(end.getFullYear(), end.getMonth(), end.getDate());
+      }
+    }
+    if(!formatted) return raw;
+    if(checked){
+      var when = customerOneDate(checked, ref, false, null);
+      if(!when) return raw;
+      formatted += ' (checked ' + customerDateText(when.getFullYear(), when.getMonth(), when.getDate()) + ')';
+    }
+    return formatted;
   }
 
   function quotedUnit(months, item){
@@ -585,6 +657,7 @@
     websitePricePlan:websitePricePlan,
     formatSize:formatSize,
     checkedLabel:checkedLabel,
+    formatCustomerDateNote:formatCustomerDateNote,
     quotedUnit:quotedUnit,
     customerFinanceLines:customerFinanceLines,
     PET_EXCLUSION:PET_EXCLUSION,

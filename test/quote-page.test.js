@@ -225,7 +225,7 @@ test('a one-letter name cannot be sent until the rep confirms it, and a short re
   assert.match(email, /showroom ZIP 08807/);
   assert.match(text, /Delivery timing is an estimate based on showroom ZIP 08807\./);
   assert.match(text, /subject to confirmation and is not a guarantee/);
-  assert.equal(text.indexOf('Get it in 3-5 Weeks'), -1);
+  assert.match(text, /Est\. delivery: Get it in 3-5 Weeks/);
   assert.equal(text.indexOf('November 9'), -1);
 });
 

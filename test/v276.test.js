@@ -254,7 +254,7 @@ test('a missing SKU stops, a second tap does not start another lookup, and saved
   doc.querySelector('[data-wpall="0"]').click();
   assert.equal(doc.getElementById('rd0').value, 'Ella Marie Triple Power Swivel Glider Recliner');
   assert.equal(doc.getElementById('rfn0').value, 'Gray');
-  assert.equal(doc.getElementById('re0').value, 'Get it by Monday, November 23 (checked Nov 20, 2026)');
+  assert.equal(doc.getElementById('re0').value, 'Get it by Mon, Nov 23, 2026 (checked Fri, Nov 20, 2026)');
   assert.equal(doc.getElementById('rsz0').value, '32" W x 35" D x 41" H');
   assert.match(api.email(), /Size: 32" W x 35" D x 41" H/);
   assert.match(api.text(), /Size: 32" W x 35" D x 41" H/);
@@ -389,6 +389,23 @@ test('the quote number sits on its own line, with no period before a dot', funct
   api.load(base({items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
   noDot(api.text()); noDot(api.email());
   assert.match(api.text(), /may sell before then\.\nQuote #Q-/);
+});
+
+test('the prepared-by line and delivery notes use the customer date style', function(){
+  var api = loadPage().api;
+  api.load(base({qn:'Q-261121-ABCD', items:[{v:'Raymour & Flanigan', d:'Rowan Bed', p:'1785.95', q:'1', e:'Get it by Monday, November 23 (checked Nov 20, 2026)'}]}));
+  var email = api.email();
+  var text = api.text();
+  assert.match(email, /Quote #Q-261121-ABCD · Sat, Nov 21, 2026 · Prepared by /);
+  assert.match(email, /Estimated delivery: Get it by Mon, Nov 23, 2026 \(checked Fri, Nov 20, 2026\)/);
+  assert.match(text, /Est\. delivery: Get it by Mon, Nov 23, 2026 \(checked Fri, Nov 20, 2026\)/);
+  assert.equal(email.indexOf('Monday, November'), -1);
+  assert.equal(text.indexOf('Monday, November'), -1);
+  api.load(base({email:'', qn:'Q-261121-ABCD', items:[{v:'Raymour & Flanigan', d:'Rowan Bed', p:'1785.95', q:'1', e:'Special order: December 28 to January 4'}]}));
+  assert.match(api.text(), /Est\. delivery: Get it between Mon, Dec 28, 2026 and Mon, Jan 4, 2027/);
+  api.load(base({qn:'Q-261121-ABCD', items:[{v:'Raymour & Flanigan', d:'Rowan Bed', p:'1785.95', q:'1', e:'Ask the warehouse'}]}));
+  assert.match(api.email(), /Estimated delivery: Ask the warehouse/);
+  assert.match(api.text(), /Est\. delivery: Ask the warehouse/);
 });
 
 test('v2.7.9 customer wording', function(){

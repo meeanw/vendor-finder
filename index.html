@@ -871,8 +871,9 @@ function isoToday(){var d=new Date();return d.getFullYear()+'-'+p2(d.getMonth()+
 function validIso(s){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||'');if(!m)return false;var d=new Date(+m[1],+m[2]-1,+m[3]);return d.getFullYear()===+m[1]&&d.getMonth()===+m[2]-1&&d.getDate()===+m[3]}
 function dstamp(iso){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');return m?MON[+m[2]-1]+' '+(+m[3])+', '+m[1]:''}
 function dshow(iso){var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||'');if(!m)return '';var dt=new Date(+m[1],+m[2]-1,+m[3]);return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dt.getDay()]+', '+MON[+m[2]-1]+' '+(+m[3])+', '+m[1]}
-function dparse(t){ // "Nov 20, 2026" or 2026-11-20 -> ISO, or ''
+function dparse(t){ // "Sat, Nov 21, 2026", "Nov 20, 2026" or 2026-11-20 -> ISO, or ''
  t=String(t||'').trim();if(validIso(t))return t;
+ t=t.replace(/^(?:Sun|Mon|Tue|Wed|Thu|Fri|Sat)[a-z]*,\s+/i,'');
  var m=/^([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(\d{4})$/.exec(t);if(!m)return '';
  var mi=MON.map(function(x){return x.toLowerCase()}).indexOf(m[1].toLowerCase());if(mi<0)return '';
  var iso=m[3]+'-'+p2(mi+1)+'-'+p2(+m[2]);return validIso(iso)?iso:''}
@@ -1245,7 +1246,7 @@ function wpIndexEntry(sku){return wpSkuIndex().then(function(idx){if(!idx)return
 function wpSkuDetails(){if(SKU_DETAILS)return Promise.resolve(SKU_DETAILS);if(SKU_DETAILS_P)return SKU_DETAILS_P;
  SKU_DETAILS_P=fetch('sku-details.json',{credentials:'omit'}).then(function(r){if(!r.ok)throw new Error('http');return r.json()}).then(function(j){SKU_DETAILS=(j&&typeof j==='object'&&!Array.isArray(j))?j:{};return SKU_DETAILS},function(){SKU_DETAILS={};SKU_DETAILS_P=null;return SKU_DETAILS});
  return SKU_DETAILS_P}
-function wpDetailNote(det){var note=wpPublic(det&&det.delivery);if(!note)return '';var when=VFQ.checkedLabel(det.checked);if(when&&note.toLowerCase().indexOf('checked ')<0)note+=' (checked '+when+')';return note.slice(0,140)}
+function wpDetailNote(det){var note=wpPublic(det&&det.delivery);if(!note)return '';var when=VFQ.checkedLabel(det.checked);if(when&&note.toLowerCase().indexOf('checked ')<0)note+=' (checked '+when+')';return (VFQ.formatCustomerDateNote(note)||note).slice(0,140)}
 function wpMergeDetails(hit,det){hit=hit||{};if(!det)return hit;var color=wpPublic(det.color);if(color&&hit.colorState!=='website'){hit.color=color;hit.colorState='website'}var note=wpDetailNote(det);if(note){hit.delText=note;hit.delState='website'}var sz=VFQ.formatSize(det);if(sz&&wpPublic(sz))hit.sz=sz;return hit}
 function wpCheck(i){if(WP_BUSY[i])return;var x=RD.items[i],box=document.getElementById('rw'+i);if(!x||!box)return;WP_BUSY[i]=1;var look=wpLookupSku(x),sku=look.sku,finished=false,to=0,ctl=null;
  var done=function(w){if(finished)return;WP_BUSY[i]=0;var cur=RD.items[i];if(cur!==x)return;finished=true;clearTimeout(to);if(ctl)try{ctl.abort()}catch(e){}x.w=wpClean(w);box.innerHTML=wpHtml(x,i);rltxt(i);rsave()};
@@ -1367,7 +1368,7 @@ function rItemBlock(x,full,num){var L=[],nm=rItemName(x),fin=x.fin.trim(),dm=rDi
  L.push(num+'. '+nm+(fin?', '+fin:'')+(tag?', '+tag:''));rEmailSizeLines(x).forEach(function(l){L.push(l)});L.push('   '+rPriceLine(x,full));
  if(x.sku.trim())sk.push('SKU '+x.sku.trim());if(x.c.trim())sk.push('Collection: '+x.c.trim());if(sk.length)L.push('   '+sk.join(' \u00b7 '));
  rTgLines(x,full).forEach(function(l){L.push('   '+l)});
- if(x.e.trim())L.push('   '+(full?'Estimated delivery: ':'Est. delivery: ')+x.e.trim());if(dm.rest)L.push('   Notes: '+dm.rest.replace(/\r?\n/g,' / '));
+ if(x.e.trim())L.push('   '+rEstCustomerLine(x,full));if(dm.rest)L.push('   Notes: '+dm.rest.replace(/\r?\n/g,' / '));
  if(x.u&&(!full||RD.links))L.push('   View online:','   '+x.u);if(x.ph&&x.ph.length)L.push('   Photos: '+x.ph.length+' (attached to this message)');L.push('');return L}
 function rPnote(){return RD.pn.trim().replace(/\s*\r?\n\s*/g,' ').slice(0,300)}
 function rZipOk(){return /^\d{5}$/.test(String(RD.zip||'').trim())}
@@ -1389,7 +1390,7 @@ function rOptHeadsUp(full){var n=rOptGroups().length;if(!n)return '';return 'I a
 function rOptionLines(full){var groups=rOptGroups();if(!groups.length)return [];
  var L=['',full?'Other Options':'OTHER OPTIONS','Each option is a separate choice. Its total is not added to the main quote.',''];
  var z=RD.zip.trim().replace(/\r?\n/g,' ');
- groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));rEmailSizeLines(x).forEach(function(l){L.push(l)});rTgLines(x,full).forEach(function(l){L.push(l)})});
+ groups.forEach(function(g){L.push('Option '+g.opt);g.items.forEach(function(x,i){L.push(rSimpleItemLine(x,i+1));rEmailSizeLines(x).forEach(function(l){L.push(l)});rTgLines(x,full).forEach(function(l){L.push(l)});if(String(x.e||'').trim())L.push(rEstCustomerLine(x,full))});
   var cl=rOptCalc(g);if(cl.needDel){L.push('Delivery: not entered');L.push('Estimated total: enter the delivery charge');}
   else{L.push(rZipOk()?((z?'Delivery to '+z+': ':'Delivery: ')+money(cl.delC/100)):'Delivery: ZIP needed');if(cl.platC>0)L.push('5-Year Platinum Protection: '+money(cl.platC/100));
    if(cl.needTax||cl.taxC===null){L.push('Sales tax: confirm the rate for this ZIP');L.push('Estimated total: confirm the sales tax rate')}
@@ -1403,7 +1404,9 @@ function rOrderClose(email){var AP='\u2019',nd=RD.needed&&validIso(RD.needed)?ds
 function rOnCount(){var n=0;RD.items.forEach(function(x){if(ritemOn(x))n++});return n}
 function rTextSizeLine(x){var overall=rSizeParts(x).overall;if(!overall)return '';var mains=RD.items.filter(function(it){return ritemOn(it)&&rIsMain(it)}).length;if(x.opt>1)return 'Option '+x.opt+', '+rItemName(x)+' size: '+overall;if(mains>=2)return rItemName(x)+' size: '+overall;return 'Size: '+overall}
 function rTextPriceLine(x){var q=qtyOf(x.q),u=rUnit(x),price;if(q===null)price='quantity must be a whole number';else if(u.need)price='regular price to be confirmed';else if(u.n===null)price=x.p.trim()||'price to be confirmed';else price=money(u.n);if(x.opt>1)return 'Option '+x.opt+', '+rItemName(x)+' \u2014 '+price;return rSimpleItemLine(x,0).replace(/^0\. /,'')}
-function rTextItems(){var noEmail=!String(RD.email||'').trim(),mains=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)}),list=noEmail?RD.items.filter(ritemOn):mains;if(!list.length)return [];if(!noEmail&&mains.length>3)return [];var sized=rOnCount()<=3,n=0,L=[];list.forEach(function(x){if(!(x.opt>1)){n++;L.push(rSimpleItemLine(x,n));if(RD.ext&&rOnSale(x))L.push(rExtLine(x));if(x.tg&&x.tg.t==='floor')L.push(rFloorLine())}if(sized&&!(x.opt>1)){var sz=rTextSizeLine(x);if(sz)L.push(sz)}});return L}
+function rEstShown(x){var raw=String(x&&x.e||'').replace(/\s+/g,' ').trim();if(!raw)return '';return VFQ.formatCustomerDateNote(raw)||raw}
+function rEstCustomerLine(x,full){var t=rEstShown(x);return t?(full?'Estimated delivery: ':'Est. delivery: ')+t:''}
+function rTextItems(){var noEmail=!String(RD.email||'').trim(),mains=RD.items.filter(function(x){return ritemOn(x)&&rIsMain(x)}),list=noEmail?RD.items.filter(ritemOn):mains;if(!list.length)return [];if(!noEmail&&mains.length>3)return [];var sized=rOnCount()<=3,n=0,L=[];list.forEach(function(x){if(!(x.opt>1)){n++;L.push(rSimpleItemLine(x,n));if(RD.ext&&rOnSale(x))L.push(rExtLine(x));if(x.tg&&x.tg.t==='floor')L.push(rFloorLine());var est=rEstCustomerLine(x,false);if(est)L.push(est)}if(sized&&!(x.opt>1)){var sz=rTextSizeLine(x);if(sz)L.push(sz)}});return L}
 function rTextOptionSizes(){if(rOnCount()>3)return [];var L=[];rOptGroups().forEach(function(g){g.items.forEach(function(x){var sz=rTextSizeLine(x);if(sz)L.push(sz)})});return L}
 function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to the emailed full quote (the email keeps the long form in rbody(true))
  var r=REPS[RD.rep],L=[],first=RD.name.trim().split(/\s+/)[0],AP='\u2019',exp=rExpiry();rstamp();
@@ -1420,7 +1423,7 @@ function rsms(){ // v2.7.1 short companion text: totals, expiry and a pointer to
  else if(pa.tier.ok){L.push('Add 5-Year Platinum Protection for '+money(pa.tier.priceCents/100)+(RD.email.trim()?' \u2014 details in the email.':'.'))}
  else if(rKnownProtector()){L.push('This protector includes the 5-Year Platinum Mattress Plan.')}
  L.push('Damage caused by pets is not covered.');
- if(rOptGroups().length){L.push('Other options: '+rOptSummary());rTextOptionSizes().forEach(function(l){L.push(l)});L.push('Other options are separate choices \u2014 not added to the main quote total.');}
+ if(rOptGroups().length){L.push('Other options: '+rOptSummary());rTextOptionSizes().forEach(function(l){L.push(l)});if(!String(RD.email||'').trim()||rOnCount()<=3)rOptGroups().forEach(function(g){g.items.forEach(function(x){var est=rEstCustomerLine(x,false);if(est)L.push('Option '+x.opt+', '+rItemName(x)+': '+est)})});L.push('Other options are separate choices \u2014 not added to the main quote total.');}
  if(RD.email.trim())L.push('Full details emailed.');L.push('');
  L.push(rOrderClose(false),'','Prices, availability and the final amount are confirmed at time of purchase.','');
  L.push(r.name+' \u00b7 Raymour & Flanigan '+(r.store||'Bridgewater'),'Cell '+fmtPh(r.phone)+(r.work?' \u00b7 Work '+fmtPh(r.work):''));
@@ -1438,7 +1441,7 @@ function rbody(full){if(!full)return rsms();var r=REPS[RD.rep],L=[],first=RD.nam
  if(nd)L.push('Needed by: '+nd);
  L.push(rHoldSentence());var floorMail=rFloorReserveLine();if(floorMail)L.push(floorMail);if(rBasis())L.push(rBasis());
  if(rZipOk()&&!to.lines.some(function(l){return l.indexOf('Delivery to')===0}))L.push('Delivery ZIP/town: '+RD.zip.trim().replace(/\r?\n/g,' '));
- L.push('Quote #'+RD.qn+' \u00b7 '+dstamp(qnoDate(RD.qn))+' \u00b7 Prepared by '+r.name);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());L.push('');
+ L.push('Quote #'+RD.qn+' \u00b7 '+dshow(qnoDate(RD.qn))+' \u00b7 Prepared by '+r.name);if(RD.ref.trim())L.push('In reply to your request #'+RD.ref.trim());L.push('');
  rOptionLines(true).forEach(function(l){L.push(l)});
  L.push('Make It Last');
  // wording below is limited to what the two R&F pages state (5-year plan; financing and payment options): no prices, rates or terms

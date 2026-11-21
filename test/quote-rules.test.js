@@ -311,6 +311,18 @@ test('a single-letter import name is incomplete, and a later crop cannot replace
   assert.equal(VFQ.preferProductName('TV', 'Television stand'), 'Television stand');
 });
 
+test('customer dates use one weekday style, including a year-end range', function(){
+  var ref = '2026-11-21';
+  assert.equal(VFQ.formatCustomerDateNote('Get it by Monday, November 23 (checked Nov 20, 2026)', ref), 'Get it by Mon, Nov 23, 2026 (checked Fri, Nov 20, 2026)');
+  assert.equal(VFQ.formatCustomerDateNote('Get it in December 7 - December 14', ref), 'Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026');
+  assert.equal(VFQ.formatCustomerDateNote('Special order: December 28 to January 4', ref), 'Get it between Mon, Dec 28, 2026 and Mon, Jan 4, 2027');
+  assert.equal(VFQ.formatCustomerDateNote('Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026', ref), 'Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026');
+  assert.equal(VFQ.formatCustomerDateNote('Get it in 3-5 Weeks', ref), 'Get it in 3-5 Weeks');
+  assert.equal(VFQ.formatCustomerDateNote('Ask the warehouse', ref), 'Ask the warehouse');
+  assert.equal(VFQ.formatCustomerDateNote('Get it by Monday', ref), 'Get it by Monday');
+  assert.equal(VFQ.checkedLabel('2026-11-20'), 'Fri, Nov 20, 2026');
+});
+
 test('showroom delivery accepts a Get it by date or a Get it in range for ZIP 08807 only', function(){
   var dateFixture = {code:'219092234', postalCode:'08807', date:{year:2026, month:11, day:9, text:'Monday, November 9', label:'Get it by', isDelivery:true, isTimeline:false}, addToCartOutOfStockSubheading:null};
   var date = VFQ.showroomDeliveryFromTimeline(dateFixture, '219092234');
