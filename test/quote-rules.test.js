@@ -3,7 +3,7 @@ var test = require('node:test');
 var assert = require('node:assert/strict');
 var VFQ = require('../quote-rules.js');
 
-var DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+var DISCLOSURE = 'Displayed prices are regular prices. Financing longer than 18 months cannot be combined with sale or outlet pricing.';
 
 test('18 months does not restrict sale pricing; longer than 18 months does', function(){
   assert.equal(VFQ.restrictsSale(18), false);
@@ -211,7 +211,7 @@ test('quoted amount follows the 18-month boundary for every discounted item', fu
   assert.equal(plain.amount, 80);
 });
 
-test('both customer text and email include the financing disclosure, including when extended financing is off', function(){
+test('the financing disclosure is included only when extended financing is on', function(){
   [false, true].forEach(function(extended){
     var out = VFQ.customerMessages({
       extended: extended,
@@ -220,14 +220,8 @@ test('both customer text and email include the financing disclosure, including w
       items: [{name: 'Lugano chair', qty: 1, price: 100, regular: 150, discounted: true}],
       delivery: '0'
     });
-    assert.match(out.text, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
-    assert.match(out.email, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
     assert.match(out.text, /Financing options:/);
     assert.match(out.email, /financing options:/i);
-    var textAt = out.text.indexOf(DISCLOSURE);
-    var emailAt = out.email.indexOf(DISCLOSURE);
-    assert.ok(textAt > out.text.indexOf('Financing options:'));
-    assert.ok(emailAt > out.email.toLowerCase().indexOf('financing options'));
     assert.match(out.text, /Delivery to 08807: \$0\.00/);
     assert.match(out.email, /Delivery to 08807: \$0\.00/);
     assert.match(out.text, /Sales tax \(NJ 6\.625%\)/);
@@ -235,6 +229,10 @@ test('both customer text and email include the financing disclosure, including w
     assert.match(out.text, /Estimated total:/);
     assert.match(out.email, /ESTIMATED TOTAL:/);
     if(extended){
+      assert.match(out.text, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+      assert.match(out.email, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+      assert.ok(out.text.indexOf(DISCLOSURE) > out.text.indexOf('Financing options:'));
+      assert.ok(out.email.indexOf(DISCLOSURE) > out.email.toLowerCase().indexOf('financing options'));
       assert.match(out.text, /Displayed prices are regular prices\./);
       assert.match(out.email, /Displayed prices are regular prices\./);
       assert.match(out.text, /Regular price: \$150\.00/);
@@ -242,6 +240,8 @@ test('both customer text and email include the financing disclosure, including w
       assert.equal(out.text.indexOf('$100.00'), -1);
       assert.equal(out.email.indexOf('$100.00'), -1);
     }else{
+      assert.equal(out.text.indexOf(DISCLOSURE), -1);
+      assert.equal(out.email.indexOf(DISCLOSURE), -1);
       assert.match(out.text, /\$100\.00/);
       assert.equal(out.text.indexOf('Displayed prices are regular prices.'), -1);
     }
@@ -262,7 +262,7 @@ test('preview is required per channel and any edit invalidates it', function(){
   quote.delivery = '50';
   var text = VFQ.preview(quote, 'sms');
   assert.equal(text.ok, true);
-  assert.match(text.body, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+  assert.equal(text.body.indexOf(DISCLOSURE), -1);
   assert.equal(VFQ.canCompose(text.state, 'sms', quote), true);
   assert.equal(VFQ.canCompose(text.state, 'mail', quote), false);
   quote.delivery = '75';
@@ -309,6 +309,18 @@ test('a single-letter import name is incomplete, and a later crop cannot replace
   assert.equal(VFQ.officialNameFromProductCard({products:[{code:'750015022', displayName:'Other'}]}, '797015027'), null);
   assert.equal(VFQ.preferProductName('A', 'Magdalena 7pc Dining set'), 'Magdalena 7pc Dining set');
   assert.equal(VFQ.preferProductName('TV', 'Television stand'), 'Television stand');
+});
+
+test('customer dates use one weekday style, including a year-end range', function(){
+  var ref = '2026-11-21';
+  assert.equal(VFQ.formatCustomerDateNote('Get it by Monday, November 23 (checked Nov 20, 2026)', ref), 'Get it by Mon, Nov 23, 2026 (checked Fri, Nov 20, 2026)');
+  assert.equal(VFQ.formatCustomerDateNote('Get it in December 7 - December 14', ref), 'Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026');
+  assert.equal(VFQ.formatCustomerDateNote('Special order: December 28 to January 4', ref), 'Get it between Mon, Dec 28, 2026 and Mon, Jan 4, 2027');
+  assert.equal(VFQ.formatCustomerDateNote('Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026', ref), 'Get it between Mon, Dec 7, 2026 and Mon, Dec 14, 2026');
+  assert.equal(VFQ.formatCustomerDateNote('Get it in 3-5 Weeks', ref), 'Get it in 3-5 Weeks');
+  assert.equal(VFQ.formatCustomerDateNote('Ask the warehouse', ref), 'Ask the warehouse');
+  assert.equal(VFQ.formatCustomerDateNote('Get it by Monday', ref), 'Get it by Monday');
+  assert.equal(VFQ.checkedLabel('2026-11-20'), 'Fri, Nov 20, 2026');
 });
 
 test('showroom delivery accepts a Get it by date or a Get it in range for ZIP 08807 only', function(){
