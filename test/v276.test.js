@@ -390,7 +390,7 @@ test('the quote number sits on its own line, with no period before a dot', funct
 
 test('the service worker can install when the SKU files are missing', function(){
   var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  assert.match(sw, /VERSION='2\.7\.7'/);
+  assert.match(sw, /VERSION='2\.7\.8'/);
   var precache = sw.match(/var PRECACHE=\[(.*?)\]/)[1];
   assert.equal(precache.indexOf('sku-index.json'), -1);
   assert.equal(precache.indexOf('sku-details.json'), -1);
