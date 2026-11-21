@@ -886,13 +886,50 @@ test('typed prices are not letter-repaired; only OCR reads are', function(){
   assert.equal(cart.state().rows[0].price, '');
 });
 
+test('a crossed-out was-price is not read as a few dollars, and a lower regular price blocks the quote', function(){
+  var page = loadPage();
+  var cart = page.dom.window.vfCart;
+  var api = page.api;
+  var doc = page.dom.window.document;
+  var html = require('fs').readFileSync(require('path').join(__dirname, '..', 'index.html'), 'utf8');
+  assert.match(html, /0123456789\.,\$/);
+  assert.equal(cart.money('$1,879.95', true), '1879.95');
+  assert.equal(cart.money('$1.87995', true), '1879.95');
+  assert.equal(cart.money('$1.879.95', true), '1879.95');
+  assert.equal(cart.money('$1.879', true), '1879.00');
+  assert.equal(cart.money('1885', true), '1885.00');
+  assert.equal(cart.money('188', true), '188.00');
+  assert.equal(cart.money('$1.8799', true), '');
+  assert.equal(cart.money('$1,299.00', true), '1299.00');
+  cart.merge({rows:[{sku:'100023629', name:'Rowan Bed', price:'1785.95', reg:'1.88'}]});
+  assert.equal(cart.state().rows[0].reg, '');
+  cart.merge({rows:[{sku:'100023629', name:'Rowan Bed', price:'1785.95', reg:'1879.95'}]});
+  assert.equal(cart.state().rows[0].reg, '1879.95');
+  cart.seedReview([{sku:'100023629', name:'Rowan Bed', price:'1785.95', reg:'1.88'}]);
+  assert.match(doc.getElementById('rcartpanel').textContent, /Regular price is lower than the sale price\. Check both prices\./);
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, true);
+  var reg = doc.querySelector('[data-cartfield=reg]');
+  reg.value = '1785.95';
+  reg.dispatchEvent(new page.dom.window.Event('input', {bubbles:true}));
+  assert.equal(doc.querySelector('[data-cart=add]').disabled, false);
+  api.load({
+    name:'Jamie Cole', phone:'9085550100', email:'jamie@example.com', zip:'08807', dl:'0', ext:true,
+    items:[{v:'Raymour & Flanigan', d:'Rowan Bed', sku:'100023629', q:'1', p:'1785.95', rg:'1.88'}]
+  });
+  assert.ok(api.valid('mail').some(function(row){return /Item 1: the regular price is lower than the sale price/.test(row[1])}));
+  assert.equal(api.preview('mail').mail, '');
+  assert.equal(api.email().indexOf('Regular price:'), -1);
+  assert.match(api.email(), /\$1,785\.95/);
+  assert.equal(api.email().indexOf('$1.88'), -1);
+});
+
 test('add is blocked while captured totals disagree with the cart, until the rep confirms the pieces', function(){
   var page = loadPage();
   var cart = page.dom.window.vfCart;
   var doc = page.dom.window.document;
   // a two-cent digit misread: 714.97 read as 714.99, so captured totals disagree with the cart subtotals
   cart.seedReview([
-    {sku:'750015022', name:'Magdalena Server', price:'714.99', reg:'714.97', qty:'1'},
+    {sku:'750015022', name:'Magdalena Server', price:'714.99', reg:'714.99', qty:'1'},
     {sku:'797015027', name:'Magdalena Dining Set', price:'1099.00', reg:'1299.00', qty:'2'}
   ], {original:'3312.97', current:'2912.97', count:3});
   var status = doc.getElementById('rcartstatus');
