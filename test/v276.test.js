@@ -55,7 +55,7 @@ test('floor samples and a sale that ends inside the hold are stated in the text 
   var email = api.email();
   [text, email].forEach(function(msg){
     assert.match(msg, /Floor sample, sold as is\. No layaways, no warranties\./);
-    assert.match(msg, /Sale price good through Nov 21, 2026; quote otherwise valid 72 hours/);
+    assert.match(msg, /Sale price good through Sat, Nov 21, 2026 only; the quote is otherwise valid 72 hours, until /);
   });
   assert.match(text, /\$400\.00/);
   assert.match(text, /\$200\.00/);
@@ -123,7 +123,7 @@ test('outlet and sale prices stay separate, and long financing quotes the regula
   assert.equal(api.items()[0].p, '499.99');
   assert.equal(api.items()[0].rg, '899.99');
   assert.match(api.text(), /Items: \$899\.99/);
-  assert.match(api.text(), /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+  assert.match(api.text(), /Displayed prices are regular prices\. Financing longer than 18 months cannot be combined with sale or outlet pricing\./);
   assert.match(api.email(), /Regular price: \$899\.99/);
   assert.match(api.email(), /Outlet/);
   api.setExt(false);
@@ -335,17 +335,20 @@ test('quote wording fixes from the v2.7.7 sample review', function(){
   api.load(base({ext:true, items:[{v:'Raymour & Flanigan', d:'Adrienne Power Recliner', p:'499.99', rg:'899.99', q:'1', fin:'Linen', tg:{t:'outlet'}}]}));
   email = api.email();
   var block = email.slice(email.indexOf('1. Adrienne'), email.indexOf('Your Investment'));
-  assert.match(block, /Adrienne Power Recliner, Linen, Outlet/);
+  assert.match(block, /Adrienne Power Recliner, Linen/);
+  assert.equal(block.indexOf(', Outlet'), -1);
   assert.equal(block.split('Regular price:').length, 2);
-  assert.match(block, /Outlet pricing does not apply with extended financing\./);
+  assert.match(block, /Outlet pricing does not apply with financing over 18 months\./);
   assert.equal(block.indexOf('sale prices do not apply'), -1);
   api.load(base({ext:true, items:[{v:'Raymour & Flanigan', d:'Main sofa', p:'100.00', q:'1'}, {v:'Raymour & Flanigan', d:'Adrienne Power Recliner', p:'499.99', rg:'899.99', q:'1', fin:'Linen', opt:2, tg:{t:'outlet'}}]}));
   var opt = api.email().slice(api.email().indexOf('Option 2'), api.email().indexOf('Make It Last'));
-  assert.match(opt, /Adrienne Power Recliner, Linen, Outlet/);
-  assert.match(opt, /Outlet pricing does not apply with extended financing\./);
+  assert.match(opt, /Adrienne Power Recliner, Linen/);
+  assert.equal(opt.indexOf(', Outlet'), -1);
+  assert.match(opt, /Outlet pricing does not apply with financing over 18 months\./);
 
   api.load(base({ext:false, items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale', se:'2026-11-21'}}]}));
-  assert.match(api.email(), /Sale price good through Nov 21, 2026 only\./);
+  assert.match(api.email(), /Sale price good through Sat, Nov 21, 2026 only; the quote is otherwise valid 72 hours, until /);
+  assert.equal(api.email().split('Sale price good through').length, 2);
 
   api.load(base({items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
   email = api.email();
@@ -364,7 +367,7 @@ test('quote wording fixes from the v2.7.7 sample review', function(){
   assert.doesNotMatch(api.text(), /^1\. One/m);
 
   api.load(base({email:'', items:[{v:'Raymour & Flanigan', d:'BEDGEAR Ver-Tex Performance Mattress Protector', sku:'MAT5VERQU', p:'279.99', q:'1'}]}));
-  assert.match(api.text(), /Here’s your quote for BEDGEAR Ver-Tex Performance Protector\./);
+  assert.match(api.text(), /Here’s your quote for BEDGEAR Ver-Tex Mattress Protector\./);
   assert.match(api.email(), /This protector includes the 5-Year Platinum Mattress Plan\./);
   assert.equal(api.email().indexOf('5-year Platinum Protection:'), -1);
 
@@ -382,15 +385,97 @@ test('the quote number sits on its own line, with no period before a dot', funct
   assert.match(api.text(), /This price is held for you for 72 hours, until .+\nQuote #Q-/);
   api.load(base({items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale', se:'2026-11-21'}}]}));
   noDot(api.text()); noDot(api.email());
-  assert.match(api.text(), /quote otherwise valid 72 hours\.\nQuote #Q-/);
+  assert.match(api.text(), /quote is otherwise valid 72 hours, until .+\.\nQuote #Q-/);
   api.load(base({items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
   noDot(api.text()); noDot(api.email());
   assert.match(api.text(), /may sell before then\.\nQuote #Q-/);
 });
 
+test('v2.7.9 customer wording', function(){
+  var api = loadPage().api;
+  function count(s, sub){var n=0, i=0; while((i=s.indexOf(sub, i))!==-1){n++; i+=sub.length;} return n;}
+  api.load(base({needed:'2026-11-28', items:[{v:'Raymour & Flanigan', d:'Rowan Bed', p:'1785.95', q:'1'}]}));
+  var email = api.email();
+  assert.match(email, /so you can picture it in your space\./);
+  assert.equal(email.indexOf('picture it in your space before'), -1);
+  var invest = email.slice(email.indexOf('Your Investment'), email.indexOf('Quote #'));
+  assert.match(invest, /Needed by: Sat, Nov 28, 2026/);
+  assert.match(email, /getting it to you by Sat, Nov 28, 2026/);
+  assert.match(api.text(), /Needed by: Sat, Nov 28, 2026/);
+
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Outlet chair', p:'650.95', rg:'899.95', q:'1', tg:{t:'outlet'}}]}));
+  email = api.email();
+  assert.match(email, /Outlet chair, Outlet/);
+  assert.match(email, /You.re saving \$249\.00 off the regular \$899\.95\./);
+  assert.equal(email.indexOf('\nOutlet item'), -1);
+  assert.equal(email.indexOf('Displayed prices are regular prices.'), -1);
+
+  api.load(base({needed:'', ext:true, items:[
+    {v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale'}},
+    {v:'Raymour & Flanigan', d:'Outlet chair', p:'650.95', rg:'899.95', q:'1', fin:'Linen', tg:{t:'outlet'}}
+  ]}));
+  email = api.email();
+  var text = api.text();
+  [text, email].forEach(function(msg){
+    assert.equal(msg.indexOf('Sale sofa, Sale'), -1);
+    assert.equal(msg.indexOf('Outlet chair, Linen, Outlet'), -1);
+    assert.equal(count(msg, 'Sale pricing does not apply with financing over 18 months.'), 1);
+    assert.equal(count(msg, 'Outlet pricing does not apply with financing over 18 months.'), 1);
+    assert.equal(count(msg, 'Displayed prices are regular prices. Financing longer than 18 months cannot be combined with sale or outlet pricing.'), 1);
+    assert.equal(msg.indexOf('Financing terms longer than 18 months cannot be combined with sale pricing.'), -1);
+  });
+
+  api.load(base({email:'', needed:'', ext:false, items:[
+    {v:'Raymour & Flanigan', d:'Main chair', p:'100.00', q:'1', sz:'32" W x 35" D x 41" H'},
+    {v:'Raymour & Flanigan', d:'Other chair', p:'80.00', q:'1', opt:2, sz:'40" W x 20" D x 30" H'}
+  ]}));
+  text = api.text();
+  assert.equal(text.indexOf('Option 2, Other chair \u2014'), -1);
+  assert.match(text, /Other options: Option 2: Other chair/);
+  assert.match(text, /Other options are separate choices — not added to the main quote total\./);
+  assert.match(text, /Option 2, Other chair size: 40" W x 20" D x 30" H/);
+  assert.match(text, /I also included 1 other option later in this text so you can compare\./);
+  api.load(base({needed:'', ext:false, items:[
+    {v:'Raymour & Flanigan', d:'Main chair', p:'100.00', q:'1'},
+    {v:'Raymour & Flanigan', d:'Other chair', p:'80.00', q:'1', opt:2}
+  ]}));
+  assert.match(api.email(), /I also included 1 other option below so you can compare\./);
+
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Floor sample chair', p:'400.00', q:'1', tg:{t:'floor'}}]}));
+  email = api.email();
+  text = api.text();
+  [text, email].forEach(function(msg){
+    assert.equal(count(msg, 'Floor sample, sold as is. No layaways, no warranties.'), 1);
+    assert.match(msg, /Reply YES \(Quote #Q-.+\) and I.ll check it.s still available and start the order\./);
+  });
+  assert.match(email, /I can.t wait to see this room come together!/);
+
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'1785.95', rg:'1.88', q:'1', tg:{t:'sale'}}]}));
+  assert.equal(api.email().indexOf('On sale, regular price'), -1);
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'100.00', rg:'194.00', q:'1', tg:{t:'sale'}}]}));
+  assert.match(api.email(), /You.re saving \$94\.00 off the regular \$194\.00\./);
+  assert.equal(api.email().indexOf('On sale, regular price'), -1);
+
+  api.load(base({email:'jamie@example.com', needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'BEDGEAR Ver-Tex Performance Mattress Protector', sku:'MAT5VERQU', p:'279.99', q:'1'}]}));
+  assert.match(api.text(), /Mattress Protector/);
+  var shown = api.preview('mail');
+  assert.match(shown.body, /Subject: .*Mattress Protector/);
+  assert.match(api.email(), /Let me know if you have any questions\./);
+  assert.equal(api.email().indexOf('see this room come together'), -1);
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Lamp', p:'40.00', q:'1', tg:{t:'accessory'}}]}));
+  assert.match(api.email(), /Let me know if you have any questions\./);
+  assert.equal(api.email().indexOf('see this room come together'), -1);
+
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Chair', p:'100.00', q:'1'}]}));
+  assert.equal(api.email().indexOf('Displayed prices are regular prices.'), -1);
+  assert.equal(api.text().indexOf('Financing terms longer than 18 months'), -1);
+  api.load(base({needed:'', ext:false, items:[{v:'Raymour & Flanigan', d:'Sale sofa', p:'200.00', rg:'300.00', q:'1', tg:{t:'sale', se:'2026-12-01'}}]}));
+  assert.match(api.email(), /Sale ends Tue, Dec 1, 2026\./);
+});
+
 test('the service worker can install when the SKU files are missing', function(){
   var sw = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
-  assert.match(sw, /VERSION='2\.7\.8'/);
+  assert.match(sw, /VERSION='2\.7\.9'/);
   var precache = sw.match(/var PRECACHE=\[(.*?)\]/)[1];
   assert.equal(precache.indexOf('sku-index.json'), -1);
   assert.equal(precache.indexOf('sku-details.json'), -1);

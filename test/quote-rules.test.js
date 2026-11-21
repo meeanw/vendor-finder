@@ -3,7 +3,7 @@ var test = require('node:test');
 var assert = require('node:assert/strict');
 var VFQ = require('../quote-rules.js');
 
-var DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+var DISCLOSURE = 'Displayed prices are regular prices. Financing longer than 18 months cannot be combined with sale or outlet pricing.';
 
 test('18 months does not restrict sale pricing; longer than 18 months does', function(){
   assert.equal(VFQ.restrictsSale(18), false);
@@ -211,7 +211,7 @@ test('quoted amount follows the 18-month boundary for every discounted item', fu
   assert.equal(plain.amount, 80);
 });
 
-test('both customer text and email include the financing disclosure, including when extended financing is off', function(){
+test('the financing disclosure is included only when extended financing is on', function(){
   [false, true].forEach(function(extended){
     var out = VFQ.customerMessages({
       extended: extended,
@@ -220,14 +220,8 @@ test('both customer text and email include the financing disclosure, including w
       items: [{name: 'Lugano chair', qty: 1, price: 100, regular: 150, discounted: true}],
       delivery: '0'
     });
-    assert.match(out.text, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
-    assert.match(out.email, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
     assert.match(out.text, /Financing options:/);
     assert.match(out.email, /financing options:/i);
-    var textAt = out.text.indexOf(DISCLOSURE);
-    var emailAt = out.email.indexOf(DISCLOSURE);
-    assert.ok(textAt > out.text.indexOf('Financing options:'));
-    assert.ok(emailAt > out.email.toLowerCase().indexOf('financing options'));
     assert.match(out.text, /Delivery to 08807: \$0\.00/);
     assert.match(out.email, /Delivery to 08807: \$0\.00/);
     assert.match(out.text, /Sales tax \(NJ 6\.625%\)/);
@@ -235,6 +229,10 @@ test('both customer text and email include the financing disclosure, including w
     assert.match(out.text, /Estimated total:/);
     assert.match(out.email, /ESTIMATED TOTAL:/);
     if(extended){
+      assert.match(out.text, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+      assert.match(out.email, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+      assert.ok(out.text.indexOf(DISCLOSURE) > out.text.indexOf('Financing options:'));
+      assert.ok(out.email.indexOf(DISCLOSURE) > out.email.toLowerCase().indexOf('financing options'));
       assert.match(out.text, /Displayed prices are regular prices\./);
       assert.match(out.email, /Displayed prices are regular prices\./);
       assert.match(out.text, /Regular price: \$150\.00/);
@@ -242,6 +240,8 @@ test('both customer text and email include the financing disclosure, including w
       assert.equal(out.text.indexOf('$100.00'), -1);
       assert.equal(out.email.indexOf('$100.00'), -1);
     }else{
+      assert.equal(out.text.indexOf(DISCLOSURE), -1);
+      assert.equal(out.email.indexOf(DISCLOSURE), -1);
       assert.match(out.text, /\$100\.00/);
       assert.equal(out.text.indexOf('Displayed prices are regular prices.'), -1);
     }
@@ -262,7 +262,7 @@ test('preview is required per channel and any edit invalidates it', function(){
   quote.delivery = '50';
   var text = VFQ.preview(quote, 'sms');
   assert.equal(text.ok, true);
-  assert.match(text.body, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+  assert.equal(text.body.indexOf(DISCLOSURE), -1);
   assert.equal(VFQ.canCompose(text.state, 'sms', quote), true);
   assert.equal(VFQ.canCompose(text.state, 'mail', quote), false);
   quote.delivery = '75';

@@ -6,7 +6,7 @@ var path = require('path');
 var {JSDOM} = require('jsdom');
 
 var root = path.join(__dirname, '..');
-var DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+var DISCLOSURE = 'Displayed prices are regular prices. Financing longer than 18 months cannot be combined with sale or outlet pricing.';
 var openPages = [];
 
 function trackTimers(window){
@@ -70,8 +70,8 @@ test('both real text and email include the disclosure, and longer than 18 months
   });
   var text = api.text();
   var email = api.email();
-  assert.ok(text.indexOf(DISCLOSURE) > text.indexOf('Financing options:'));
-  assert.ok(email.indexOf(DISCLOSURE) > email.toLowerCase().indexOf('financing options'));
+  assert.equal(text.indexOf(DISCLOSURE), -1);
+  assert.equal(email.indexOf(DISCLOSURE), -1);
   assert.equal(text.indexOf('Displayed prices are regular prices.'), -1);
   assert.match(text, /\$100\.00/);
   assert.match(text, /Delivery to 08807: \$0\.00/);
@@ -121,11 +121,11 @@ test('missing regular price blocks preview, blank delivery is not zero, and edit
     items: [{v: 'Raymour & Flanigan', d: 'Sofa', p: '200.00', q: '1'}]
   });
   var preview = api.preview('sms');
-  assert.ok(preview.sms.indexOf(DISCLOSURE) > 0);
+  assert.equal(preview.sms.indexOf(DISCLOSURE), -1);
   assert.match(preview.sms, /Delivery to 08002: \$0\.00/);
   assert.equal(preview.hidden, false);
   var emailPreview = api.preview('mail');
-  assert.ok(emailPreview.mail.indexOf(DISCLOSURE) > 0);
+  assert.equal(emailPreview.mail.indexOf(DISCLOSURE), -1);
 
   var field = dom.window.document.getElementById('rdel');
   field.value = '25';
@@ -134,7 +134,7 @@ test('missing regular price blocks preview, blank delivery is not zero, and edit
   assert.notEqual(api.text(), preview.sms);
   var again = api.preview('sms');
   assert.match(again.sms, /Delivery to 08002: \$25\.00/);
-  assert.match(again.body, new RegExp(DISCLOSURE.replace(/[.]/g, '\\.')));
+  assert.equal(again.body.indexOf(DISCLOSURE), -1);
 
   api.load({
     name: 'Jamie', phone: '9085550100', email: 'jamie@example.com', zip: '08002', dl: '25', ext: true, notes: '', pn: '',
@@ -504,7 +504,7 @@ test('Platinum Protection adds the tier for eligible furniture and each option h
   assert.match(api.email(), /Platinum Protection can be added within three days of delivery\./);
   assert.equal(api.email().indexOf('5-Year Platinum Protection: $'), -1);
   assert.equal(api.email().indexOf('is included in this quote'), -1);
-  assert.match(api.email(), /5-year Platinum Protection:/);
+  assert.match(api.email(), /5-Year Platinum Protection:/);
   assert.equal(api.logFields().platinum, 'No');
   assert.equal(api.logFields().estTotal, 2185.75);
 
@@ -604,10 +604,10 @@ test('the email is quieter by default, and a heads-up text is previewed before M
   assert.match(email, /SKU 218092233/);
   assert.equal(text.indexOf('View online:'), -1);
   assert.equal(text.indexOf(itemUrl), -1);
-  assert.match(email, /Could you reply to let me know this came through\?/);
-  assert.equal(text.indexOf('Could you reply to let me know this came through?'), -1);
-  assert.ok(email.indexOf('The gray one is the one we sat on') < email.indexOf('Could you reply to let me know this came through?'));
-  assert.ok(email.indexOf('Could you reply to let me know this came through?') < email.indexOf('What You Picked'));
+  assert.match(email, /Could you reply to let me know this arrived\? You don.t need to say YES until you.re ready to order\./);
+  assert.equal(text.indexOf('Could you reply to let me know this arrived?'), -1);
+  assert.ok(email.indexOf('The gray one is the one we sat on') < email.indexOf('Could you reply to let me know this arrived?'));
+  assert.ok(email.indexOf('Could you reply to let me know this arrived?') < email.indexOf('What You Picked'));
   assert.match(email, /What You Picked/);
   assert.match(email, /Your Investment/);
   assert.match(email, /Make It Last/);
@@ -620,7 +620,7 @@ test('the email is quieter by default, and a heads-up text is previewed before M
   assert.equal(email.indexOf('READY WHEN YOU ARE'), -1);
   assert.match(text, /OTHER OPTIONS|Estimated total:/);
   assert.match(email, /Damage caused by pets is not covered\./);
-  assert.match(email, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
+  assert.equal(email.indexOf(DISCLOSURE), -1);
   assert.match(email, /72 hours/);
   assert.match(email, /Quote #/);
   var urls = email.match(/https?:\/\/\S+/g);
@@ -630,9 +630,10 @@ test('the email is quieter by default, and a heads-up text is previewed before M
   ]);
   var shown = api.preview('mail');
   assert.match(shown.body, /^Subject: Barbara, the details from your Raymour & Flanigan visit — Example Sofa \(Quote #Q-/);
-  assert.equal(shown.body.indexOf('ready'), -1);
-  assert.equal(shown.body.slice(0, shown.body.indexOf('\n')).indexOf('$'), -1);
-  assert.equal(shown.body.slice(0, shown.body.indexOf('\n')).indexOf('!'), -1);
+  var subjectLine = shown.body.slice(0, shown.body.indexOf('\n'));
+  assert.equal(subjectLine.indexOf('ready'), -1);
+  assert.equal(subjectLine.indexOf('$'), -1);
+  assert.equal(subjectLine.indexOf('!'), -1);
   assert.match(email, /What You Picked/);
   doc.getElementById('rlinks').checked = true;
   doc.getElementById('rlinks').dispatchEvent(new win.Event('change', {bubbles:true}));
@@ -685,8 +686,8 @@ test('main quote stays full and alternatives are separate options', function(){
   [text, email].forEach(function(msg){
     assert.match(msg, /Example Sofa A/);
     assert.match(msg, /Damage caused by pets is not covered\./);
-    assert.match(msg, /Financing terms longer than 18 months cannot be combined with sale pricing\. Regular prices apply\./);
-    assert.match(msg, /I also included 3 other options below so you can compare\./);
+    assert.equal(msg.indexOf(DISCLOSURE), -1);
+    assert.match(msg, msg === text ? /I also included 3 other options later in this text so you can compare\./ : /I also included 3 other options below so you can compare\./);
     assert.match(msg, /72 hours/);
     assert.match(msg, /Quote #/);
     assert.match(msg, /Amount saved: \$400\.00/);
@@ -702,7 +703,7 @@ test('main quote stays full and alternatives are separate options', function(){
   assert.equal(email.indexOf('disclosure above'), -1);
   assert.ok(email.indexOf('72 hours') < email.indexOf('Other Options'));
   assert.ok(email.indexOf('Other Options') < email.indexOf('platinum-protection'));
-  assert.ok(email.indexOf('Other Options') < email.indexOf('Financing terms longer than 18 months'));
+  assert.ok(email.indexOf('Other Options') < email.indexOf('financing-options'));
   assert.match(email, /Option 2/);
   assert.match(email, /Example Sofa B, Sale/);
   assert.match(email, /\$899\.00/);
@@ -729,7 +730,7 @@ test('main quote stays full and alternatives are separate options', function(){
   assert.ok(email.indexOf('\n1. Example Sofa A\n') < email.indexOf('Other Options'));
   assert.ok(email.indexOf('You’re saving') < email.indexOf('Other Options'));
   assert.match(text, /Reply YES \(Quote #/);
-  assert.match(email, /reply YES to this email \(Quote #/i);
+  assert.match(email, /Reply YES \(Quote #.+\) and I.ll check it.s still available and start the order/);
   assert.match(text, /Cell /);
   assert.equal(email.indexOf('Cell '), -1);
   assert.match(email, /The gray one is the one we sat on/);

@@ -4,7 +4,7 @@
   if(typeof module === 'object' && module.exports) module.exports = api;
   if(root) root.VFQ = api;
 })(typeof globalThis !== 'undefined' ? globalThis : this, function(){
-  var FINANCE_DISCLOSURE = 'Financing terms longer than 18 months cannot be combined with sale pricing. Regular prices apply.';
+  var FINANCE_DISCLOSURE = 'Displayed prices are regular prices. Financing longer than 18 months cannot be combined with sale or outlet pricing.';
   var PET_EXCLUSION = 'Damage caused by pets is not covered.';
   var COLOR_NAMES = {color:1, colour:1, finish:1, colorfamily:1, primarycolor:1, upholsterycolor:1, framecolor:1};
   var DISCOUNT_STYLES = {Sale:1, Outlet:1, Clearance:1};
@@ -410,9 +410,7 @@
   function financeMonths(extended){return extended ? 19 : 18}
 
   function customerFinanceLines(extended){
-    var lines = [FINANCE_DISCLOSURE];
-    if(extended) lines.push('Displayed prices are regular prices.');
-    return lines;
+    return extended ? [FINANCE_DISCLOSURE] : [];
   }
 
   function coverageProblem(body){
